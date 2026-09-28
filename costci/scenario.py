@@ -85,6 +85,8 @@ class ChangeSet:
     new_models: list[str]
     removed_models: list[str]
     consumers: list[str]
+    detection: str = "dbt_state"
+    rendered_modified: list[str] | None = None
 
 
 @dataclass
@@ -136,6 +138,32 @@ def _topo(names: list[str], models: dict[str, dict]) -> list[str]:
     return order
 
 
+_COMMENT_RE = re.compile(r"--[^\n]*|/\*.*?\*/", re.S)
+
+
+def normalise_sql(sql: str) -> str:
+    """Strip comments, collapse whitespace, lower-case: a cheap stand-in for AST comparison."""
+    return " ".join(_COMMENT_RE.sub(" ", sql or "").lower().split())
+
+
+def rendered_models(project: Path, ws: "Workspace") -> dict[str, str]:
+    """Compile every model against prod (incremental branch where it applies) -> normalised SQL."""
+    models = ws.models(dbtops.parse(project, ws.profiles, "prod"))
+    compiled = dbtops.compile_nodes(project, ws.profiles, list(models), "prod", None)
+    out = {n: normalise_sql(c.get("compiled_code")) for n, c in compiled.items()}
+    for n, m in models.items():                       # materialisation is part of what runs
+        out[n] += f" /*materialized={m['config']['materialized']}*/"
+    return out
+
+
+def rendered_diff(ws: "Workspace", pr_project: Path) -> list[str]:
+    """Models whose rendered SQL or materialisation differs between MAIN and PR (incl. new ones)."""
+    if not hasattr(ws, "_main_rendered"):
+        ws._main_rendered = rendered_models(ws.main, ws)
+    pr = rendered_models(pr_project, ws)
+    return sorted(n for n in pr if ws._main_rendered.get(n) != pr[n])
+
+
 def job_for(model: dict, ctx: dict) -> dict:
     for job in ctx["jobs"]:
         if model["name"] in (job.get("models") or []):
@@ -154,9 +182,8 @@ def resolve_consumer(sql: str, rebuilt: set[str], schema: str) -> str:
                       sql)
 
 
-def prepare(ws: Workspace, sc: Scenario) -> Prepared:
-    t0 = sum(t for _, t in dbtops.TIMINGS)
-    ctx = load_context(sc.context_overrides)
+def pr_project(ws: Workspace, sc: Scenario) -> Path:
+    """Materialise the PR's version of the project: base + overlay files - deleted files."""
     pr = ws.root / "scenarios" / sc.id / "pr"
     if pr.exists():
         shutil.rmtree(pr)
@@ -167,6 +194,15 @@ def prepare(ws: Workspace, sc: Scenario) -> Prepared:
         shutil.copy(sc.dir / src, target)
     for dest in sc.delete:
         (pr / dest).unlink()
+    return pr
+
+
+def prepare(ws: Workspace, sc: Scenario, detection: str = "dbt_state") -> Prepared:
+    """detection: "dbt_state" (what dbt's state:modified sees) or "union" (dbt state plus a
+    rendered-SQL diff of every model, which also catches var/env/config-driven changes)."""
+    t0 = sum(t for _, t in dbtops.TIMINGS)
+    ctx = load_context(sc.context_overrides)
+    pr = pr_project(ws, sc)
 
     diff = subprocess.run(["git", "diff", "--no-index", "--name-only", str(BASE_PROJECT), str(pr)],
                           capture_output=True, text=True)
@@ -179,6 +215,14 @@ def prepare(ws: Workspace, sc: Scenario) -> Prepared:
     modified_by = {s: _names(dbtops.ls(pr, ws.profiles, f"state:modified.{s}", ws.state))
                    for s in dbtops.MODIFIED_SUBSELECTORS}
     modified_plus = _names(dbtops.ls(pr, ws.profiles, "state:modified+", ws.state))
+    rendered = None
+    if detection == "union":
+        rendered = rendered_diff(ws, pr)
+        extra = [n for n in rendered if n not in modified]
+        if extra:
+            modified = sorted(set(modified) | set(extra))
+            more = _names(dbtops.ls(pr, ws.profiles, " ".join(f"{n}+" for n in extra)))
+            modified_plus = sorted(set(modified_plus) | set(more))
 
     main_models = ws.models(ws.main_manifest)
     pr_models = ws.models(pr_manifest)
@@ -213,6 +257,7 @@ def prepare(ws: Workspace, sc: Scenario) -> Prepared:
         plans[variant] = wl
     changes = ChangeSet(changed_files=changed, modified=modified, modified_by=modified_by,
                         modified_plus=modified_plus, new_models=new, removed_models=removed,
-                        consumers=[c["id"] for c in consumers])
+                        consumers=[c["id"] for c in consumers], detection=detection,
+                        rendered_modified=rendered)
     return Prepared(scenario=sc, context=ctx, changes=changes, plans=plans,
                     dbt_seconds=sum(t for _, t in dbtops.TIMINGS) - t0)

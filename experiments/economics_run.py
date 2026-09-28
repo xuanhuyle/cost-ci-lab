@@ -82,7 +82,16 @@ def main():
                 else:
                     pr_e[wid] = dict(pc)
                 pr_e[wid].update(info)
-        row = {"id": sd.id, "category": rec["scenario"]["category"], "pools": {}}
+        row = {"id": sd.id, "category": rec["scenario"]["category"], "pools": {}, "kappa": {}}
+        # sensitivity of marginal-vs-attributed to the ASSUMED lab->production time scale
+        for kappa in (10, 100, 1000):
+            kctx = dict(ctx, time_scale=kappa, data_scale=kappa)
+            t = delta_dollars(kctx, POOL_MATRIX["snowflake_dedicated"], base_run, main_t, pr_t)
+            nv = sum(naive(POOL_MATRIX["snowflake_dedicated"][p], kctx,
+                           [d for d, wid in zip(deltas_t, sd.workloads) if sd.meta(wid)["pool"] == p])
+                     for p in POOL_MATRIX["snowflake_dedicated"])
+            row["kappa"][kappa] = {"truth_marginal": t["delta"], "naive_attributed": nv,
+                                   "main_bill": t["main"]}
         own = {"own_context": ctx["pools"]}
         for name, pools in {**own, **POOL_MATRIX}.items():
             t = delta_dollars(ctx, pools, base_run, main_t, pr_t)

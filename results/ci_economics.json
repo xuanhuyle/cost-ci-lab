@@ -1,0 +1,581 @@
+{
+ "k_measured": {
+  "ab_full_abs": 4.464155139739102,
+  "pr_vs_history": 2.232822034282448,
+  "ab_key10": 2.143457743771702,
+  "hybrid": 4.312471834607905,
+  "static_cout": 0.0
+ },
+ "breakeven_runs_per_month": {
+  "ab_full_abs": [
+   {
+    "p_regression": 0.05,
+    "mean_regression": 0.5,
+    "months_undetected": 1,
+    "ci_runs_per_pr": 1,
+    "breakeven_runs_per_month": 178.56620558956408
+   },
+   {
+    "p_regression": 0.05,
+    "mean_regression": 0.5,
+    "months_undetected": 1,
+    "ci_runs_per_pr": 3,
+    "breakeven_runs_per_month": 535.6986167686922
+   },
+   {
+    "p_regression": 0.05,
+    "mean_regression": 0.5,
+    "months_undetected": 3,
+    "ci_runs_per_pr": 1,
+    "breakeven_runs_per_month": 59.522068529854685
+   },
+   {
+    "p_regression": 0.05,
+    "mean_regression": 0.5,
+    "months_undetected": 3,
+    "ci_runs_per_pr": 3,
+    "breakeven_runs_per_month": 178.56620558956405
+   },
+   {
+    "p_regression": 0.05,
+    "mean_regression": 1.0,
+    "months_undetected": 1,
+    "ci_runs_per_pr": 1,
+    "breakeven_runs_per_month": 89.28310279478204
+   },
+   {
+    "p_regression": 0.05,
+    "mean_regression": 1.0,
+    "months_undetected": 1,
+    "ci_runs_per_pr": 3,
+    "breakeven_runs_per_month": 267.8493083843461
+   },
+   {
+    "p_regression": 0.05,
+    "mean_regression": 1.0,
+    "months_undetected": 3,
+    "ci_runs_per_pr": 1,
+    "breakeven_runs_per_month": 29.761034264927343
+   },
+   {
+    "p_regression": 0.05,
+    "mean_regression": 1.0,
+    "months_undetected": 3,
+    "ci_runs_per_pr": 3,
+    "breakeven_runs_per_month": 89.28310279478202
+   },
+   {
+    "p_regression": 0.2,
+    "mean_regression": 0.5,
+    "months_undetected": 1,
+    "ci_runs_per_pr": 1,
+    "breakeven_runs_per_month": 44.64155139739102
+   },
+   {
+    "p_regression": 0.2,
+    "mean_regression": 0.5,
+    "months_undetected": 1,
+    "ci_runs_per_pr": 3,
+    "breakeven_runs_per_month": 133.92465419217305
+   },
+   {
+    "p_regression": 0.2,
+    "mean_regression": 0.5,
+    "months_undetected": 3,
+    "ci_runs_per_pr": 1,
+    "breakeven_runs_per_month": 14.880517132463671
+   },
+   {
+    "p_regression": 0.2,
+    "mean_regression": 0.5,
+    "months_undetected": 3,
+    "ci_runs_per_pr": 3,
+    "breakeven_runs_per_month": 44.64155139739101
+   },
+   {
+    "p_regression": 0.2,
+    "mean_regression": 1.0,
+    "months_undetected": 1,
+    "ci_runs_per_pr": 1,
+    "breakeven_runs_per_month": 22.32077569869551
+   },
+   {
+    "p_regression": 0.2,
+    "mean_regression": 1.0,
+    "months_undetected": 1,
+    "ci_runs_per_pr": 3,
+    "breakeven_runs_per_month": 66.96232709608653
+   },
+   {
+    "p_regression": 0.2,
+    "mean_regression": 1.0,
+    "months_undetected": 3,
+    "ci_runs_per_pr": 1,
+    "breakeven_runs_per_month": 7.440258566231836
+   },
+   {
+    "p_regression": 0.2,
+    "mean_regression": 1.0,
+    "months_undetected": 3,
+    "ci_runs_per_pr": 3,
+    "breakeven_runs_per_month": 22.320775698695506
+   }
+  ],
+  "pr_vs_history": [
+   {
+    "p_regression": 0.05,
+    "mean_regression": 0.5,
+    "months_undetected": 1,
+    "ci_runs_per_pr": 1,
+    "breakeven_runs_per_month": 89.31288137129792
+   },
+   {
+    "p_regression": 0.05,
+    "mean_regression": 0.5,
+    "months_undetected": 1,
+    "ci_runs_per_pr": 3,
+    "breakeven_runs_per_month": 267.93864411389376
+   },
+   {
+    "p_regression": 0.05,
+    "mean_regression": 0.5,
+    "months_undetected": 3,
+    "ci_runs_per_pr": 1,
+    "breakeven_runs_per_month": 29.770960457099303
+   },
+   {
+    "p_regression": 0.05,
+    "mean_regression": 0.5,
+    "months_undetected": 3,
+    "ci_runs_per_pr": 3,
+    "breakeven_runs_per_month": 89.31288137129792
+   },
+   {
+    "p_regression": 0.05,
+    "mean_regression": 1.0,
+    "months_undetected": 1,
+    "ci_runs_per_pr": 1,
+    "breakeven_runs_per_month": 44.65644068564896
+   },
+   {
+    "p_regression": 0.05,
+    "mean_regression": 1.0,
+    "months_undetected": 1,
+    "ci_runs_per_pr": 3,
+    "breakeven_runs_per_month": 133.96932205694688
+   },
+   {
+    "p_regression": 0.05,
+    "mean_regression": 1.0,
+    "months_undetected": 3,
+    "ci_runs_per_pr": 1,
+    "breakeven_runs_per_month": 14.885480228549651
+   },
+   {
+    "p_regression": 0.05,
+    "mean_regression": 1.0,
+    "months_undetected": 3,
+    "ci_runs_per_pr": 3,
+    "breakeven_runs_per_month": 44.65644068564896
+   },
+   {
+    "p_regression": 0.2,
+    "mean_regression": 0.5,
+    "months_undetected": 1,
+    "ci_runs_per_pr": 1,
+    "breakeven_runs_per_month": 22.32822034282448
+   },
+   {
+    "p_regression": 0.2,
+    "mean_regression": 0.5,
+    "months_undetected": 1,
+    "ci_runs_per_pr": 3,
+    "breakeven_runs_per_month": 66.98466102847344
+   },
+   {
+    "p_regression": 0.2,
+    "mean_regression": 0.5,
+    "months_undetected": 3,
+    "ci_runs_per_pr": 1,
+    "breakeven_runs_per_month": 7.442740114274826
+   },
+   {
+    "p_regression": 0.2,
+    "mean_regression": 0.5,
+    "months_undetected": 3,
+    "ci_runs_per_pr": 3,
+    "breakeven_runs_per_month": 22.32822034282448
+   },
+   {
+    "p_regression": 0.2,
+    "mean_regression": 1.0,
+    "months_undetected": 1,
+    "ci_runs_per_pr": 1,
+    "breakeven_runs_per_month": 11.16411017141224
+   },
+   {
+    "p_regression": 0.2,
+    "mean_regression": 1.0,
+    "months_undetected": 1,
+    "ci_runs_per_pr": 3,
+    "breakeven_runs_per_month": 33.49233051423672
+   },
+   {
+    "p_regression": 0.2,
+    "mean_regression": 1.0,
+    "months_undetected": 3,
+    "ci_runs_per_pr": 1,
+    "breakeven_runs_per_month": 3.721370057137413
+   },
+   {
+    "p_regression": 0.2,
+    "mean_regression": 1.0,
+    "months_undetected": 3,
+    "ci_runs_per_pr": 3,
+    "breakeven_runs_per_month": 11.16411017141224
+   }
+  ],
+  "ab_key10": [
+   {
+    "p_regression": 0.05,
+    "mean_regression": 0.5,
+    "months_undetected": 1,
+    "ci_runs_per_pr": 1,
+    "breakeven_runs_per_month": 85.73830975086808
+   },
+   {
+    "p_regression": 0.05,
+    "mean_regression": 0.5,
+    "months_undetected": 1,
+    "ci_runs_per_pr": 3,
+    "breakeven_runs_per_month": 257.21492925260424
+   },
+   {
+    "p_regression": 0.05,
+    "mean_regression": 0.5,
+    "months_undetected": 3,
+    "ci_runs_per_pr": 1,
+    "breakeven_runs_per_month": 28.57943658362269
+   },
+   {
+    "p_regression": 0.05,
+    "mean_regression": 0.5,
+    "months_undetected": 3,
+    "ci_runs_per_pr": 3,
+    "breakeven_runs_per_month": 85.73830975086808
+   },
+   {
+    "p_regression": 0.05,
+    "mean_regression": 1.0,
+    "months_undetected": 1,
+    "ci_runs_per_pr": 1,
+    "breakeven_runs_per_month": 42.86915487543404
+   },
+   {
+    "p_regression": 0.05,
+    "mean_regression": 1.0,
+    "months_undetected": 1,
+    "ci_runs_per_pr": 3,
+    "breakeven_runs_per_month": 128.60746462630212
+   },
+   {
+    "p_regression": 0.05,
+    "mean_regression": 1.0,
+    "months_undetected": 3,
+    "ci_runs_per_pr": 1,
+    "breakeven_runs_per_month": 14.289718291811345
+   },
+   {
+    "p_regression": 0.05,
+    "mean_regression": 1.0,
+    "months_undetected": 3,
+    "ci_runs_per_pr": 3,
+    "breakeven_runs_per_month": 42.86915487543404
+   },
+   {
+    "p_regression": 0.2,
+    "mean_regression": 0.5,
+    "months_undetected": 1,
+    "ci_runs_per_pr": 1,
+    "breakeven_runs_per_month": 21.43457743771702
+   },
+   {
+    "p_regression": 0.2,
+    "mean_regression": 0.5,
+    "months_undetected": 1,
+    "ci_runs_per_pr": 3,
+    "breakeven_runs_per_month": 64.30373231315106
+   },
+   {
+    "p_regression": 0.2,
+    "mean_regression": 0.5,
+    "months_undetected": 3,
+    "ci_runs_per_pr": 1,
+    "breakeven_runs_per_month": 7.144859145905673
+   },
+   {
+    "p_regression": 0.2,
+    "mean_regression": 0.5,
+    "months_undetected": 3,
+    "ci_runs_per_pr": 3,
+    "breakeven_runs_per_month": 21.43457743771702
+   },
+   {
+    "p_regression": 0.2,
+    "mean_regression": 1.0,
+    "months_undetected": 1,
+    "ci_runs_per_pr": 1,
+    "breakeven_runs_per_month": 10.71728871885851
+   },
+   {
+    "p_regression": 0.2,
+    "mean_regression": 1.0,
+    "months_undetected": 1,
+    "ci_runs_per_pr": 3,
+    "breakeven_runs_per_month": 32.15186615657553
+   },
+   {
+    "p_regression": 0.2,
+    "mean_regression": 1.0,
+    "months_undetected": 3,
+    "ci_runs_per_pr": 1,
+    "breakeven_runs_per_month": 3.5724295729528364
+   },
+   {
+    "p_regression": 0.2,
+    "mean_regression": 1.0,
+    "months_undetected": 3,
+    "ci_runs_per_pr": 3,
+    "breakeven_runs_per_month": 10.71728871885851
+   }
+  ],
+  "hybrid": [
+   {
+    "p_regression": 0.05,
+    "mean_regression": 0.5,
+    "months_undetected": 1,
+    "ci_runs_per_pr": 1,
+    "breakeven_runs_per_month": 172.4988733843162
+   },
+   {
+    "p_regression": 0.05,
+    "mean_regression": 0.5,
+    "months_undetected": 1,
+    "ci_runs_per_pr": 3,
+    "breakeven_runs_per_month": 517.4966201529486
+   },
+   {
+    "p_regression": 0.05,
+    "mean_regression": 0.5,
+    "months_undetected": 3,
+    "ci_runs_per_pr": 1,
+    "breakeven_runs_per_month": 57.49962446143872
+   },
+   {
+    "p_regression": 0.05,
+    "mean_regression": 0.5,
+    "months_undetected": 3,
+    "ci_runs_per_pr": 3,
+    "breakeven_runs_per_month": 172.49887338431617
+   },
+   {
+    "p_regression": 0.05,
+    "mean_regression": 1.0,
+    "months_undetected": 1,
+    "ci_runs_per_pr": 1,
+    "breakeven_runs_per_month": 86.2494366921581
+   },
+   {
+    "p_regression": 0.05,
+    "mean_regression": 1.0,
+    "months_undetected": 1,
+    "ci_runs_per_pr": 3,
+    "breakeven_runs_per_month": 258.7483100764743
+   },
+   {
+    "p_regression": 0.05,
+    "mean_regression": 1.0,
+    "months_undetected": 3,
+    "ci_runs_per_pr": 1,
+    "breakeven_runs_per_month": 28.74981223071936
+   },
+   {
+    "p_regression": 0.05,
+    "mean_regression": 1.0,
+    "months_undetected": 3,
+    "ci_runs_per_pr": 3,
+    "breakeven_runs_per_month": 86.24943669215808
+   },
+   {
+    "p_regression": 0.2,
+    "mean_regression": 0.5,
+    "months_undetected": 1,
+    "ci_runs_per_pr": 1,
+    "breakeven_runs_per_month": 43.12471834607905
+   },
+   {
+    "p_regression": 0.2,
+    "mean_regression": 0.5,
+    "months_undetected": 1,
+    "ci_runs_per_pr": 3,
+    "breakeven_runs_per_month": 129.37415503823715
+   },
+   {
+    "p_regression": 0.2,
+    "mean_regression": 0.5,
+    "months_undetected": 3,
+    "ci_runs_per_pr": 1,
+    "breakeven_runs_per_month": 14.37490611535968
+   },
+   {
+    "p_regression": 0.2,
+    "mean_regression": 0.5,
+    "months_undetected": 3,
+    "ci_runs_per_pr": 3,
+    "breakeven_runs_per_month": 43.12471834607904
+   },
+   {
+    "p_regression": 0.2,
+    "mean_regression": 1.0,
+    "months_undetected": 1,
+    "ci_runs_per_pr": 1,
+    "breakeven_runs_per_month": 21.562359173039525
+   },
+   {
+    "p_regression": 0.2,
+    "mean_regression": 1.0,
+    "months_undetected": 1,
+    "ci_runs_per_pr": 3,
+    "breakeven_runs_per_month": 64.68707751911857
+   },
+   {
+    "p_regression": 0.2,
+    "mean_regression": 1.0,
+    "months_undetected": 3,
+    "ci_runs_per_pr": 1,
+    "breakeven_runs_per_month": 7.18745305767984
+   },
+   {
+    "p_regression": 0.2,
+    "mean_regression": 1.0,
+    "months_undetected": 3,
+    "ci_runs_per_pr": 3,
+    "breakeven_runs_per_month": 21.56235917303952
+   }
+  ],
+  "static_cout": [
+   {
+    "p_regression": 0.05,
+    "mean_regression": 0.5,
+    "months_undetected": 1,
+    "ci_runs_per_pr": 1,
+    "breakeven_runs_per_month": 0.0
+   },
+   {
+    "p_regression": 0.05,
+    "mean_regression": 0.5,
+    "months_undetected": 1,
+    "ci_runs_per_pr": 3,
+    "breakeven_runs_per_month": 0.0
+   },
+   {
+    "p_regression": 0.05,
+    "mean_regression": 0.5,
+    "months_undetected": 3,
+    "ci_runs_per_pr": 1,
+    "breakeven_runs_per_month": 0.0
+   },
+   {
+    "p_regression": 0.05,
+    "mean_regression": 0.5,
+    "months_undetected": 3,
+    "ci_runs_per_pr": 3,
+    "breakeven_runs_per_month": 0.0
+   },
+   {
+    "p_regression": 0.05,
+    "mean_regression": 1.0,
+    "months_undetected": 1,
+    "ci_runs_per_pr": 1,
+    "breakeven_runs_per_month": 0.0
+   },
+   {
+    "p_regression": 0.05,
+    "mean_regression": 1.0,
+    "months_undetected": 1,
+    "ci_runs_per_pr": 3,
+    "breakeven_runs_per_month": 0.0
+   },
+   {
+    "p_regression": 0.05,
+    "mean_regression": 1.0,
+    "months_undetected": 3,
+    "ci_runs_per_pr": 1,
+    "breakeven_runs_per_month": 0.0
+   },
+   {
+    "p_regression": 0.05,
+    "mean_regression": 1.0,
+    "months_undetected": 3,
+    "ci_runs_per_pr": 3,
+    "breakeven_runs_per_month": 0.0
+   },
+   {
+    "p_regression": 0.2,
+    "mean_regression": 0.5,
+    "months_undetected": 1,
+    "ci_runs_per_pr": 1,
+    "breakeven_runs_per_month": 0.0
+   },
+   {
+    "p_regression": 0.2,
+    "mean_regression": 0.5,
+    "months_undetected": 1,
+    "ci_runs_per_pr": 3,
+    "breakeven_runs_per_month": 0.0
+   },
+   {
+    "p_regression": 0.2,
+    "mean_regression": 0.5,
+    "months_undetected": 3,
+    "ci_runs_per_pr": 1,
+    "breakeven_runs_per_month": 0.0
+   },
+   {
+    "p_regression": 0.2,
+    "mean_regression": 0.5,
+    "months_undetected": 3,
+    "ci_runs_per_pr": 3,
+    "breakeven_runs_per_month": 0.0
+   },
+   {
+    "p_regression": 0.2,
+    "mean_regression": 1.0,
+    "months_undetected": 1,
+    "ci_runs_per_pr": 1,
+    "breakeven_runs_per_month": 0.0
+   },
+   {
+    "p_regression": 0.2,
+    "mean_regression": 1.0,
+    "months_undetected": 1,
+    "ci_runs_per_pr": 3,
+    "breakeven_runs_per_month": 0.0
+   },
+   {
+    "p_regression": 0.2,
+    "mean_regression": 1.0,
+    "months_undetected": 3,
+    "ci_runs_per_pr": 1,
+    "breakeven_runs_per_month": 0.0
+   },
+   {
+    "p_regression": 0.2,
+    "mean_regression": 1.0,
+    "months_undetected": 3,
+    "ci_runs_per_pr": 3,
+    "breakeven_runs_per_month": 0.0
+   }
+  ]
+ }
+}

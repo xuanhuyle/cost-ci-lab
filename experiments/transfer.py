@@ -22,12 +22,12 @@ from costci.measure import measure_env
 from costci.paths import RESULTS
 from costci.scenario import Workspace, load_scenarios, prepare
 
-SCENARIOS = ["s01_widen_date_filter", "s05_many_to_many_join", "s07_unnecessary_distinct",
-             "s08_expensive_window", "s13_select_fewer_columns", "s22_sort_for_determinism",
-             "s09_repeated_scans", "s04_incremental_to_table"]
-REPS = 4
-BACKGROUND_SQL = ("SELECT l_partkey, l_suppkey, count(*), sum(l_extendedprice), "
-                  "string_agg(l_comment, ',') FROM lab.raw.lineitem GROUP BY 1, 2 ORDER BY 3 DESC LIMIT 10")
+SCENARIOS = ["s01_widen_date_filter", "s05_many_to_many_join", "s04_incremental_to_table",
+             "s08_expensive_window", "s22_sort_for_determinism",
+             "s09_repeated_scans"]
+REPS = 3
+BACKGROUND_SQL = ("SELECT l_partkey, count(*), sum(l_extendedprice), max(l_comment) "
+                  "FROM lab.raw.lineitem GROUP BY 1 ORDER BY 2 DESC LIMIT 10")
 
 
 def totals(res):
@@ -53,14 +53,19 @@ class Background:
         self.n = n_threads
         self.threads = []
         self.count = 0
+        self.errors: list[str] = []
 
     def _loop(self):
         # Same process + same file => same DuckDB instance: background queries share the engine's
         # thread pool and memory limit with the measured queries, like tenants of one warehouse.
         s = Session(self.env)
         while not self.stop.is_set():
-            s.con.execute(BACKGROUND_SQL).fetchall()
-            self.count += 1
+            try:
+                s.con.execute(BACKGROUND_SQL).fetchall()
+                self.count += 1
+            except Exception as e:          # e.g. out-of-memory under contention: record, continue
+                self.errors.append(str(e)[:200])
+                time.sleep(0.5)
         s.close()
 
     def __enter__(self):
@@ -102,12 +107,20 @@ def main():
         prep = prepare(ws, sc)
         r = {}
         t0 = time.perf_counter()
-        r["cold_single"] = cold_single(prep.plans)
-        r["prod_4t"] = totals(measure_env("prod", prep.plans, REPS, threads=4))
-        r["ci_1t"] = totals(measure_env("prod", prep.plans, REPS, threads=1))
+
+        def attempt(key, fn):
+            try:
+                r[key] = fn()
+            except Exception as e:           # a failure (e.g. OOM under load) is itself a result
+                r[key] = {"error": str(e)[:300], "ratio": None}
+
+        attempt("cold_single", lambda: cold_single(prep.plans))
+        attempt("prod_4t", lambda: totals(measure_env("prod", prep.plans, REPS, threads=4)))
+        attempt("ci_1t", lambda: totals(measure_env("prod", prep.plans, REPS, threads=1)))
         with Background("prod") as bg:
-            r["prod_4t_loaded"] = totals(measure_env("prod", prep.plans, REPS, threads=4))
+            attempt("prod_4t_loaded", lambda: totals(measure_env("prod", prep.plans, REPS, threads=4)))
             r["background_queries"] = bg.count
+            r["background_errors"] = bg.errors[:5]
         r["seconds"] = time.perf_counter() - t0
         results[sc.id] = r
         print(sc.id, {k: (round(v["ratio"], 3) if isinstance(v, dict) and v.get("ratio") else v)

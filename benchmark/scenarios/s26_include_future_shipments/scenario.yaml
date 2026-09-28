@@ -1,0 +1,6 @@
+id: s26_include_future_shipments
+title: Include shipments scheduled after the run date in int_order_lines
+category: regression
+description: Removes the upper date bound so the backlog of future-dated shipments is included (roughly +35% rows; ship dates run up to 121 days past the last order date). The model itself gets somewhat more expensive; unchanged downstream marts read a larger table. Added because s15 turned out to be a no-op on TPC-H data (all recent shipments have return flag N); this is the downstream-propagation test.
+overlay:
+  models/intermediate/int_order_lines.sql: int_order_lines.sql

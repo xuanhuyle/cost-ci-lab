@@ -1,40 +1,31 @@
-# STATUS — Cost CI feasibility investigation
+# STATUS: Cost CI feasibility investigation
 
-Last updated: 2026-09-28 (session 1)
+Last updated: 2026-09-28 12:40 (session 1)
 
-## Hypothesis status
+## Hypothesis status (provisional, updated as results land)
 | ID | Hypothesis | Status | Evidence so far |
 |----|-----------|--------|-----------------|
-| H1 | Change attribution (diff → workloads → history) | OPEN | — |
-| H2 | Counterfactual estimation (Cost(PR) − Cost(MAIN)) | OPEN | — |
-| H3 | Production extrapolation to recurring $ | OPEN | — |
-| H4 | Post-merge calibration | OPEN | — |
-| H5 | CI practicality (latency, analysis cost) | OPEN | — |
-| H6 | Cross-platform abstraction | OPEN | — |
+| H1 | Change attribution | Largely supported, with known blind spots | dbt state works for SQL-text changes. Blind spots: var/env (E-017), cosmetic false positives, consumers need access history. |
+| H2 | Counterfactual estimation | Supported only via production-scale execution (partial E1) | Full-clone A/B tracks truth; samples, static and bytes are off by large factors both ways. |
+| H3 | Production extrapolation | Partly | Anchor × ratio works in the lab. Frequency is fine for crons and bad for sparse/seasonal (E6, simulated). Pool economics: pending E2. |
+| H4 | Calibration | Pending E7 | — |
+| H5 | CI practicality | Doubtful for heavy workloads | Reliable strategy costs about 1–2 production runs per affected workload per CI run. |
+| H6 | Cross-platform abstraction | Survives only with explicit pool semantics | PLATFORM_FEASIBILITY §1, ARCHITECTURE §1 |
 
-## Plan
-1. [x] Inspect repo/environment. Repo contained only the brief. No Snowflake/Databricks credentials.
-       gcloud has credentials for an unrelated project (not used; see OWNER_REQUEST).
-2. [ ] Phase 1 platform research (parallel subagents → `docs/research/*.md`) → `docs/PLATFORM_FEASIBILITY.md`.
-3. [ ] Local lab: DuckDB + real dbt (dbt-duckdb) on TPC-H, adapter-portable SQL.
-       Measures resource ratios at production scale (ground truth) vs CI-feasible estimators.
-4. [ ] Benchmark suite (~24 scenarios incl. adversarial) as overlays on a base dbt project.
-5. [ ] Estimators A (static/plan), B (A/B full clone / samples), C (production-anchored),
-       D (native-estimator analog), E (hybrid); pool/billing layer from documented pricing rules.
-6. [ ] Metrics, uncertainty calibration, downstream propagation, CI economics.
-7. [ ] Architecture + portability (Snowflake / Databricks / BigQuery) + failure modes.
-8. [ ] Live-experiment kit + OWNER_REQUEST; DECISION.
+## Done
+- Repo and venv; research on all 4 streams → `docs/research/*`, `docs/PLATFORM_FEASIBILITY.md`, EVIDENCE_LOG E-001..E-022.
+- Lab: TPC-H SF2 plus 4 CI sample envs; dbt project (17 models); 25 scenarios; harness; tests (18 pass).
+- Docs drafted: EXPERIMENT_DESIGN, ARCHITECTURE, OWNER_REQUEST, README; live/snowflake kit (UNVALIDATED).
+- E6 frequency (simulated) done → `results/frequency.json`.
 
-## Competing hypotheses being tested (where uncertainty is material)
-- HA: Relative resource ratios measured cheaply in CI (samples/static) transfer to production scale.
-  HB: Ratios are scale-dependent for a material class of changes (joins, windows, spills), so only
-      full-scale A/B is trustworthy → CI cost scales with production cost.
-- HC: Per-workload attributed cost is a good proxy for marginal $ impact.
-  HD: Marginal $ is a property of the capacity pool (warehouse/reservation), not the query; per-query
-      attribution misleads on shared/prepaid capacity.
+## In progress
+- E1 benchmark running in the background (`work/bench_run.log`; ~2.5 min per scenario; results in `results/bench/`).
+
+## Next (in order; do not run measurement experiments concurrently)
+1. After E1: `experiments.measure_baseline` → `analyze` → `economics_run` → `uncertainty` → `calibration`.
+2. `costci.data --only prodfine` → `experiments.layout` (physical-layout sensitivity: SF2 row groups span ~26 days, so incremental-window truth is scale-limited).
+3. `experiments.transfer` (1 thread vs 4, concurrent load, cold run), then `experiments.downstream`.
+4. Write RESULTS, FAILURE_MODES, DECISION; update ARCHITECTURE §5 and README; final commit.
 
 ## Blockers
-- No live platform access (see `docs/OWNER_REQUEST.md` once written).
-
-## Next step
-Launch research subagents; set up venv + dbt-duckdb; build base dbt project and measurement harness.
+- No live platform access (`docs/OWNER_REQUEST.md`). The gcloud credentials on this machine belong to an unrelated project and are not used.

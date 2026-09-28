@@ -30,7 +30,7 @@ it is labelled `SIMULATED`: it demonstrates mechanisms, not magnitudes.
 
 | Hypothesis | Experiment | Output |
 |---|---|---|
-| H1 attribution: diff → models → workloads → history | E1: dbt state + consumer mapping over 25 PRs | per-scenario detected vs affected workloads |
+| H1 attribution: diff → models → workloads → history | E1 + E9: dbt state vs rendered-SQL diff + consumer mapping over 26 PRs | per-scenario detected vs affected workloads |
 | H2 counterfactual: Cost(PR) − Cost(MAIN) | E1: MAIN vs PR at production scale = truth; CI strategies = estimates | `results/bench/*.json`, `results/analysis.json` |
 | H3 production extrapolation (per-run → monthly $) | E1 (history anchoring), E2 (pool economics), E6 (frequency) | `analysis.json`, `economics.json`, `frequency.json` |
 | H4 calibration | E7: leave-one-out correction on predicted vs realised pairs | `calibration.json` |
@@ -81,7 +81,7 @@ cross-database macros), so the same project can run against Snowflake's `SNOWFLA
   operator CPU, rows scanned, peak memory and spill. It also computes "logical bytes", which emulate
   BigQuery on-demand semantics: rows scanned after pruning × logical width of every referenced column.
 
-## 3. Benchmark suite (25 PRs)
+## 3. Benchmark suite (26 PRs)
 
 Each scenario is an overlay on the base project (`benchmark/scenarios/<id>/`). Scenario files hold
 **no expected outputs**. The label column is descriptive and is never used for scoring.
@@ -113,6 +113,14 @@ Each scenario is an overlay on the base project (`benchmark/scenarios/<id>/`). S
 | s23 | Round and null-guard the shared net_revenue macro (`macros/net_revenue.sql`) | neutral | One macro edit silently changes every model that uses it, and their descendants. Cheap arithmetic; tests multi-model attribution and false positives. |
 | s24 | Change the revenue_lookback_days var default from 3 to 45 in dbt_project.yml (`dbt_project.yml`) | adversarial | Same production effect as s03, but the change lives in project config, not in the model file. Tests whether change detection sees it. |
 | s25 | Materialise the whole staging layer as tables (folder-level config) (`dbt_project.yml`) | regression | One line in dbt_project.yml turns five staging views into tables rebuilt daily (copies of the largest source tables). |
+| s26 | Include shipments scheduled after the run date in int_order_lines (`models/intermediate/int_order_lines.sql`) | regression | Removes the upper date bound (roughly +35% rows). Added during the run as the downstream-propagation test after s15 turned out to be a no-op on this data. |
+
+**Design note on s15.** As written, s15 was meant to add ~1/3 more rows by including returned
+items. It changed **nothing**: in TPC-H, every shipment in the model's 180-day window has
+`return_flag = 'N'`, so the filter never removed a row. The measured truth is ≈0 (E1). We keep the
+scenario because it is a genuine case of a code change whose cost impact depends on the data.
+Static reading of the diff (by a human or a plan-free tool) predicts +33% rows; measurement shows
+none. s26 replaces it as the downstream-propagation test.
 
 How the suite covers the brief's scenario list:
 
@@ -131,7 +139,7 @@ How the suite covers the brief's scenario list:
 | predicate pushdown | s12 |
 | select fewer columns | s13 |
 | join optimisation | s14 |
-| increased downstream rows | s15 |
+| increased downstream rows | s26 (s15 turned out to be a no-op) |
 | new downstream dependency | s16 |
 | infrequent but expensive | s17 |
 | frequent but cheap | s18 |
@@ -146,7 +154,7 @@ Cases aimed at naive estimators:
 | concurrency | s22 + E3 |
 | macro fan-out | s23 |
 | config/var changes invisible to naive diffing | s24, s25 |
-| upstream rows → downstream cost | s15, s01 |
+| upstream rows → downstream cost | s26, s01 |
 | sparse/seasonal frequency | E6 |
 | shared compute / idle capacity | E2 |
 
@@ -235,6 +243,9 @@ The hybrid's three stages:
 | E5 | uncertainty | 80% intervals from the measured noise model; coverage; confidence labels vs correctness | MEASURED noise, computed intervals |
 | E6 | frequency | Synthetic run histories (cron, BI weekday, growth, seasonal, sparse, data-driven) → next-month forecast error | SIMULATED |
 | E7 | calibration | Leave-one-scenario-out multiplicative corrections (global, and per workload class) | MEASURED pairs, local only |
+| E8 | layout | The same PRs on identical data with 8,192-row row groups (~1.7 days) vs the default (~26 days at SF2) | MEASURED (local) |
+| E9 | attribution | Detectors compared: git diff vs dbt `state:modified` (+ sub-selectors) vs a rendered-SQL diff of every model; scenarios dbt misses are re-measured with union detection (`results/bench_union/`) | MEASURED (dbt behaviour) |
+| E10 | CI economics | Break-even run frequency = k × pushes / (P(regression) × E[r] × months undetected), with k measured per strategy | MEASURED k, ASSUMED rates |
 
 ## 8. Threats to validity
 
@@ -258,16 +269,16 @@ python -m venv .venv
 .venv/Scripts/pip install -r requirements.txt
 .venv/Scripts/python -m costci.data --sf 2
 .venv/Scripts/python -m experiments.run_benchmark
-.venv/Scripts/python -m experiments.measure_baseline
-.venv/Scripts/python -m experiments.analyze
-.venv/Scripts/python -m experiments.economics_run
-.venv/Scripts/python -m experiments.transfer
-.venv/Scripts/python -m experiments.downstream
-.venv/Scripts/python -m experiments.uncertainty
+.venv/Scripts/python -m experiments.followups
 .venv/Scripts/python -m experiments.frequency
-.venv/Scripts/python -m experiments.calibration
 .venv/Scripts/python -m pytest -q
 ```
 
-On Linux/macOS, use `.venv/bin/` instead of `.venv/Scripts/`. `costci.data` takes about 2 min and
-~1.5 GB of disk. `run_benchmark` takes about 75 min on a 4-core laptop.
+- `costci.data` builds the environments (about 2 min, ~1.5 GB).
+- `run_benchmark` is E1: 25 scenarios in about 75 min on a 4-core laptop.
+- `followups` runs, in order: s26; E9 attribution (plus union re-measurement of anything dbt missed);
+  baseline; analyze; E2; E5; E7; E10; E8; E3; E4; report.
+- `frequency` is E6 and is simulated.
+
+On Linux/macOS use `.venv/bin/` instead of `.venv/Scripts/`. Every experiment is also a standalone
+module (`python -m experiments.<name>`). Measurement experiments must not run concurrently.

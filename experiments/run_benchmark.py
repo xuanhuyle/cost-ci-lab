@@ -31,8 +31,10 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--only", nargs="*")
     ap.add_argument("--skip-existing", action="store_true")
+    ap.add_argument("--detection", choices=["dbt_state", "union"], default="dbt_state",
+                    help="union = dbt state:modified plus rendered-SQL diff (results/bench_union)")
     args = ap.parse_args()
-    out_dir = RESULTS / "bench"
+    out_dir = RESULTS / ("bench" if args.detection == "dbt_state" else "bench_union")
     out_dir.mkdir(parents=True, exist_ok=True)
 
     t0 = time.perf_counter()
@@ -47,7 +49,7 @@ def main() -> None:
             continue
         t_start = time.perf_counter()
         dbtops.TIMINGS.clear()
-        prep = prepare(ws, sc)
+        prep = prepare(ws, sc, detection=args.detection)
         t_prep = time.perf_counter() - t_start
         record = {
             "scenario": {k: v for k, v in asdict(sc).items() if k != "dir"},

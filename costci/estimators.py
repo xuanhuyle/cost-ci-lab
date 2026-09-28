@@ -20,11 +20,18 @@ CI_REP = [0]
 HIST_REPS = [1, 2, 3]
 TRUTH_REPS = [4, 5, 6, 7]
 SAMPLE_ENVS = ["bern01", "key01", "key10", "recent90"]
-# fraction of production fact rows present in each sample env (lineitem rows / prod lineitem rows)
+# Resource used as "cost": engine latency (what a dedicated warehouse bills) by default; analyses
+# can switch to "cpu_s" (work, closer to slot/DBU consumption) via set_metric().
 METRIC = "latency_s"
 
 
-def _vals(runs: dict, variant: str, wid: str, reps: list[int] | None = None, metric=METRIC):
+def set_metric(name: str) -> None:
+    global METRIC
+    METRIC = name
+
+
+def _vals(runs: dict, variant: str, wid: str, reps: list[int] | None = None, metric=None):
+    metric = metric or METRIC
     xs = runs.get(variant, {}).get(wid)
     if not xs:
         return None
@@ -60,13 +67,13 @@ class ScenarioData:
         return w.get("pr") or w.get("main")
 
     # ---- truth and anchor
-    def truth(self, wid, metric=METRIC):
+    def truth(self, wid, metric=None):
         r = self.runs("prod")
         m = med(_vals(r, "main", wid, TRUTH_REPS, metric)) or 0.0
         p = med(_vals(r, "pr", wid, TRUTH_REPS, metric)) or 0.0
         return m, p
 
-    def truth_paired_ratio(self, wid, metric=METRIC):
+    def truth_paired_ratio(self, wid, metric=None):
         r = self.runs("prod")
         m = _vals(r, "main", wid, TRUTH_REPS, metric)
         p = _vals(r, "pr", wid, TRUTH_REPS, metric)
@@ -74,17 +81,17 @@ class ScenarioData:
             return None
         return med([b / a for a, b in zip(m, p) if a > 0])
 
-    def anchor(self, wid, metric=METRIC):
+    def anchor(self, wid, metric=None):
         return med(_vals(self.runs("prod"), "main", wid, HIST_REPS, metric))
 
-    def hist_spread(self, wid, metric=METRIC):
+    def hist_spread(self, wid, metric=None):
         xs = _vals(self.runs("prod"), "main", wid, HIST_REPS, metric)
         if not xs or len(xs) < 2:
             return None
         return (max(xs) - min(xs)) / max(med(xs), 1e-9)
 
     # ---- measurement accessors for estimators
-    def env_medians(self, env, wid, reps=None, metric=METRIC):
+    def env_medians(self, env, wid, reps=None, metric=None):
         r = self.runs(env)
         return med(_vals(r, "main", wid, reps, metric)), med(_vals(r, "pr", wid, reps, metric))
 
@@ -112,8 +119,8 @@ def _anchored(sd: ScenarioData, wid, ratio, absolute_pr=None):
     """Apply a PR/MAIN ratio to the production history of MAIN. New workloads need an absolute."""
     if sd.in_variant(wid, "main"):
         h = sd.anchor(wid)
-        if h is None or ratio is None or not math.isfinite(ratio):
-            return None
+        if not h or ratio is None or not math.isfinite(ratio):
+            return absolute_pr  # MAIN did no measurable work (e.g. was a view): use the absolute
         return h * (ratio - 1.0)
     return absolute_pr          # new workload: no anchor exists
 
@@ -125,6 +132,8 @@ def est_ab_full_abs(sd, wid):
 
 def est_ab_full_anchored(sd, wid):
     m, p = sd.env_medians("prod", wid, CI_REP)
+    if m == 0 and p == 0:
+        return 0.0                  # no measurable work in either variant (e.g. CREATE VIEW)
     ratio = (p / m) if (m and p is not None) else None
     return _anchored(sd, wid, ratio, absolute_pr=p)
 
@@ -132,6 +141,8 @@ def est_ab_full_anchored(sd, wid):
 def est_ab_sample(env):
     def f(sd, wid):
         m, p = sd.env_medians(env, wid)
+        if m == 0 and p == 0:
+            return 0.0
         ratio = (p / m) if (m and p is not None) else None
         frac = sd.env_rows[env]
         absolute = (p / frac) if p is not None else None       # linear scale-up for new workloads
@@ -153,6 +164,8 @@ def est_ab_two_point(sd, wid):
     fs, fl = sd.env_rows["key01"], sd.env_rows["key10"]
     m01, p01 = sd.env_medians("key01", wid)
     m10, p10 = sd.env_medians("key10", wid)
+    if not any((m01, p01, m10, p10)):
+        return 0.0
     pm = _two_point(m01, m10, fs, fl) if sd.in_variant(wid, "main") else None
     pp = _two_point(p01, p10, fs, fl)
     if pp is None:
@@ -171,8 +184,8 @@ def est_static_cout(sd, wid, sec_per_cout=None):
         return 0.0
     if cp is None:
         return None
-    if cm is None or cm == 0:
-        return cp * sec_per_cout if (sec_per_cout and cm is None) else None
+    if not cm:
+        return cp * sec_per_cout if sec_per_cout else None
     return _anchored(sd, wid, cp / cm, absolute_pr=None)
 
 

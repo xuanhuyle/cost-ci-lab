@@ -101,6 +101,29 @@ def build_recent(env: str, days: int) -> None:
     _copy_from_prod(env, sql)
 
 
+def build_fine_layout(env: str = "prodfine", row_group_size: int = 8192) -> None:
+    """Same data as prod, but ~1.7 days of line items per row group instead of ~26.
+
+    At SF2 DuckDB's default row group (122,880 rows) spans ~26 days of lineitem, so pruning is far
+    coarser than per-day micro-partitions/partitions of a production-scale table. This copy is used
+    to test how much a change's true cost depends on physical layout (experiments/layout.py).
+    """
+    path = env_db(env)
+    if path.parent.exists():
+        shutil.rmtree(path.parent)
+    path.parent.mkdir(parents=True)
+    con = duckdb.connect()
+    con.execute(f"SET memory_limit='{MEMORY_LIMIT}'")
+    con.execute(f"ATTACH '{path.as_posix()}' AS {CATALOG} (ROW_GROUP_SIZE {row_group_size})")
+    con.execute(f"ATTACH '{env_db('prod').as_posix()}' AS src (READ_ONLY)")
+    con.execute(f"CREATE SCHEMA {CATALOG}.raw")
+    for t in TABLES:
+        con.execute(f"CREATE TABLE {CATALOG}.raw.{t} AS SELECT * FROM src.raw.{t}")
+    con.execute("DETACH src")
+    con.execute(f"CHECKPOINT {CATALOG}")
+    con.close()
+
+
 def describe(env: str) -> dict:
     con = duckdb.connect(str(env_db(env)), read_only=True)
     rows = {t: con.execute(f"SELECT count(*) FROM raw.{t}").fetchone()[0] for t in TABLES}
@@ -113,6 +136,7 @@ SAMPLE_BUILDERS = {
     "key01": lambda: build_key_consistent("key01", 10),
     "key10": lambda: build_key_consistent("key10", 100),
     "recent90": lambda: build_recent("recent90", 90),
+    "prodfine": lambda: build_fine_layout("prodfine"),
 }
 
 

@@ -1,0 +1,568 @@
+{
+ "scenario": {
+  "id": "s16_new_model",
+  "title": "Add a new daily churn mart",
+  "category": "regression",
+  "description": "Pure addition - there is no MAIN baseline, so ratio-based estimators cannot be anchored.",
+  "overlay": {
+   "models/marts/mart_customer_churn.sql": "mart_customer_churn.sql"
+  },
+  "delete": [],
+  "context_overrides": {}
+ },
+ "changes": {
+  "changed_files": [],
+  "modified": [
+   "mart_customer_churn"
+  ],
+  "modified_by": {
+   "body": [
+    "mart_customer_churn"
+   ],
+   "configs": [
+    "mart_customer_churn"
+   ],
+   "macros": [],
+   "relation": [
+    "mart_customer_churn"
+   ],
+   "persisted_descriptions": [
+    "mart_customer_churn"
+   ],
+   "contract": [
+    "mart_customer_churn"
+   ]
+  },
+  "modified_plus": [
+   "mart_customer_churn"
+  ],
+  "new_models": [
+   "mart_customer_churn"
+  ],
+  "removed_models": [],
+  "consumers": []
+ },
+ "context": {
+  "run_date": "1998-08-02",
+  "time_scale": 100,
+  "data_scale": 100,
+  "jobs": [
+   {
+    "id": "revenue_hourly",
+    "models": [
+     "fct_daily_revenue"
+    ],
+    "runs_per_month": 720,
+    "pool": "transform_wh",
+    "start_minute": 5
+   },
+   {
+    "id": "monthly_ltv",
+    "tags": [
+     "monthly"
+    ],
+    "runs_per_month": 1,
+    "pool": "transform_wh",
+    "start_minute": 180
+   },
+   {
+    "id": "daily_build",
+    "default": true,
+    "runs_per_month": 30,
+    "pool": "transform_wh",
+    "start_minute": 120
+   }
+  ],
+  "consumers": [
+   {
+    "id": "bi_customer_lookup",
+    "sql": "select * from {{ ref('dim_customers') }} where customer_key = 4242",
+    "runs_per_month": 60000,
+    "pool": "bi_wh"
+   },
+   {
+    "id": "bi_segments_dashboard",
+    "sql": "select * from {{ ref('rpt_customer_segments') }} order by customer_count desc",
+    "runs_per_month": 9000,
+    "pool": "bi_wh"
+   },
+   {
+    "id": "bi_kpi_tiles",
+    "sql": "select * from {{ ref('rpt_daily_kpis') }} order by ship_date",
+    "runs_per_month": 30000,
+    "pool": "bi_wh"
+   },
+   {
+    "id": "bi_nation_trend",
+    "sql": "select nation_name, ship_month, sum(net_revenue) as net_revenue from {{ ref('mart_revenue_by_nation') }} group by 1, 2",
+    "runs_per_month": 3000,
+    "pool": "bi_wh"
+   }
+  ],
+  "pools": {
+   "transform_wh": {
+    "kind": "snowflake_warehouse",
+    "credits_per_hour": 4,
+    "price_per_credit": 3.0,
+    "auto_suspend_s": 60
+   },
+   "bi_wh": {
+    "kind": "snowflake_warehouse",
+    "credits_per_hour": 2,
+    "price_per_credit": 3.0,
+    "auto_suspend_s": 300,
+    "max_clusters": 2,
+    "business_hours": [
+     8,
+     20
+    ]
+   }
+  }
+ },
+ "workloads": {
+  "main": [],
+  "pr": [
+   {
+    "id": "model:mart_customer_churn",
+    "kind": "model",
+    "name": "mart_customer_churn",
+    "sql": "with customer_months as (\n    select\n        ol.customer_key,\n        date_trunc('month', ol.order_date) as order_month,\n        sum(ol.net_revenue) as revenue\n    from \"lab\".\"prod\".\"int_order_lines\" ol\n    group by 1, 2\n),\nsequenced as (\n    select\n        cm.*,\n        lag(order_month) over (partition by customer_key order by order_month) as previous_month,\n        avg(revenue) over (partition by customer_key order by order_month\n                           rows between 2 preceding and current row)          as revenue_3m_avg\n    from customer_months cm\n)\nselect\n    s.customer_key,\n    d.market_segment,\n    d.nation_name,\n    max(s.order_month)                                   as last_active_month,\n    count(*)                                             as active_months,\n    sum(case when s.previous_month is null then 1 else 0 end) as reactivations,\n    avg(s.revenue_3m_avg)                                as avg_revenue_3m,\n    max(d.days_since_last_order)                         as days_since_last_order\nfrom sequenced s\njoin \"lab\".\"prod\".\"dim_customers\" d on d.customer_key = s.customer_key\ngroup by 1, 2, 3",
+    "materialized": "table",
+    "unique_key": null,
+    "job": "daily_build",
+    "runs_per_month": 30,
+    "pool": "transform_wh"
+   }
+  ]
+ },
+ "timing": {
+  "prepare_s": 22.801265499962028,
+  "dbt_calls": [
+   [
+    "parse",
+    4.095992600021418
+   ],
+   [
+    "ls",
+    1.7139966000104323
+   ],
+   [
+    "ls",
+    1.7495935000479221
+   ],
+   [
+    "ls",
+    1.7335052999551408
+   ],
+   [
+    "ls",
+    1.798599199973978
+   ],
+   [
+    "ls",
+    1.9089500000118278
+   ],
+   [
+    "ls",
+    1.7621125999721698
+   ],
+   [
+    "ls",
+    1.6196968000149354
+   ],
+   [
+    "ls",
+    1.6951297000050545
+   ],
+   [
+    "compile",
+    4.480129199975636
+   ]
+  ],
+  "env_s": {
+   "prod": 7.463419499981683,
+   "bern01": 0.4919621999724768,
+   "key01": 0.46914250002009794,
+   "key10": 0.8885638000210747,
+   "recent90": 1.5263630000408739
+  }
+ },
+ "envs": {
+  "prod": {
+   "env": "prod",
+   "reps": 8,
+   "runs": {
+    "main": {},
+    "pr": {
+     "model:mart_customer_churn": [
+      {
+       "latency_s": 0.7559055,
+       "cpu_s": 1.4599807000000002,
+       "rows_scanned": 1198901,
+       "logical_bytes": 39587542.0,
+       "peak_mem_bytes": 253681664,
+       "spill_bytes": 0,
+       "bytes_written": 2883584,
+       "rows_out": 1,
+       "wall_s": 0.7579964000033215,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.7521907,
+       "cpu_s": 1.5016994999999997,
+       "rows_scanned": 1198901,
+       "logical_bytes": 39587542.0,
+       "peak_mem_bytes": 253681664,
+       "spill_bytes": 0,
+       "bytes_written": 2883584,
+       "rows_out": 1,
+       "wall_s": 0.7540428999927826,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.7105503,
+       "cpu_s": 1.4314471999999996,
+       "rows_scanned": 1198901,
+       "logical_bytes": 39587542.0,
+       "peak_mem_bytes": 253681664,
+       "spill_bytes": 0,
+       "bytes_written": 2621440,
+       "rows_out": 1,
+       "wall_s": 0.7117210000287741,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.7153962,
+       "cpu_s": 1.4390697,
+       "rows_scanned": 1198901,
+       "logical_bytes": 39587542.0,
+       "peak_mem_bytes": 254304256,
+       "spill_bytes": 0,
+       "bytes_written": 2621440,
+       "rows_out": 1,
+       "wall_s": 0.717233799980022,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.7162931,
+       "cpu_s": 1.4113574999999998,
+       "rows_scanned": 1198901,
+       "logical_bytes": 39587542.0,
+       "peak_mem_bytes": 254304256,
+       "spill_bytes": 0,
+       "bytes_written": 2621440,
+       "rows_out": 1,
+       "wall_s": 0.7175218999618664,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.7086458,
+       "cpu_s": 1.4306024,
+       "rows_scanned": 1198901,
+       "logical_bytes": 39587542.0,
+       "peak_mem_bytes": 254304256,
+       "spill_bytes": 0,
+       "bytes_written": 2883584,
+       "rows_out": 1,
+       "wall_s": 0.7097419999772683,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.7299005,
+       "cpu_s": 1.4471660000000004,
+       "rows_scanned": 1198901,
+       "logical_bytes": 39587542.0,
+       "peak_mem_bytes": 255139840,
+       "spill_bytes": 0,
+       "bytes_written": 2883584,
+       "rows_out": 1,
+       "wall_s": 0.7321399999782443,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.7020868,
+       "cpu_s": 1.3757917000000002,
+       "rows_scanned": 1198901,
+       "logical_bytes": 39587542.0,
+       "peak_mem_bytes": 255139840,
+       "spill_bytes": 0,
+       "bytes_written": 2621440,
+       "rows_out": 1,
+       "wall_s": 0.7032346000196412,
+       "statements": 1
+      }
+     ]
+    }
+   },
+   "explain": {
+    "main": {},
+    "pr": {
+     "model:mart_customer_churn": [
+      {
+       "op": "PROJECTION",
+       "ec": 217972.0,
+       "table": null
+      },
+      {
+       "op": "HASH_GROUP_BY",
+       "ec": 217972.0,
+       "table": null
+      },
+      {
+       "op": "PROJECTION",
+       "ec": 217973.0,
+       "table": null
+      },
+      {
+       "op": "PROJECTION",
+       "ec": 217973.0,
+       "table": null
+      },
+      {
+       "op": "HASH_JOIN",
+       "ec": 217973.0,
+       "table": null
+      },
+      {
+       "op": "SEQ_SCAN",
+       "ec": 300000.0,
+       "table": "lab.prod.dim_customers"
+      },
+      {
+       "op": "PROJECTION",
+       "ec": 169812.0,
+       "table": null
+      },
+      {
+       "op": "PROJECTION",
+       "ec": 169812.0,
+       "table": null
+      },
+      {
+       "op": "WINDOW",
+       "ec": 0.0,
+       "table": null
+      },
+      {
+       "op": "PROJECTION",
+       "ec": 169812.0,
+       "table": null
+      },
+      {
+       "op": "HASH_GROUP_BY",
+       "ec": 169812.0,
+       "table": null
+      },
+      {
+       "op": "PROJECTION",
+       "ec": 898901.0,
+       "table": null
+      },
+      {
+       "op": "PROJECTION",
+       "ec": 898901.0,
+       "table": null
+      },
+      {
+       "op": "SEQ_SCAN",
+       "ec": 898901.0,
+       "table": "lab.prod.int_order_lines"
+      }
+     ]
+    }
+   }
+  },
+  "bern01": {
+   "env": "bern01",
+   "reps": 3,
+   "runs": {
+    "main": {},
+    "pr": {
+     "model:mart_customer_churn": [
+      {
+       "latency_s": 0.0363569,
+       "cpu_s": 0.04539029999999999,
+       "rows_scanned": 3035,
+       "logical_bytes": 109123.00000000001,
+       "peak_mem_bytes": 31694848,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 1,
+       "wall_s": 0.03752760001225397,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.0290952,
+       "cpu_s": 0.0493381,
+       "rows_scanned": 3035,
+       "logical_bytes": 109123.00000000001,
+       "peak_mem_bytes": 31694848,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 1,
+       "wall_s": 0.03024839999852702,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.0219247,
+       "cpu_s": 0.0407081,
+       "rows_scanned": 3035,
+       "logical_bytes": 109123.00000000001,
+       "peak_mem_bytes": 31694848,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 1,
+       "wall_s": 0.022806999972090125,
+       "statements": 1
+      }
+     ]
+    }
+   },
+   "explain": {}
+  },
+  "key01": {
+   "env": "key01",
+   "reps": 3,
+   "runs": {
+    "main": {},
+    "pr": {
+     "model:mart_customer_churn": [
+      {
+       "latency_s": 0.0357375,
+       "cpu_s": 0.0543721,
+       "rows_scanned": 11914,
+       "logical_bytes": 393571.0,
+       "peak_mem_bytes": 45510720,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 1,
+       "wall_s": 0.03699870000127703,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.0462044,
+       "cpu_s": 0.04878360000000002,
+       "rows_scanned": 11914,
+       "logical_bytes": 393571.0,
+       "peak_mem_bytes": 46406784,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 1,
+       "wall_s": 0.04764510004315525,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.0606966,
+       "cpu_s": 0.10092880000000004,
+       "rows_scanned": 11914,
+       "logical_bytes": 393571.0,
+       "peak_mem_bytes": 46406784,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 1,
+       "wall_s": 0.062091599975246936,
+       "statements": 1
+      }
+     ]
+    }
+   },
+   "explain": {}
+  },
+  "key10": {
+   "env": "key10",
+   "reps": 3,
+   "runs": {
+    "main": {},
+    "pr": {
+     "model:mart_customer_churn": [
+      {
+       "latency_s": 0.1183741,
+       "cpu_s": 0.1689936,
+       "rows_scanned": 120394,
+       "logical_bytes": 3976090.0,
+       "peak_mem_bytes": 64212992,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 1,
+       "wall_s": 0.11967720004031435,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.117177,
+       "cpu_s": 0.1723801,
+       "rows_scanned": 120394,
+       "logical_bytes": 3976090.0,
+       "peak_mem_bytes": 64212992,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 1,
+       "wall_s": 0.11841070000082254,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.1144072,
+       "cpu_s": 0.16993149999999999,
+       "rows_scanned": 120394,
+       "logical_bytes": 3976090.0,
+       "peak_mem_bytes": 64212992,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 1,
+       "wall_s": 0.11573350004618987,
+       "statements": 1
+      }
+     ]
+    }
+   },
+   "explain": {}
+  },
+  "recent90": {
+   "env": "recent90",
+   "reps": 3,
+   "runs": {
+    "main": {},
+    "pr": {
+     "model:mart_customer_churn": [
+      {
+       "latency_s": 0.2602578,
+       "cpu_s": 0.5141185999999999,
+       "rows_scanned": 464415,
+       "logical_bytes": 16083990.0,
+       "peak_mem_bytes": 86999040,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 1,
+       "wall_s": 0.2616194000001997,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.248788,
+       "cpu_s": 0.49491080000000004,
+       "rows_scanned": 464415,
+       "logical_bytes": 16083990.0,
+       "peak_mem_bytes": 86999040,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 1,
+       "wall_s": 0.2502825999981724,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.3549793,
+       "cpu_s": 0.498051,
+       "rows_scanned": 464415,
+       "logical_bytes": 16083990.0,
+       "peak_mem_bytes": 86999040,
+       "spill_bytes": 0,
+       "bytes_written": 1052672,
+       "rows_out": 1,
+       "wall_s": 0.3563272999599576,
+       "statements": 1
+      }
+     ]
+    }
+   },
+   "explain": {}
+  }
+ }
+}
