@@ -1,0 +1,5 @@
+-- Removes everything setup.sql created. Destructive: run only when the experiment is finished.
+DROP DATABASE IF EXISTS COSTCI_LAB;
+DROP WAREHOUSE IF EXISTS COSTCI_CI_WH;
+DROP WAREHOUSE IF EXISTS COSTCI_PROD_WH;
+DROP RESOURCE MONITOR IF EXISTS COSTCI_CAP;
