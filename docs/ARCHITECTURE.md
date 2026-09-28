@@ -177,7 +177,7 @@ they can be turned into trustworthy dollars in CI time.
 
 | Platform | Workload family | Grade | Why |
 |---|---|---|---|
-| Snowflake | dbt SQL models on a **dedicated** warehouse, scheduled ≥ daily | **HIGH** | Zero-copy clone + `--defer` + `dbt clone` for incremental targets; real-time `execution_time`; the billing function is fully documented and replayable (uptime, 60 s minimum, auto-suspend) |
+| Snowflake | dbt SQL models on a **dedicated** warehouse, run frequently enough to pay for the check (E10: break-even ~40–70 runs/month at median assumptions) | **HIGH** | Zero-copy clone + `--defer` + `dbt clone` for incremental targets; real-time `execution_time`; the billing function is fully documented and replayable (uptime, 60 s minimum, auto-suspend) |
 | Snowflake | dbt models on a warehouse **shared** with other teams | MEDIUM | The usage delta is measurable; marginal $ depends on the pool's background load (replayable from `QUERY_HISTORY` / `WAREHOUSE_EVENTS_HISTORY`); attribution is an allocation that excludes idle time |
 | Snowflake | BI / consumer queries on busy BI warehouses | LOW for $ (MEDIUM for usage) | Changes are absorbed by uptime that is already paid for, until multi-cluster scale-out, whose timing is not published |
 | Snowflake | Adaptive warehouses (GA 2026-06) | MEDIUM | Per-query credits are metered (`QUERY_METERING_HISTORY`, ≤1 h), so attribution ≈ marginal. But no formula is published: a CI run's credits are observable ~1 h after it, not at once |

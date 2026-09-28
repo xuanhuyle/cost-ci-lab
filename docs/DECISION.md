@@ -9,9 +9,10 @@ built as a cheap *predictor*.**
 **What works.** Execute the changed workloads at production scale: on a zero-copy clone, or as a
 PR-only run against the workload's own production history. Then replay the capacity pool's billing
 over a month.
-- In the lab this got the direction of **every** material change right and caught **every** large
-  regression.
-- Magnitude was within ~10% (median) and 96% of estimates were within one magnitude bucket.
+- In the lab, the full-clone A/B variant got the direction of **every** material change right and
+  caught **every** large regression.
+- Its magnitude was within ~10% (median), and 96% of its estimates were within one magnitude bucket.
+- The PR-only variant costs about half as much: 94% direction, one miss.
 - Intervals built from measured run-to-run noise were close to calibrated, and the grades derived
   from them were informative.
 
@@ -20,8 +21,9 @@ PRs:
 - static plans;
 - dry-run-style byte counts;
 - four ways of sampling data;
-- scale extrapolation;
-- post-hoc calibration.
+- scale extrapolation.
+
+Post-hoc calibration did not repair them.
 
 **The consequences:**
 - **CI cost.** A reliable check costs ≈2.5–4.6 production runs of the affected workloads per
@@ -47,7 +49,7 @@ technical moat.
 | Outcome | Verdict | Deciding evidence |
 |---|---|---|
 | **A: Strong primitive** | No | The only reliable estimator is "run it at production scale". That is conceptually simple and costs production compute, so it is not a reusable predictive core. Cheap estimators fail on meaningful classes (E1: 62–88% direction; wrong-sign on s14/s22). Calibration cannot fix them (E7). Dollar meaning depends on pool policy (E2). |
-| **B: Useful but narrow** | **Yes** | For scheduled SQL/dbt workloads on dedicated or per-query-billed compute, with enough run frequency to pay for execution, estimates were decision-grade: 100% direction, 100% large-regression recall, 96% within one bucket, calibrated noise intervals. Outside that region, quality degrades to LOW or NOT_VIABLE (ARCHITECTURE §7). |
+| **B: Useful but narrow** | **Yes** | For scheduled SQL/dbt workloads on dedicated or per-query-billed compute, with enough run frequency to pay for execution, production-scale estimates were decision-grade in the lab (full clone: 100% direction, 100% large-regression recall, 96% within one bucket, calibrated noise intervals). Outside that region, quality degrades to LOW or NOT_VIABLE (ARCHITECTURE §7). |
 | **C: Integration product** | Partly true, not sufficient | Change detection, lineage, telemetry joins, price lists, the PR-comment UX and BigQuery on-demand dry runs are commodity (E-019: `dbt-costgate`, dbt Cost Insights, Infracost). But a product assembled *only* from those gets documented, reproducible cases wrong (see below). |
 | **D: Fundamentally unreliable** | No | Within the narrow class, estimates were consistently useful and uncertainty grades were informative. Unpredictability is concentrated in identifiable conditions (see Q4). |
 
@@ -78,8 +80,8 @@ benchmark that approach was not decision-grade (E1, E7, E-025…E-027).
 
 | Grade | Workload class | Conditions |
 |---|---|---|
-| **HIGH** | Scheduled dbt/SQL models (table, view-to-table, incremental with its target cloned) on a **dedicated** warehouse or **per-query/per-job-billed** compute (Snowflake dedicated or Adaptive, Databricks serverless jobs, BigQuery on-demand) | The workload runs more than ~40–70×/month (so the check pays for itself, E10); production history exists; CI can use a production-scale clone. BigQuery on-demand bytes are HIGH but already commodity (dry run). |
-| **MEDIUM** | Relations with BI/app consumers; models on warehouses shared across teams; Databricks SQL warehouses; BigQuery autoscale-only reservations | Usage deltas are measurable. Dollars are a range whose meaning depends on pool state and on a policy (marginal vs attributed). Millisecond consumers need many repetitions. |
+| **HIGH** | Scheduled dbt/SQL models (tables, and incremental models with their target cloned) on a **dedicated Snowflake warehouse**; any query under **BigQuery on-demand** (already commodity via dry run) | The workload runs more than ~40–70×/month (so the check pays for itself, E10); production history exists; CI can use a production-scale clone on the production warehouse size (E3). |
+| **MEDIUM** | Relations with BI/app consumers; models on warehouses shared across teams; Snowflake Adaptive warehouses (per-query metering, but no published formula); Databricks serverless jobs and SQL warehouses (DBUs appear only after ≤24 h); BigQuery autoscale-only reservations | Usage deltas are measurable. Dollars are a range whose meaning depends on pool state and on a policy (marginal vs attributed), or they are observable only after the CI run. Millisecond consumers need many repetitions. |
 | **LOW** | Prepaid or baseline capacity with headroom; multi-cluster scale-out; classic Databricks job clusters (VM cost outside the platform); non-SQL Spark | Marginal $ is 0 until saturation, then a step; or attribution is indirect. |
 | **NOT_VIABLE** | Shared all-purpose Databricks clusters; serverless side-costs (auto-clustering, MV/dynamic-table refresh); sparse, seasonal or ad-hoc workloads; infrequent heavy jobs such as monthly runs | No attribution path, vendor estimators at ±50–100%, frequency is unforecastable (E6), or execution costs more than the risk (E10). |
 
@@ -90,15 +92,22 @@ benchmark that approach was not decision-grade (E1, E7, E-025…E-027).
 | Estimator | Direction on material changes | Large-regression recall | False warnings | Within one bucket | Median magnitude error |
 |---|---|---|---|---|---|
 | Full-clone A/B + history | **100%** | **100%** | 20% (all near the ±10% threshold) | 96% | ~10% |
-| PR-only vs history | 94% | — | — | 96% | ~14% |
-| Cheap strategies | 62–88% | — | — | 69–88% | 24–180% |
+| PR-only vs history | 94% | 89% | 20% | 96% | ~14% |
+| Hybrid (static → samples → clone) | 88% | 100% | 10% | 88% | ~13% |
+| Cheap strategies (static plan, bytes, 4 sampling schemes, extrapolation) | 62–88% | 78–100% | 0–60% | 69–85% | ~27% to ~6× |
 
-The full-clone estimator had 0 wrong-sign errors. Each cheap strategy had at least one wrong-sign
-error or missed a material change.
+The full-clone estimator had 0 wrong-sign errors and 0 missed material changes. Each other strategy
+had at least one wrong-sign error or missed a material change.
 
 **On a real platform** (`INFERRED`), expect worse. The lab's full clone *is* the production data;
-real CI differs in warehouse size, concurrency, cache warmth, data growth and plan learning (E3,
-`FAILURE_MODES.md`). A realistic target is:
+real CI differs in warehouse size, concurrency, cache warmth, data growth and plan learning. When
+the lab introduced those gaps deliberately (E3, `MEASURED`):
+- a smaller CI engine overstated ratios by up to +136% and **flipped one sign** (s22);
+- concurrent production load shifted ratios by −18% to +58%;
+- cold, unwarmed single runs understated ratios by up to 29%.
+
+So E1's figures are an upper bound. They hold only if CI runs on the **production warehouse size**
+with a warm-up, and the interval is widened for contention. A realistic target is:
 - a correct **direction class** and a **magnitude bucket within one** for HIGH-grade cases;
 - dollar **ranges**, not points.
 
@@ -151,7 +160,7 @@ Point estimates should not be shown alone.
   - Snowflake (dedicated) is the cleanest fit.
   - BigQuery on-demand is easy but already commodity.
   - Databricks is the weakest for a synchronous verdict: billing latency up to 24 h, a disk cache
-    that cannot be disabled, VM cost outside the platform, and no negotiated prices.
+    that cannot be disabled, VM cost outside the platform, and negotiated prices that are invisible.
 
 ### 7. What is technically hard versus commodity?
 
@@ -180,14 +189,18 @@ replay, consumer-aware mapping, noise and uncertainty).
 Scope and trigger:
 - Only models (and their dbt descendants) that run ≥ ~daily. Hourly and frequent models are the
   sweet spot (E10).
-- **Detection:** `state:modified` ∪ rendered-SQL diff. Consumers of changed relations come from
-  `ACCESS_HISTORY`.
+- **Detection:** `state:modified` ∪ rendered-SQL diff.
+- **What gets executed:** changed models, their direct children and the consumers of changed
+  relations (consumers come from `ACCESS_HISTORY`). Deeper descendants are only screened: plan
+  identical and row counts unchanged ⇒ skip (E4).
 
 Measurement:
 - A static screen skips workloads with identical plans.
 - Changed workloads get **one PR-only run on a zero-copy clone**, with `--defer`, `dbt clone` of
-  incremental targets, and `USE_CACHED_RESULT=FALSE`, on a pinned single-cluster CI warehouse. The
-  run is compared with the workload's production history. Use an A/B when history is thin or noisy.
+  incremental targets, and `USE_CACHED_RESULT=FALSE`. The run is compared with the workload's
+  production history. Use an A/B when history is thin or noisy.
+- It runs on a pinned single-cluster CI warehouse **of the same size as production**. A smaller CI
+  warehouse distorts ratios and can flip their sign (E3).
 - Repeat millisecond statements until stable.
 
 Economics:

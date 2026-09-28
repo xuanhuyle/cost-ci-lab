@@ -6,6 +6,21 @@ decisions? The governing brief is [`COST_CI_TECHNICAL_FEASIBILITY_CLAUDE_CODE.md
 **Start with [`docs/DECISION.md`](docs/DECISION.md)** for the verdict and the answers to the brief's
 ten final questions.
 
+**Verdict: B, "Useful but narrow".**
+- **What works:** measuring the change, not predicting it. Run the changed dbt workloads at
+  production scale (a zero-copy clone, or PR-only against production history), then replay the
+  capacity pool's billing.
+  - Lab result on 26 adversarial PRs: 100% direction on material changes, 100% large-regression
+    recall, ~10% median magnitude error, and calibrated noise-based intervals.
+- **What does not work:** every cheap alternative. Static plans, dry-run-style bytes, four data-sampling
+  schemes, scale extrapolation and calibration all made wrong-sign or missed-material errors.
+- **Where it pays off:** reliable checks cost ~2.5–4.6 production runs per analysis, so they break
+  even only on workloads run more than ~40–70 times a month.
+- **Where the dollars mean something:** dollar impact is unambiguous only on dedicated or
+  per-query-billed compute. On shared or prepaid capacity it depends on policy.
+- **The limit of the evidence:** all execution evidence is from a local engine. No live platform
+  access was available (see `docs/OWNER_REQUEST.md`).
+
 ## What is here
 
 | Path | What |
@@ -38,4 +53,4 @@ ten final questions.
 ## Reproduce
 
 See [`docs/EXPERIMENT_DESIGN.md` §9](docs/EXPERIMENT_DESIGN.md#9-reproduce). A 4-core laptop needs
-about 2 h end to end and about 2 GB of disk. `pytest -q` runs the unit tests.
+about 2.5 h end to end and about 2 GB of disk. `pytest -q` runs the unit tests.

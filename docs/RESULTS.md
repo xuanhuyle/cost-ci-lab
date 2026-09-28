@@ -53,7 +53,7 @@ Refined bars used in `DECISION.md`:
   - **Truth:** the median of 4 production-scale repetitions per variant.
   - **Estimators** use only CI-available information: a single full-clone run, production history
     of MAIN from separate repetitions, sample environments, and `EXPLAIN`.
-- **Mix:** 16 material changes (10 increases, 5 decreases, 1 new model), 10 immaterial, and 9 large
+- **Mix:** 16 material changes (11 increases, 1 new model, 4 decreases), 10 immaterial, and 9 large
   regressions (≥ +50%, incl. the new model).
 - **Protocol fix mid-run (E-030):** millisecond BI queries weighted by up to 60,000 runs/month made
   single-execution measurements unusable. Before the fix:
@@ -127,9 +127,10 @@ Robustness checks (`results/analysis.json`):
    because parallel efficiency differs between variants and with data size (E-028).
 5. **Data-dependent no-ops.** s15's removed filter matched no rows in the window (truth ≈0; E-029).
    A code-reading estimator predicts +33% rows.
-6. **Scale-limited truth for incremental windows.** s03 and s24 (3→45-day lookback) are ≈0 at SF2,
-   because a default DuckDB row group spans ~26 days of line items. At production scale with
-   per-day pruning they would be large; E8 tests this.
+6. **Scale-limited truth for incremental windows.** s03 and s24 (3→45-day lookback) are small at SF2
+   (+7%, +0%). E8 shows the cause is fixed per-statement overhead on tiny increments, not pruning
+   granularity. At production volume, a 15× larger reprocessing window would be a large regression
+   of the hourly job, so lab truth understates these cases.
 7. **Time-window CI data cannot see window changes.** s01 (window 180→730 days): the last-90-days
    sample says −5%, while the truth is +111%.
 8. **PR-only-vs-history is fragile for tiny, high-frequency workloads** (s04). A 7 ms dashboard
@@ -174,8 +175,8 @@ On a real warehouse the execution term dominates: production dbt models run for 
   - In-file materialisation changes (s04, s10, s11) were caught via `body` + `configs`.
 - **1 miss, s24:** a var default changed in `dbt_project.yml`. dbt reported nothing, while the
   hourly incremental model now reprocesses 15× more days (E-023). The rendered-SQL diff catches it.
-  With union detection the model is measured at +28% per run at lab scale; see E8 for production
-  layout.
+  With union detection the model is measured at +28% per run at lab scale. E8 shows this lab figure
+  is limited by fixed overhead, not by layout.
 - **Changed ≠ costlier.**
   - s21 (a cosmetic refactor with a CTE rename) is flagged by both detectors. Whitespace/comment
     normalisation does not canonicalise identifiers. Its truth is −1%.
@@ -218,7 +219,7 @@ The new model s16 is excluded because its relative impact is infinite. Per-scena
 - **This interval covers only measurement noise.** A production interval must also include the
   following, none of which the lab could quantify on a real platform:
   - CI-vs-production condition gaps: warehouse size, concurrency, cache (E3);
-  - physical layout (E8);
+  - physical layout (no effect in E8, but untested on real micro-partitions);
   - frequency uncertainty (E6);
   - the pool-policy range (E2).
 
@@ -354,9 +355,80 @@ are not forecasts. The replay model itself has **not** been validated against re
 first item of the live experiment. One defect in the simulator was found and fixed during this work:
 float residue created phantom autoscale charges (E-032).
 
-## 9. [pending: E3 transfer to production conditions, E4 downstream strategies]
+## 9. E3: does a CI measurement transfer to production *conditions*? (`MEASURED (local engine)`)
 
-## 10. E6: frequency extrapolation (SIMULATED)
+E1's full clone ran under the same conditions as its truth, which flatters it. E3 re-measures six
+scenarios under conditions where CI and production typically differ. Each cell is the PR/MAIN
+total-latency ratio; the percentage is its deviation from the production reference (4 threads,
+isolated, warm, 3 interleaved reps):
+
+| scenario | production reference | CI on smaller engine (1 thread) | production under concurrent load | cold single run (no warm-up) |
+|---|---|---|---|---|
+| s01 widen window | 2.36 | 3.00 (+27%) | 1.95 (−18%) | 2.14 (−10%) |
+| s04 incremental → full | 6.78 | 15.98 (+136%) | 10.70 (+58%) | 4.79 (−29%) |
+| s05 many-to-many join | 1.67 | 1.94 (+16%) | 1.58 (−5%) | 1.63 (−3%) |
+| s08 window functions | 2.26 | 3.44 (+52%) | 2.52 (+12%) | 2.00 (−11%) |
+| s09 repeated scans | 1.26 | 1.28 (+1%) | 1.28 (+1%) | 1.26 (−0%) |
+| s22 add ORDER BY | **0.81** | **1.10 (+35%, sign flip)** | 0.90 (+11%) | 0.78 (−4%) |
+
+The background load is two concurrent heavy aggregations on the same engine, like tenants of one
+warehouse. It slowed absolute runtimes 2.6–4.5×.
+
+- **Warehouse size must match production.**
+  - A smaller CI engine overstated regressions by up to 136%, because MAIN and PR parallelise
+    differently.
+  - It flipped the sign of s22: an improvement in production, a regression on the small engine.
+  - `INFERRED` for Snowflake: an X-Small CI warehouse is not a valid proxy for a Large production
+    warehouse. CI must run on the production size, or be calibrated per pool. s22 shows the error
+    is not a constant factor.
+- **Concurrency shifts ratios by −18% to +58% while preserving direction here.** It is irreducible
+  pre-merge (it depends on what else runs), so it belongs in the uncertainty interval, not in the
+  point estimate.
+- **Protocol matters.** A cold, unwarmed single run understated ratios by up to 29%. Warm-up plus
+  interleaving (E1's protocol) is required.
+- **Implication for accuracy:** E1's 100% direction for the full clone is an *upper bound*. Under
+  realistic condition gaps, a HIGH-grade verdict needs same-size CI compute and a
+  concurrency-widened interval. See `DECISION.md` Q3.
+
+## 10. E4: downstream propagation strategies (Phase 9) (`MEASURED (local engine)`)
+
+The question is whether `Δ Cost(PR) = direct changed-workload delta + downstream workload deltas` is
+useful, and how far downstream to execute. Relative impact is shown per strategy
+(`results/tables/downstream.md`). CI cost is lab-seconds executed (MAIN+PR once).
+
+| scenario | truth | direct only | + 1 hop | all dbt descendants | + consumers | row-elasticity (no descendant execution) |
+|---|---|---|---|---|---|---|
+| s01 widen window | +111% | +87% | +98% | +98% | +99% | +193% |
+| s26 future shipments | +33% | +20% | +25% | +25% | +30% | +30% |
+| s25 staging → tables | +94% | +82% | +83% | +83% | +83% | +82% |
+| s10 table → view | +118% | −10% | −10% | −10% | **+118%** | −10% |
+| s18 frequent cheap view | +77% | 0% | 0% | 0% | **+64%** | 0% |
+
+| CI execution (lab-seconds) | direct | + 1 hop | all descendants | + consumers |
+|---|---|---|---|---|
+| s01 | 18.2 | 22.9 | 22.9 | 22.9 |
+| s25 | 32.2 | 78.2 | 83.1 | 83.2 |
+| s23 (macro fan-out) | 30.3 | 34.1 | 34.1 | 34.1 |
+
+- **One hop is enough within the dbt DAG here.** Executing direct children captured nearly all of the
+  DAG-downstream effect (s01: +87% → +98%; s26: +20% → +25%). Deeper descendants added execution
+  cost without accuracy. In s25 they cost 2.6× the direct run for a 1-point change.
+  - `INFERRED` caveat: this project's DAG is shallow (≤3 levels). Deeper DAGs with fan-out would make
+    "all descendants" more expensive, not more informative. It is not shown that 1 hop always
+    suffices.
+- **Consumers dominate "downstream" economics.** The largest downstream effects came from non-dbt
+  consumers (s10, s11, s18, s19). A DAG-only strategy gets them wrong or misses them entirely.
+- **Row-count elasticity is cheap but unreliable.** It scales descendants by the modified model's
+  output-row ratio, without executing them.
+  - It was accurate for s26 (+30% vs +33%).
+  - It overstated s01 by 82 points: one descendant filters to recent months, so its cost did not
+    scale with rows.
+  - It is usable as a screen ("rows changed ⇒ execute that descendant"), not as an estimate.
+- **Verdict on the Phase 9 options:** downstream propagation is "useful one or a few hops
+  downstream", plus consumers. Exhaustive descendant execution is CI-expensive for little gain.
+  Static propagation is too noisy to trust for magnitude.
+
+## 11. E6: frequency extrapolation (SIMULATED)
 
 Recurring cost = per-run Δ × future runs, and runs must be forecast from telemetry. For each
 pattern, 300 synthetic 180-day histories were generated and the next 30 days forecast
@@ -380,3 +452,16 @@ pattern, 300 synthetic 180-day histories were generated and the next 30 days for
 - **Seasonal peaks absent from history:** missed by ~67% (a 3× peak). Not predictable from history.
 - **Sparse ad-hoc jobs:** ±100%.
 - **Data-arrival-driven rebuilds** (dbt-State-style skipping): ~10% median error, 26% at p90.
+
+## 12. Hypothesis verdicts
+
+| Hypothesis | Verdict | Key evidence |
+|---|---|---|
+| **H1** change attribution (diff → workloads → history) | **Supported, with two required fixes.** (a) Add a rendered-SQL diff to dbt `state:modified` (var/env changes; E-023, 25/26 agreement otherwise). (b) Discover consumers outside dbt via platform access history; without it the direction is wrong on materialisation changes (§2.4). | E9, E1 §2.4 |
+| **H2** counterfactual Cost(PR) − Cost(MAIN) before deployment | **Supported only by production-scale execution.** Full-clone A/B: 100% direction, 0 wrong-sign. Every cheaper estimator (static, bytes, 4 sampling schemes, extrapolation) made wrong-sign or missed-material errors. | E1 §2.2–2.3 |
+| **H3** extrapolation to recurring monthly cost | **Partly.** Per-run × frequency works for cron-scheduled workloads on dedicated or per-query pools. Frequency is unforecastable for seasonal/sparse work (E6). Marginal $ on shared/prepaid pools is policy-dependent and can have the opposite sign to attributed $ (E2). Production-condition gaps shift ratios by 10–60% (E3). | E2, E3, E6 |
+| **H4** post-merge calibration | **Designed; weakly supported.** It removes small systematic bias from the accurate estimator; it makes inaccurate estimators worse; there is no evidence of cross-customer transfer. | E7, ARCHITECTURE §6 |
+| **H5** CI practicality | **Narrow.** A reliable check costs k ≈ 2.5–4.6 production runs (max ≈ 36) and ≈ production runtime in latency. It breaks even only above ~40–70 runs/month at median assumptions. | E10, §2.5 |
+| **H6** cross-platform abstraction | **Survives as usage delta × pool billing replay, not as cost-per-query.** Magnitudes are not comparable across billing models (s06: $208 vs $1). | E2, ARCHITECTURE §1, §7 |
+| **HA vs HB** (cheap CI data transfers vs scale-dependent) | **HB.** Sample ratios err in both directions by large factors, and the direction itself flips with scale for some changes (s22, s14) and with warehouse size (E3). | E1, E3 |
+| **HC vs HD** (attributed ≈ marginal vs pool-dependent) | **HD, as a mechanism** (simulated under documented rules). For long batch jobs on dedicated pools, attributed ≈ marginal; for consumer workloads on busy or prepaid pools they diverge, including in sign. | E2 |
