@@ -111,6 +111,9 @@ def bigquery_editions(execs: list[Execution], price_per_slot_hour: float = 0.06,
         demand[a] += slots
         demand[max(b, a + 1)] -= slots
     demand = np.cumsum(demand)[:MONTH_S]
+    # cumsum of +x/-x in float leaves ~1e-12 residues; without this, ceil() below turns them into
+    # a phantom 50-slot autoscale step that is billed for the rest of the month
+    demand[np.abs(demand) < 1e-6] = 0.0
     need = np.clip(demand - baseline_slots, 0, max_slots - baseline_slots)
     auto = np.ceil(need / increment) * increment
     # hold each scale-up for at least min_scale_s (running max over a trailing window)

@@ -31,7 +31,7 @@ Lab experiment IDs (E1–E8) refer to `RESULTS.md`; evidence IDs (E-0xx) refer t
 | 12 | Schedule / frequency changes | DET if the schedule is in the diff; NRP otherwise | Frequency changes made in orchestrator UIs are invisible to the PR |
 | 13 | Frequency estimation from history | STAT (cron) / UNC (BI, data-driven) / NRP (seasonal peaks, sparse ad hoc) | E6 (simulated) |
 | 14 | Downstream recomputation | DET (identification); STAT/UNC (magnitude) | Lineage is exact; the cost of unchanged descendants depends on data and layout (E4) |
-| 15 | Incremental models | DET (reproduce the incremental branch via clone); UNC (recurring volume per run) | CI must build the incremental branch (E-003); steady-state volume depends on data arrival and pruning granularity (E8) |
+| 15 | Incremental models | DET (reproduce the incremental branch via clone); UNC (recurring volume per run) | CI must build the incremental branch (E-003). At lab scale, a 15× larger reprocessing window cost only +17–21% per run, because fixed per-statement overhead dominates small increments (E8); at production volume it would be ~15× the scan. So CI on less-than-production data understates incremental regressions |
 | 16 | Retries | STAT | Retry rates live in telemetry (`query_retry_time`, BigQuery counts up to 3 attempts in slot-ms) |
 | 17 | Orchestration that skips work (dbt State, state-aware) | UNC | Rebuild frequency becomes data-dependent (`DOCUMENTED`); the multiplier is itself a forecast |
 | 18 | Dynamic SQL / introspective macros | DET at compile time (rendered-SQL diff against prod metadata); NRP for future data-driven changes | `state:modified` compares raw text only (E-004, E-017) |
@@ -51,8 +51,8 @@ Lab experiment IDs (E1–E8) refer to `RESULTS.md`; evidence IDs (E-0xx) refer t
 ## Lab evidence behind the classifications (`MEASURED (local engine)` unless stated)
 
 - **Consumers flip the verdict (row 20).** A dbt-DAG-only estimate, even on a full production
-  clone, reads s10 (table→view) as −4% when the truth is +152%, and s11 (view→table) as 0% when the
-  truth is −89%. Adding the BI consumers of the changed relations gives +143% and −92%.
+  clone, reads s10 (table→view) as −10% when the truth is +118%, and s11 (view→table) as +1% when
+  the truth is −89%. Adding the BI consumers of the changed relations gives +118% and −92%.
 - **Static plans get signs wrong (rows 27, 11).**
   - s14 (join pre-aggregation, truth −29%): the C_out estimate says +127%.
   - s17 (window functions, truth +56% per run): static and bytes both say 0%. The change is

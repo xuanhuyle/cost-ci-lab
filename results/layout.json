@@ -1,0 +1,74 @@
+{
+ "s01_widen_date_filter": {
+  "coarse_default_rowgroups": {
+   "main": 3.3530501499999996,
+   "pr": 8.3906779,
+   "ratio": 2.5024015522106047
+  },
+  "fine_8192_rowgroups": {
+   "main": 3.1549089500000003,
+   "pr": 7.526881100000001,
+   "ratio": 2.3857680900743587
+  }
+ },
+ "s02_remove_partition_pruning": {
+  "coarse_default_rowgroups": {
+   "main": 3.28130855,
+   "pr": 3.2613706999999996,
+   "ratio": 0.9939238112794969
+  },
+  "fine_8192_rowgroups": {
+   "main": 3.4213383000000004,
+   "pr": 3.45741825,
+   "ratio": 1.0105455663358398
+  }
+ },
+ "s03_expand_incremental_window": {
+  "coarse_default_rowgroups": {
+   "main": 0.018457400006189197,
+   "pr": 0.022296800005228073,
+   "ratio": 1.20801412971228
+  },
+  "fine_8192_rowgroups": {
+   "main": 0.018321449988848715,
+   "pr": 0.021361049977451564,
+   "ratio": 1.1659038990065138
+  }
+ },
+ "s04_incremental_to_table": {
+  "coarse_default_rowgroups": {
+   "main": 0.018265300007275866,
+   "pr": 0.1073555000193212,
+   "ratio": 5.877565656001097
+  },
+  "fine_8192_rowgroups": {
+   "main": 0.019739250002488867,
+   "pr": 0.11399549998369551,
+   "ratio": 5.775067440217948
+  }
+ },
+ "s13_select_fewer_columns": {
+  "coarse_default_rowgroups": {
+   "main": 3.3098833,
+   "pr": 1.9234661,
+   "ratio": 0.5811280717963682
+  },
+  "fine_8192_rowgroups": {
+   "main": 3.0541053500000004,
+   "pr": 1.82173235,
+   "ratio": 0.5964864145894639
+  }
+ },
+ "s24_var_default_change": {
+  "coarse_default_rowgroups": {
+   "main": 0.0,
+   "pr": 0.0,
+   "ratio": null
+  },
+  "fine_8192_rowgroups": {
+   "main": 0.0,
+   "pr": 0.0,
+   "ratio": null
+  }
+ }
+}

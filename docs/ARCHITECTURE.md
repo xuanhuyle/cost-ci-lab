@@ -113,18 +113,29 @@ Realisation  per workload post-merge usage; per pool metered $; linked to Predic
 These are the design consequences of `RESULTS.md`:
 
 1. **Execution at production scale is the only strategy that tracked truth across change classes.**
-   The measurement layer is therefore mandatory for time-billed platforms, and its cost scales with
-   the production cost of the affected workloads. The strategy policy (component 3) exists to spend
-   that budget only where needed. It is a *cost-control* component, not an accuracy component.
-2. **Static plans and bytes are screening signals, not estimators.** They are used only to skip
-   execution for changes proven to have unchanged plans. They are never used for magnitude.
+   Full-clone A/B: 100% direction on material changes, 0 wrong-sign errors (E1). Every cheaper
+   estimator made wrong-sign or missed-material errors.
+   - The measurement layer is therefore mandatory for time-billed platforms, and its cost scales
+     with the production cost of the affected workloads (k ≈ 2.5–4.6 production runs per analysis).
+   - The strategy policy (component 3) exists to spend that budget only where needed. It is a
+     *cost-control* component, not an accuracy component.
+2. **Static plans and bytes are screening signals, not estimators.**
+   - They skip execution only for workloads proven to have unchanged plans. That resolved 58 of 108
+     workload-analyses in E1, mostly unchanged descendants.
+   - They are never used for magnitude: static C_out has 20% of estimates within 2×, and bytes are
+     blind to compute-bound changes (s17).
 3. **Consumer discovery is not optional.** Materialisation changes move cost between the dbt DAG and
-   its consumers, so a DAG-only system gets the sign wrong.
-4. **Economic translation is a pool replay with explicit customer configuration:** commitments,
+   its consumers. DAG-only mapping scored 75% direction vs 100% with consumers, and got the sign
+   wrong on s10.
+4. **Measurement must be noise-adaptive.** Millisecond statements weighted by high frequency must be
+   repeated until stable (E-030). Paired A/B beats comparing against history when drift is possible
+   (s04).
+5. **Economic translation is a pool replay with explicit customer configuration:** commitments,
    negotiated prices, and the marginal-vs-attributed policy. Reporting must say which view the
-   number is.
-5. **Calibration works on usage ratios (weeks), not dollars (months).** Dollar-level ground truth is
-   confounded by other changes landing in the same pool.
+   number is; E2 shows sign flips between the two views.
+6. **Calibration works on usage ratios (weeks), not dollars (months).** Dollar-level ground truth is
+   confounded by other changes landing in the same pool. It removes small systematic bias from an
+   accurate estimator, but cannot rescue an inaccurate one (E7).
 
 ## 6. Post-merge calibration loop (Phase 10)
 

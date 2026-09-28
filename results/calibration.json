@@ -1,0 +1,44 @@
+{
+ "ab_full_anchored": {
+  "n_pairs": 38,
+  "median_abs_log_err_before": 0.16310105482813952,
+  "median_abs_log_err_global": 0.1415734840688848,
+  "median_abs_log_err_by_class": 0.19210978818514413,
+  "learned_global_factor": 1.0790745519065346
+ },
+ "hybrid": {
+  "n_pairs": 31,
+  "median_abs_log_err_before": 0.1558425977654853,
+  "median_abs_log_err_global": 0.15064572158121556,
+  "median_abs_log_err_by_class": 0.177825647514078,
+  "learned_global_factor": 1.0830842270101368
+ },
+ "ab_two_point": {
+  "n_pairs": 32,
+  "median_abs_log_err_before": 0.6968697564007503,
+  "median_abs_log_err_global": 0.8419761918830446,
+  "median_abs_log_err_by_class": 0.6423038169698367,
+  "learned_global_factor": 0.8779633420999615
+ },
+ "ab_key10": {
+  "n_pairs": 34,
+  "median_abs_log_err_before": 0.4240876207935217,
+  "median_abs_log_err_global": 0.5451221491877003,
+  "median_abs_log_err_by_class": 0.5656058409049267,
+  "learned_global_factor": 1.2812960151303838
+ },
+ "static_cout": {
+  "n_pairs": 22,
+  "median_abs_log_err_before": 1.3221556188389747,
+  "median_abs_log_err_global": 1.1003227752358473,
+  "median_abs_log_err_by_class": 1.1266686029791573,
+  "learned_global_factor": 0.46183728151061315
+ },
+ "bytes_proxy": {
+  "n_pairs": 28,
+  "median_abs_log_err_before": 0.6244023948432392,
+  "median_abs_log_err_global": 0.5242656714224903,
+  "median_abs_log_err_by_class": 0.5462482030101665,
+  "learned_global_factor": 1.130075007550478
+ }
+}

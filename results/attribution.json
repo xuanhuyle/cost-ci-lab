@@ -1,0 +1,655 @@
+{
+ "s01_widen_date_filter": {
+  "changed_files": [],
+  "dbt_modified": [
+   "int_order_lines"
+  ],
+  "dbt_modified_by": {
+   "body": [
+    "int_order_lines"
+   ]
+  },
+  "rendered_modified": [
+   "int_order_lines"
+  ],
+  "missed_by_dbt": [],
+  "flagged_but_render_identical": [],
+  "modified_plus": [
+   "int_order_lines",
+   "mart_part_profitability",
+   "mart_revenue_by_nation"
+  ],
+  "consumers": [
+   "bi_nation_trend"
+  ]
+ },
+ "s02_remove_partition_pruning": {
+  "changed_files": [],
+  "dbt_modified": [
+   "int_order_lines"
+  ],
+  "dbt_modified_by": {
+   "body": [
+    "int_order_lines"
+   ]
+  },
+  "rendered_modified": [
+   "int_order_lines"
+  ],
+  "missed_by_dbt": [],
+  "flagged_but_render_identical": [],
+  "modified_plus": [
+   "int_order_lines",
+   "mart_part_profitability",
+   "mart_revenue_by_nation"
+  ],
+  "consumers": [
+   "bi_nation_trend"
+  ]
+ },
+ "s03_expand_incremental_window": {
+  "changed_files": [],
+  "dbt_modified": [
+   "fct_daily_revenue"
+  ],
+  "dbt_modified_by": {
+   "body": [
+    "fct_daily_revenue"
+   ]
+  },
+  "rendered_modified": [
+   "fct_daily_revenue"
+  ],
+  "missed_by_dbt": [],
+  "flagged_but_render_identical": [],
+  "modified_plus": [
+   "fct_daily_revenue",
+   "rpt_daily_kpis"
+  ],
+  "consumers": [
+   "bi_kpi_tiles"
+  ]
+ },
+ "s04_incremental_to_table": {
+  "changed_files": [],
+  "dbt_modified": [
+   "fct_daily_revenue"
+  ],
+  "dbt_modified_by": {
+   "body": [
+    "fct_daily_revenue"
+   ],
+   "configs": [
+    "fct_daily_revenue"
+   ]
+  },
+  "rendered_modified": [
+   "fct_daily_revenue"
+  ],
+  "missed_by_dbt": [],
+  "flagged_but_render_identical": [],
+  "modified_plus": [
+   "fct_daily_revenue",
+   "rpt_daily_kpis"
+  ],
+  "consumers": [
+   "bi_kpi_tiles"
+  ]
+ },
+ "s05_many_to_many_join": {
+  "changed_files": [],
+  "dbt_modified": [
+   "mart_part_profitability"
+  ],
+  "dbt_modified_by": {
+   "body": [
+    "mart_part_profitability"
+   ]
+  },
+  "rendered_modified": [
+   "mart_part_profitability"
+  ],
+  "missed_by_dbt": [],
+  "flagged_but_render_identical": [],
+  "modified_plus": [
+   "mart_part_profitability"
+  ],
+  "consumers": []
+ },
+ "s06_superlinear_self_join": {
+  "changed_files": [],
+  "dbt_modified": [
+   "mart_part_profitability"
+  ],
+  "dbt_modified_by": {
+   "body": [
+    "mart_part_profitability"
+   ]
+  },
+  "rendered_modified": [
+   "mart_part_profitability"
+  ],
+  "missed_by_dbt": [],
+  "flagged_but_render_identical": [],
+  "modified_plus": [
+   "mart_part_profitability"
+  ],
+  "consumers": []
+ },
+ "s07_unnecessary_distinct": {
+  "changed_files": [],
+  "dbt_modified": [
+   "int_order_lines"
+  ],
+  "dbt_modified_by": {
+   "body": [
+    "int_order_lines"
+   ]
+  },
+  "rendered_modified": [
+   "int_order_lines"
+  ],
+  "missed_by_dbt": [],
+  "flagged_but_render_identical": [],
+  "modified_plus": [
+   "int_order_lines",
+   "mart_part_profitability",
+   "mart_revenue_by_nation"
+  ],
+  "consumers": [
+   "bi_nation_trend"
+  ]
+ },
+ "s08_expensive_window": {
+  "changed_files": [],
+  "dbt_modified": [
+   "customer_features"
+  ],
+  "dbt_modified_by": {
+   "body": [
+    "customer_features"
+   ]
+  },
+  "rendered_modified": [
+   "customer_features"
+  ],
+  "missed_by_dbt": [],
+  "flagged_but_render_identical": [],
+  "modified_plus": [
+   "customer_features",
+   "dim_customers",
+   "mart_revenue_by_nation",
+   "rpt_customer_segments"
+  ],
+  "consumers": [
+   "bi_customer_lookup",
+   "bi_segments_dashboard",
+   "bi_nation_trend"
+  ]
+ },
+ "s09_repeated_scans": {
+  "changed_files": [],
+  "dbt_modified": [
+   "customer_features"
+  ],
+  "dbt_modified_by": {
+   "body": [
+    "customer_features"
+   ]
+  },
+  "rendered_modified": [
+   "customer_features"
+  ],
+  "missed_by_dbt": [],
+  "flagged_but_render_identical": [],
+  "modified_plus": [
+   "customer_features",
+   "dim_customers",
+   "mart_revenue_by_nation",
+   "rpt_customer_segments"
+  ],
+  "consumers": [
+   "bi_customer_lookup",
+   "bi_segments_dashboard",
+   "bi_nation_trend"
+  ]
+ },
+ "s10_table_to_view": {
+  "changed_files": [],
+  "dbt_modified": [
+   "dim_customers"
+  ],
+  "dbt_modified_by": {
+   "body": [
+    "dim_customers"
+   ],
+   "configs": [
+    "dim_customers"
+   ]
+  },
+  "rendered_modified": [
+   "dim_customers"
+  ],
+  "missed_by_dbt": [],
+  "flagged_but_render_identical": [],
+  "modified_plus": [
+   "dim_customers",
+   "mart_revenue_by_nation",
+   "rpt_customer_segments"
+  ],
+  "consumers": [
+   "bi_customer_lookup",
+   "bi_segments_dashboard",
+   "bi_nation_trend"
+  ]
+ },
+ "s11_view_to_table": {
+  "changed_files": [],
+  "dbt_modified": [
+   "rpt_customer_segments"
+  ],
+  "dbt_modified_by": {
+   "body": [
+    "rpt_customer_segments"
+   ],
+   "configs": [
+    "rpt_customer_segments"
+   ]
+  },
+  "rendered_modified": [
+   "rpt_customer_segments"
+  ],
+  "missed_by_dbt": [],
+  "flagged_but_render_identical": [],
+  "modified_plus": [
+   "rpt_customer_segments"
+  ],
+  "consumers": [
+   "bi_segments_dashboard"
+  ]
+ },
+ "s12_manual_predicate_pushdown": {
+  "changed_files": [],
+  "dbt_modified": [
+   "mart_revenue_by_nation"
+  ],
+  "dbt_modified_by": {
+   "body": [
+    "mart_revenue_by_nation"
+   ]
+  },
+  "rendered_modified": [
+   "mart_revenue_by_nation"
+  ],
+  "missed_by_dbt": [],
+  "flagged_but_render_identical": [],
+  "modified_plus": [
+   "mart_revenue_by_nation"
+  ],
+  "consumers": [
+   "bi_nation_trend"
+  ]
+ },
+ "s13_select_fewer_columns": {
+  "changed_files": [],
+  "dbt_modified": [
+   "int_order_lines"
+  ],
+  "dbt_modified_by": {
+   "body": [
+    "int_order_lines"
+   ]
+  },
+  "rendered_modified": [
+   "int_order_lines"
+  ],
+  "missed_by_dbt": [],
+  "flagged_but_render_identical": [],
+  "modified_plus": [
+   "int_order_lines",
+   "mart_part_profitability",
+   "mart_revenue_by_nation"
+  ],
+  "consumers": [
+   "bi_nation_trend"
+  ]
+ },
+ "s14_join_preaggregation": {
+  "changed_files": [],
+  "dbt_modified": [
+   "customer_ltv_monthly"
+  ],
+  "dbt_modified_by": {
+   "body": [
+    "customer_ltv_monthly"
+   ]
+  },
+  "rendered_modified": [
+   "customer_ltv_monthly"
+  ],
+  "missed_by_dbt": [],
+  "flagged_but_render_identical": [],
+  "modified_plus": [
+   "customer_ltv_monthly"
+  ],
+  "consumers": []
+ },
+ "s15_include_returns": {
+  "changed_files": [],
+  "dbt_modified": [
+   "int_order_lines"
+  ],
+  "dbt_modified_by": {
+   "body": [
+    "int_order_lines"
+   ]
+  },
+  "rendered_modified": [
+   "int_order_lines"
+  ],
+  "missed_by_dbt": [],
+  "flagged_but_render_identical": [],
+  "modified_plus": [
+   "int_order_lines",
+   "mart_part_profitability",
+   "mart_revenue_by_nation"
+  ],
+  "consumers": [
+   "bi_nation_trend"
+  ]
+ },
+ "s16_new_model": {
+  "changed_files": [],
+  "dbt_modified": [
+   "mart_customer_churn"
+  ],
+  "dbt_modified_by": {
+   "body": [
+    "mart_customer_churn"
+   ],
+   "configs": [
+    "mart_customer_churn"
+   ],
+   "relation": [
+    "mart_customer_churn"
+   ],
+   "persisted_descriptions": [
+    "mart_customer_churn"
+   ],
+   "contract": [
+    "mart_customer_churn"
+   ]
+  },
+  "rendered_modified": [
+   "mart_customer_churn"
+  ],
+  "missed_by_dbt": [],
+  "flagged_but_render_identical": [],
+  "modified_plus": [
+   "mart_customer_churn"
+  ],
+  "consumers": []
+ },
+ "s17_monthly_job_regression": {
+  "changed_files": [],
+  "dbt_modified": [
+   "customer_ltv_monthly"
+  ],
+  "dbt_modified_by": {
+   "body": [
+    "customer_ltv_monthly"
+   ]
+  },
+  "rendered_modified": [
+   "customer_ltv_monthly"
+  ],
+  "missed_by_dbt": [],
+  "flagged_but_render_identical": [],
+  "modified_plus": [
+   "customer_ltv_monthly"
+  ],
+  "consumers": []
+ },
+ "s18_frequent_cheap_view": {
+  "changed_files": [],
+  "dbt_modified": [
+   "rpt_daily_kpis"
+  ],
+  "dbt_modified_by": {
+   "body": [
+    "rpt_daily_kpis"
+   ]
+  },
+  "rendered_modified": [
+   "rpt_daily_kpis"
+  ],
+  "missed_by_dbt": [],
+  "flagged_but_render_identical": [],
+  "modified_plus": [
+   "rpt_daily_kpis"
+  ],
+  "consumers": [
+   "bi_kpi_tiles"
+  ]
+ },
+ "s19_idle_capacity_absorbs": {
+  "changed_files": [],
+  "dbt_modified": [
+   "rpt_daily_kpis"
+  ],
+  "dbt_modified_by": {
+   "body": [
+    "rpt_daily_kpis"
+   ]
+  },
+  "rendered_modified": [
+   "rpt_daily_kpis"
+  ],
+  "missed_by_dbt": [],
+  "flagged_but_render_identical": [],
+  "modified_plus": [
+   "rpt_daily_kpis"
+  ],
+  "consumers": [
+   "bi_kpi_tiles"
+  ]
+ },
+ "s20_bytes_up_capacity_pricing": {
+  "changed_files": [],
+  "dbt_modified": [
+   "int_order_lines"
+  ],
+  "dbt_modified_by": {
+   "body": [
+    "int_order_lines"
+   ]
+  },
+  "rendered_modified": [
+   "int_order_lines"
+  ],
+  "missed_by_dbt": [],
+  "flagged_but_render_identical": [],
+  "modified_plus": [
+   "int_order_lines",
+   "mart_part_profitability",
+   "mart_revenue_by_nation"
+  ],
+  "consumers": [
+   "bi_nation_trend"
+  ]
+ },
+ "s21_cosmetic_refactor": {
+  "changed_files": [],
+  "dbt_modified": [
+   "customer_features"
+  ],
+  "dbt_modified_by": {
+   "body": [
+    "customer_features"
+   ]
+  },
+  "rendered_modified": [
+   "customer_features"
+  ],
+  "missed_by_dbt": [],
+  "flagged_but_render_identical": [],
+  "modified_plus": [
+   "customer_features",
+   "dim_customers",
+   "mart_revenue_by_nation",
+   "rpt_customer_segments"
+  ],
+  "consumers": [
+   "bi_customer_lookup",
+   "bi_segments_dashboard",
+   "bi_nation_trend"
+  ]
+ },
+ "s22_sort_for_determinism": {
+  "changed_files": [],
+  "dbt_modified": [
+   "int_order_lines"
+  ],
+  "dbt_modified_by": {
+   "body": [
+    "int_order_lines"
+   ]
+  },
+  "rendered_modified": [
+   "int_order_lines"
+  ],
+  "missed_by_dbt": [],
+  "flagged_but_render_identical": [],
+  "modified_plus": [
+   "int_order_lines",
+   "mart_part_profitability",
+   "mart_revenue_by_nation"
+  ],
+  "consumers": [
+   "bi_nation_trend"
+  ]
+ },
+ "s23_macro_change": {
+  "changed_files": [],
+  "dbt_modified": [
+   "customer_ltv_monthly",
+   "fct_daily_revenue",
+   "int_order_lines"
+  ],
+  "dbt_modified_by": {
+   "macros": [
+    "customer_ltv_monthly",
+    "fct_daily_revenue",
+    "int_order_lines"
+   ]
+  },
+  "rendered_modified": [
+   "customer_ltv_monthly",
+   "fct_daily_revenue",
+   "int_order_lines"
+  ],
+  "missed_by_dbt": [],
+  "flagged_but_render_identical": [],
+  "modified_plus": [
+   "customer_ltv_monthly",
+   "fct_daily_revenue",
+   "int_order_lines",
+   "mart_part_profitability",
+   "mart_revenue_by_nation",
+   "rpt_daily_kpis"
+  ],
+  "consumers": [
+   "bi_kpi_tiles",
+   "bi_nation_trend"
+  ]
+ },
+ "s24_var_default_change": {
+  "changed_files": [],
+  "dbt_modified": [],
+  "dbt_modified_by": {},
+  "rendered_modified": [
+   "fct_daily_revenue"
+  ],
+  "missed_by_dbt": [
+   "fct_daily_revenue"
+  ],
+  "flagged_but_render_identical": [],
+  "modified_plus": [],
+  "consumers": []
+ },
+ "s25_config_inheritance": {
+  "changed_files": [],
+  "dbt_modified": [
+   "stg_customers",
+   "stg_lineitem",
+   "stg_orders",
+   "stg_parts",
+   "stg_partsupp"
+  ],
+  "dbt_modified_by": {
+   "configs": [
+    "stg_customers",
+    "stg_lineitem",
+    "stg_orders",
+    "stg_parts",
+    "stg_partsupp"
+   ]
+  },
+  "rendered_modified": [
+   "stg_customers",
+   "stg_lineitem",
+   "stg_orders",
+   "stg_parts",
+   "stg_partsupp"
+  ],
+  "missed_by_dbt": [],
+  "flagged_but_render_identical": [],
+  "modified_plus": [
+   "customer_features",
+   "customer_ltv_monthly",
+   "dim_customers",
+   "fct_daily_revenue",
+   "int_order_lines",
+   "mart_part_profitability",
+   "mart_revenue_by_nation",
+   "part_supplier_costs",
+   "rpt_customer_segments",
+   "rpt_daily_kpis",
+   "stg_customers",
+   "stg_lineitem",
+   "stg_orders",
+   "stg_parts",
+   "stg_partsupp"
+  ],
+  "consumers": [
+   "bi_customer_lookup",
+   "bi_segments_dashboard",
+   "bi_kpi_tiles",
+   "bi_nation_trend"
+  ]
+ },
+ "s26_include_future_shipments": {
+  "changed_files": [],
+  "dbt_modified": [
+   "int_order_lines"
+  ],
+  "dbt_modified_by": {
+   "body": [
+    "int_order_lines"
+   ]
+  },
+  "rendered_modified": [
+   "int_order_lines"
+  ],
+  "missed_by_dbt": [],
+  "flagged_but_render_identical": [],
+  "modified_plus": [
+   "int_order_lines",
+   "mart_part_profitability",
+   "mart_revenue_by_nation"
+  ],
+  "consumers": [
+   "bi_nation_trend"
+  ]
+ }
+}

@@ -1,0 +1,2420 @@
+[
+ {
+  "id": "s01_widen_date_filter",
+  "category": "regression",
+  "pools": {
+   "own_context": {
+    "truth_marginal": 89.91130050000083,
+    "truth_main_bill": 2405.428585659942,
+    "est_marginal": 78.93153998986918,
+    "naive_attributed": 89.70832550000003,
+    "truth_by_pool": {
+     "transform_wh": 89.9113005000012,
+     "bi_wh": 0.0
+    }
+   },
+   "snowflake_dedicated": {
+    "truth_marginal": 89.91130050000083,
+    "truth_main_bill": 2405.428585659942,
+    "est_marginal": 78.93153998986918,
+    "naive_attributed": 89.70832550000003,
+    "truth_by_pool": {
+     "transform_wh": 89.9113005000012,
+     "bi_wh": 0.0
+    }
+   },
+   "snowflake_always_on_bi": {
+    "truth_marginal": 89.91130050000174,
+    "truth_main_bill": 4552.037074400602,
+    "est_marginal": 78.93153998986872,
+    "naive_attributed": 89.70832550000003,
+    "truth_by_pool": {
+     "transform_wh": 89.9113005000012,
+     "bi_wh": 0.0
+    }
+   },
+   "attributed_per_second": {
+    "truth_marginal": 89.70832550000699,
+    "truth_main_bill": 158.27012340056734,
+    "est_marginal": 79.59956547337114,
+    "naive_attributed": 89.7083255,
+    "truth_by_pool": {
+     "transform_wh": 89.91130049999988,
+     "bi_wh": -0.2029749999928896
+    }
+   },
+   "bigquery_on_demand": {
+    "truth_marginal": 9.543412035535198,
+    "truth_main_bill": 625.0995194922292,
+    "est_marginal": 9.543412035535198,
+    "naive_attributed": 9.54341203553512,
+    "truth_by_pool": {
+     "transform_wh": 9.543412035535141,
+     "bi_wh": 0.0
+    }
+   },
+   "bigquery_editions": {
+    "truth_marginal": 61.725000000000364,
+    "truth_main_bill": 4381.881666666666,
+    "est_marginal": 51.82499999999982,
+    "naive_attributed": 33.9864163125,
+    "truth_by_pool": {
+     "transform_wh": 61.724999999999994,
+     "bi_wh": 0.0
+    }
+   },
+   "databricks_sql_serverless": {
+    "truth_marginal": 125.87582070000099,
+    "truth_main_bill": 5203.00001992392,
+    "est_marginal": 110.5041559858164,
+    "naive_attributed": 125.59165569999998,
+    "truth_by_pool": {
+     "transform_wh": 125.87582070000144,
+     "bi_wh": 0.0
+    }
+   }
+  },
+  "kappa": {
+   "10": {
+    "truth_marginal": 8.991130050005722,
+    "naive_attributed": 8.970832550000003,
+    "main_bill": 2332.381797444542
+   },
+   "100": {
+    "truth_marginal": 89.91130050000083,
+    "naive_attributed": 89.70832550000003,
+    "main_bill": 2405.428585659942
+   },
+   "1000": {
+    "truth_marginal": 885.2206049999872,
+    "naive_attributed": 897.0832550000001,
+    "main_bill": 3172.5651662761625
+   }
+  }
+ },
+ {
+  "id": "s02_remove_partition_pruning",
+  "category": "regression",
+  "pools": {
+   "own_context": {
+    "truth_marginal": 2.3496055000068736,
+    "truth_main_bill": 2405.614348659948,
+    "est_marginal": -0.5236596280960839,
+    "naive_attributed": 2.574680500000003,
+    "truth_by_pool": {
+     "transform_wh": 2.3496055000068736,
+     "bi_wh": 0.0
+    }
+   },
+   "snowflake_dedicated": {
+    "truth_marginal": 2.3496055000068736,
+    "truth_main_bill": 2405.614348659948,
+    "est_marginal": -0.5236596280960839,
+    "naive_attributed": 2.574680500000003,
+    "truth_by_pool": {
+     "transform_wh": 2.3496055000068736,
+     "bi_wh": 0.0
+    }
+   },
+   "snowflake_always_on_bi": {
+    "truth_marginal": 2.3496055000068736,
+    "truth_main_bill": 4552.222837400609,
+    "est_marginal": -0.5236596280965387,
+    "naive_attributed": 2.574680500000003,
+    "truth_by_pool": {
+     "transform_wh": 2.3496055000068736,
+     "bi_wh": 0.0
+    }
+   },
+   "attributed_per_second": {
+    "truth_marginal": 2.574680499980275,
+    "truth_main_bill": 155.7319364005677,
+    "est_marginal": -0.8218014457956713,
+    "naive_attributed": 2.5746805000000026,
+    "truth_by_pool": {
+     "transform_wh": 2.3496054999999814,
+     "bi_wh": 0.22507499998029346
+    }
+   },
+   "bigquery_on_demand": {
+    "truth_marginal": 23.363495725063444,
+    "truth_main_bill": 625.0995194922292,
+    "est_marginal": 23.363495725063444,
+    "naive_attributed": 23.363495725063387,
+    "truth_by_pool": {
+     "transform_wh": 23.363495725063398,
+     "bi_wh": 0.0
+    }
+   },
+   "bigquery_editions": {
+    "truth_marginal": 0.5500000000001819,
+    "truth_main_bill": 4381.931666666666,
+    "est_marginal": -0.024999999999636202,
+    "naive_attributed": -0.03916281249999913,
+    "truth_by_pool": {
+     "transform_wh": 0.5500000000000043,
+     "bi_wh": 0.0
+    }
+   },
+   "databricks_sql_serverless": {
+    "truth_marginal": 3.289447700009987,
+    "truth_main_bill": 5203.260088123929,
+    "est_marginal": -0.7331234793346084,
+    "naive_attributed": 3.6045527000000037,
+    "truth_by_pool": {
+     "transform_wh": 3.289447700009987,
+     "bi_wh": 0.0
+    }
+   }
+  },
+  "kappa": {
+   "10": {
+    "truth_marginal": 0.23496054999259286,
+    "naive_attributed": 0.2574680500000003,
+    "main_bill": 2332.4003737445532
+   },
+   "100": {
+    "truth_marginal": 2.3496055000068736,
+    "naive_attributed": 2.574680500000003,
+    "main_bill": 2405.614348659948
+   },
+   "1000": {
+    "truth_marginal": 23.496055000006436,
+    "naive_attributed": 25.74680500000003,
+    "main_bill": 3174.4227962761547
+   }
+  }
+ },
+ {
+  "id": "s03_expand_incremental_window",
+  "category": "regression",
+  "pools": {
+   "own_context": {
+    "truth_marginal": 0.8349031914440275,
+    "truth_main_bill": 2370.849091618149,
+    "est_marginal": 2.9884196535526826,
+    "naive_attributed": 4.478611499913217,
+    "truth_by_pool": {
+     "transform_wh": 0.8338210164446878,
+     "bi_wh": 0.00108217499928287
+    }
+   },
+   "snowflake_dedicated": {
+    "truth_marginal": 0.8349031914440275,
+    "truth_main_bill": 2370.849091618149,
+    "est_marginal": 2.9884196535526826,
+    "naive_attributed": 4.478611499913217,
+    "truth_by_pool": {
+     "transform_wh": 0.8338210164446878,
+     "bi_wh": 0.00108217499928287
+    }
+   },
+   "snowflake_always_on_bi": {
+    "truth_marginal": 0.8338210164447446,
+    "truth_main_bill": 4517.445099083809,
+    "est_marginal": 2.988915445784187,
+    "naive_attributed": 4.478611499913217,
+    "truth_by_pool": {
+     "transform_wh": 0.8338210164446878,
+     "bi_wh": 0.0
+    }
+   },
+   "attributed_per_second": {
+    "truth_marginal": 4.478611499829299,
+    "truth_main_bill": 161.08994140031,
+    "est_marginal": 1.4707426030109332,
+    "naive_attributed": 4.478611499913217,
+    "truth_by_pool": {
+     "transform_wh": 0.8713614999156505,
+     "bi_wh": 3.60724999991362
+    }
+   },
+   "bigquery_on_demand": {
+    "truth_marginal": 5.935625085840002,
+    "truth_main_bill": 625.0995194922292,
+    "est_marginal": 5.935625085840002,
+    "naive_attributed": 5.935625085840002,
+    "truth_by_pool": {
+     "transform_wh": 5.935625085840002,
+     "bi_wh": 0.0
+    }
+   },
+   "bigquery_editions": {
+    "truth_marginal": 0.0,
+    "truth_main_bill": 4372.381666666666,
+    "est_marginal": 0.0,
+    "naive_attributed": 0.5399235000000001,
+    "truth_by_pool": {
+     "transform_wh": 0.0,
+     "bi_wh": 0.0
+    }
+   },
+   "databricks_sql_serverless": {
+    "truth_marginal": 1.1688644680216385,
+    "truth_main_bill": 5154.588728265409,
+    "est_marginal": 4.1837875149722095,
+    "naive_attributed": 6.270056099878504,
+    "truth_by_pool": {
+     "transform_wh": 1.1673494230226424,
+     "bi_wh": 0.0015150449994507653
+    }
+   }
+  },
+  "kappa": {
+   "10": {
+    "truth_marginal": 0.08724436755392162,
+    "naive_attributed": 0.44786114999132176,
+    "main_bill": 2328.9458698718736
+   },
+   "100": {
+    "truth_marginal": 0.8349031914440275,
+    "naive_attributed": 4.478611499913217,
+    "main_bill": 2370.849091618149
+   },
+   "1000": {
+    "truth_marginal": 7.996897443286798,
+    "naive_attributed": 44.786114999132174,
+    "main_bill": 2840.1617270325687
+   }
+  }
+ },
+ {
+  "id": "s04_incremental_to_table",
+  "category": "regression",
+  "pools": {
+   "own_context": {
+    "truth_marginal": 46.95538789996817,
+    "truth_main_bill": 2370.749420176098,
+    "est_marginal": 40.180328174714305,
+    "naive_attributed": 49.33982299981677,
+    "truth_by_pool": {
+     "transform_wh": 46.95530629996864,
+     "bi_wh": 8.159999970303033e-05
+    }
+   },
+   "snowflake_dedicated": {
+    "truth_marginal": 46.95538789996817,
+    "truth_main_bill": 2370.749420176098,
+    "est_marginal": 40.180328174714305,
+    "naive_attributed": 49.33982299981677,
+    "truth_by_pool": {
+     "transform_wh": 46.95530629996864,
+     "bi_wh": 8.159999970303033e-05
+    }
+   },
+   "snowflake_always_on_bi": {
+    "truth_marginal": 46.95530629996847,
+    "truth_main_bill": 4517.350691366759,
+    "est_marginal": 40.17976427949816,
+    "naive_attributed": 49.33982299981677,
+    "truth_by_pool": {
+     "transform_wh": 46.95530629996864,
+     "bi_wh": 0.0
+    }
+   },
+   "attributed_per_second": {
+    "truth_marginal": 49.33982299984825,
+    "truth_main_bill": 143.44568290006768,
+    "est_marginal": 43.86708258478626,
+    "naive_attributed": 49.33982299981677,
+    "truth_by_pool": {
+     "transform_wh": 49.06782299981941,
+     "bi_wh": 0.2720000000288394
+    }
+   },
+   "bigquery_on_demand": {
+    "truth_marginal": 281.88214637339127,
+    "truth_main_bill": 625.0995194922292,
+    "est_marginal": 281.88214637339127,
+    "naive_attributed": 281.88214637339115,
+    "truth_by_pool": {
+     "transform_wh": 281.88214637339115,
+     "bi_wh": 0.0
+    }
+   },
+   "bigquery_editions": {
+    "truth_marginal": 37.56833333333361,
+    "truth_main_bill": 4372.381666666666,
+    "est_marginal": 72.01833333333343,
+    "naive_attributed": 24.519440000000003,
+    "truth_by_pool": {
+     "transform_wh": 37.56833333333333,
+     "bi_wh": 0.0
+    }
+   },
+   "databricks_sql_serverless": {
+    "truth_marginal": 65.7375430599568,
+    "truth_main_bill": 5154.449188246537,
+    "est_marginal": 56.25245944460039,
+    "naive_attributed": 69.07575219974346,
+    "truth_by_pool": {
+     "transform_wh": 65.73742881995622,
+     "bi_wh": 0.00011423999967519194
+    }
+   }
+  },
+  "kappa": {
+   "10": {
+    "truth_marginal": 4.906790460030152,
+    "naive_attributed": 4.933982299981676,
+    "main_bill": 2328.9354926494625
+   },
+   "100": {
+    "truth_marginal": 46.95538789996817,
+    "naive_attributed": 49.33982299981677,
+    "main_bill": 2370.749420176098
+   },
+   "1000": {
+    "truth_marginal": 449.7902903314748,
+    "naive_attributed": 493.3982299981676,
+    "main_bill": 2839.2238244383548
+   }
+  }
+ },
+ {
+  "id": "s05_many_to_many_join",
+  "category": "regression",
+  "pools": {
+   "own_context": {
+    "truth_marginal": 7.00271050000174,
+    "truth_main_bill": 2374.5884576599415,
+    "est_marginal": 7.752529354942908,
+    "naive_attributed": 7.002710499999996,
+    "truth_by_pool": {
+     "transform_wh": 7.002710500001541,
+     "bi_wh": 0.0
+    }
+   },
+   "snowflake_dedicated": {
+    "truth_marginal": 7.00271050000174,
+    "truth_main_bill": 2374.5884576599415,
+    "est_marginal": 7.752529354942908,
+    "naive_attributed": 7.002710499999996,
+    "truth_by_pool": {
+     "transform_wh": 7.002710500001541,
+     "bi_wh": 0.0
+    }
+   },
+   "snowflake_always_on_bi": {
+    "truth_marginal": 7.0027105000008305,
+    "truth_main_bill": 4521.196946400602,
+    "est_marginal": 7.752529354942453,
+    "naive_attributed": 7.002710499999996,
+    "truth_by_pool": {
+     "transform_wh": 7.002710500001541,
+     "bi_wh": 0.0
+    }
+   },
+   "attributed_per_second": {
+    "truth_marginal": 7.002710500000049,
+    "truth_main_bill": 123.01732040054587,
+    "est_marginal": 7.752529354949701,
+    "naive_attributed": 7.002710499999996,
+    "truth_by_pool": {
+     "transform_wh": 7.002710500000049,
+     "bi_wh": 0.0
+    }
+   },
+   "bigquery_on_demand": {
+    "truth_marginal": 0.6548361852765083,
+    "truth_main_bill": 625.0995194922292,
+    "est_marginal": 0.6548361852765083,
+    "naive_attributed": 0.6548361852765083,
+    "truth_by_pool": {
+     "transform_wh": 0.6548361852765083,
+     "bi_wh": 0.0
+    }
+   },
+   "bigquery_editions": {
+    "truth_marginal": 3.25,
+    "truth_main_bill": 4373.031666666666,
+    "est_marginal": 1.925000000000182,
+    "naive_attributed": 2.8831171249999987,
+    "truth_by_pool": {
+     "transform_wh": 3.25,
+     "bi_wh": 0.0
+    }
+   },
+   "databricks_sql_serverless": {
+    "truth_marginal": 9.803794700002982,
+    "truth_main_bill": 5159.823840723919,
+    "est_marginal": 10.853541096919798,
+    "naive_attributed": 9.803794699999992,
+    "truth_by_pool": {
+     "transform_wh": 9.803794700002072,
+     "bi_wh": 0.0
+    }
+   }
+  },
+  "kappa": {
+   "10": {
+    "truth_marginal": 0.7002710499987188,
+    "naive_attributed": 0.7002710499999997,
+    "main_bill": 2329.2977846445538
+   },
+   "100": {
+    "truth_marginal": 7.00271050000174,
+    "naive_attributed": 7.002710499999996,
+    "main_bill": 2374.5884576599415
+   },
+   "1000": {
+    "truth_marginal": 67.69286816667181,
+    "naive_attributed": 70.02710499999996,
+    "main_bill": 2876.7848081092734
+   }
+  }
+ },
+ {
+  "id": "s06_superlinear_self_join",
+  "category": "adversarial",
+  "pools": {
+   "own_context": {
+    "truth_marginal": 208.33162149999725,
+    "truth_main_bill": 2374.57930815995,
+    "est_marginal": 209.30099149031412,
+    "naive_attributed": 208.3316215,
+    "truth_by_pool": {
+     "transform_wh": 208.3316214999972,
+     "bi_wh": 0.0
+    }
+   },
+   "snowflake_dedicated": {
+    "truth_marginal": 208.33162149999725,
+    "truth_main_bill": 2374.57930815995,
+    "est_marginal": 209.30099149031412,
+    "naive_attributed": 208.3316215,
+    "truth_by_pool": {
+     "transform_wh": 208.3316214999972,
+     "bi_wh": 0.0
+    }
+   },
+   "snowflake_always_on_bi": {
+    "truth_marginal": 208.3316214999968,
+    "truth_main_bill": 4521.187796900611,
+    "est_marginal": 209.30099149031412,
+    "naive_attributed": 208.3316215,
+    "truth_by_pool": {
+     "transform_wh": 208.3316214999972,
+     "bi_wh": 0.0
+    }
+   },
+   "attributed_per_second": {
+    "truth_marginal": 208.3316215000175,
+    "truth_main_bill": 123.00817090054592,
+    "est_marginal": 209.30099149033333,
+    "naive_attributed": 208.33162149999998,
+    "truth_by_pool": {
+     "transform_wh": 208.33162150001743,
+     "bi_wh": 0.0
+    }
+   },
+   "bigquery_on_demand": {
+    "truth_marginal": 0.9284733664571831,
+    "truth_main_bill": 625.0995194922292,
+    "est_marginal": 0.9284733664571831,
+    "naive_attributed": 0.9284733664571831,
+    "truth_by_pool": {
+     "transform_wh": 0.9284733664571831,
+     "bi_wh": 0.0
+    }
+   },
+   "bigquery_editions": {
+    "truth_marginal": 109.375,
+    "truth_main_bill": 4374.531666666666,
+    "est_marginal": 111.20000000000073,
+    "naive_attributed": 93.15324731249795,
+    "truth_by_pool": {
+     "transform_wh": 109.37499999999997,
+     "bi_wh": 0.0
+    }
+   },
+   "databricks_sql_serverless": {
+    "truth_marginal": 291.66427009999643,
+    "truth_main_bill": 5159.811031423931,
+    "est_marginal": 293.0213880864394,
+    "naive_attributed": 291.66427009999995,
+    "truth_by_pool": {
+     "transform_wh": 291.664270099996,
+     "bi_wh": 0.0
+    }
+   }
+  },
+  "kappa": {
+   "10": {
+    "truth_marginal": 18.61481479992699,
+    "naive_attributed": 20.83316215,
+    "main_bill": 2329.296869694555
+   },
+   "100": {
+    "truth_marginal": 208.33162149999725,
+    "naive_attributed": 208.3316215,
+    "main_bill": 2374.57930815995
+   },
+   "1000": {
+    "truth_marginal": 2035.9612433335428,
+    "naive_attributed": 2083.316215,
+    "main_bill": 2876.696362942617
+   }
+  }
+ },
+ {
+  "id": "s07_unnecessary_distinct",
+  "category": "regression",
+  "pools": {
+   "own_context": {
+    "truth_marginal": 2.562855500003934,
+    "truth_main_bill": 2407.655886659949,
+    "est_marginal": -1.5083146331035095,
+    "naive_attributed": 2.3453804999999885,
+    "truth_by_pool": {
+     "transform_wh": 2.5628555000038773,
+     "bi_wh": 0.0
+    }
+   },
+   "snowflake_dedicated": {
+    "truth_marginal": 2.562855500003934,
+    "truth_main_bill": 2407.655886659949,
+    "est_marginal": -1.5083146331035095,
+    "naive_attributed": 2.3453804999999885,
+    "truth_by_pool": {
+     "transform_wh": 2.5628555000038773,
+     "bi_wh": 0.0
+    }
+   },
+   "snowflake_always_on_bi": {
+    "truth_marginal": 2.562855500003934,
+    "truth_main_bill": 4554.264375400609,
+    "est_marginal": -1.5083146331035095,
+    "naive_attributed": 2.3453804999999885,
+    "truth_by_pool": {
+     "transform_wh": 2.5628555000038773,
+     "bi_wh": 0.0
+    }
+   },
+   "attributed_per_second": {
+    "truth_marginal": 2.345380500009611,
+    "truth_main_bill": 156.74297440055247,
+    "est_marginal": -1.6270064126357795,
+    "naive_attributed": 2.3453804999999885,
+    "truth_by_pool": {
+     "transform_wh": 2.5628554999999835,
+     "bi_wh": -0.21747499999037245
+    }
+   },
+   "bigquery_on_demand": {
+    "truth_marginal": 0.0,
+    "truth_main_bill": 625.0995194922292,
+    "est_marginal": 0.0,
+    "naive_attributed": 0.0,
+    "truth_by_pool": {
+     "transform_wh": 0.0,
+     "bi_wh": 0.0
+    }
+   },
+   "bigquery_editions": {
+    "truth_marginal": 0.5999999999994543,
+    "truth_main_bill": 4382.431666666666,
+    "est_marginal": -1.875,
+    "naive_attributed": 3.0621715625000028,
+    "truth_by_pool": {
+     "transform_wh": 0.6000000000000014,
+     "bi_wh": 0.0
+    }
+   },
+   "databricks_sql_serverless": {
+    "truth_marginal": 3.5879977000058716,
+    "truth_main_bill": 5206.118241323929,
+    "est_marginal": -2.1116404863450953,
+    "naive_attributed": 3.2835326999999825,
+    "truth_by_pool": {
+     "transform_wh": 3.587997700005417,
+     "bi_wh": 0.0
+    }
+   }
+  },
+  "kappa": {
+   "10": {
+    "truth_marginal": 0.25628554998866093,
+    "naive_attributed": 0.23453804999999883,
+    "main_bill": 2332.6045275445567
+   },
+   "100": {
+    "truth_marginal": 2.562855500003934,
+    "naive_attributed": 2.3453804999999885,
+    "main_bill": 2407.655886659949
+   },
+   "1000": {
+    "truth_marginal": 25.62855499999887,
+    "naive_attributed": 23.453804999999885,
+    "main_bill": 3194.8381762761624
+   }
+  }
+ },
+ {
+  "id": "s08_expensive_window",
+  "category": "regression",
+  "pools": {
+   "own_context": {
+    "truth_marginal": 23.687670291584254,
+    "truth_main_bill": 2377.2806072684825,
+    "est_marginal": 22.3129548428401,
+    "naive_attributed": 15.482012499916381,
+    "truth_by_pool": {
+     "transform_wh": 23.69063749991892,
+     "bi_wh": -0.0029672083346667932
+    }
+   },
+   "snowflake_dedicated": {
+    "truth_marginal": 23.687670291584254,
+    "truth_main_bill": 2377.2806072684825,
+    "est_marginal": 22.3129548428401,
+    "naive_attributed": 15.482012499916381,
+    "truth_by_pool": {
+     "transform_wh": 23.69063749991892,
+     "bi_wh": -0.0029672083346667932
+    }
+   },
+   "snowflake_always_on_bi": {
+    "truth_marginal": 23.69063749991892,
+    "truth_main_bill": 4523.8862289008075,
+    "est_marginal": 22.31269976935073,
+    "naive_attributed": 15.482012499916381,
+    "truth_by_pool": {
+     "transform_wh": 23.69063749991892,
+     "bi_wh": 0.0
+    }
+   },
+   "attributed_per_second": {
+    "truth_marginal": 15.48201249989711,
+    "truth_main_bill": 131.99460290078463,
+    "est_marginal": 22.096289667395553,
+    "naive_attributed": 15.482012499916381,
+    "truth_by_pool": {
+     "transform_wh": 23.690637499916363,
+     "bi_wh": -8.208625000019246
+    }
+   },
+   "bigquery_on_demand": {
+    "truth_marginal": 0.4092726157978177,
+    "truth_main_bill": 625.0995194922292,
+    "est_marginal": 0.4092726157978177,
+    "naive_attributed": 0.4092726157978177,
+    "truth_by_pool": {
+     "transform_wh": 0.4092726157978177,
+     "bi_wh": 0.0
+    }
+   },
+   "bigquery_editions": {
+    "truth_marginal": 11.75,
+    "truth_main_bill": 4375.081666666667,
+    "est_marginal": 11.100000000000364,
+    "naive_attributed": 8.704104437499996,
+    "truth_by_pool": {
+     "transform_wh": 11.850000000000001,
+     "bi_wh": -0.1000000000003638
+    }
+   },
+   "databricks_sql_serverless": {
+    "truth_marginal": 33.16273840821759,
+    "truth_main_bill": 5163.592850175876,
+    "est_marginal": 31.23813677997532,
+    "naive_attributed": 21.674817499882938,
+    "truth_by_pool": {
+     "transform_wh": 33.16689249988667,
+     "bi_wh": -0.00415409166862446
+    }
+   }
+  },
+  "kappa": {
+   "10": {
+    "truth_marginal": 2.368767029119226,
+    "naive_attributed": 1.5482012499916387,
+    "main_bill": 2329.566999605409
+   },
+   "100": {
+    "truth_marginal": 23.687670291584254,
+    "naive_attributed": 15.482012499916381,
+    "main_bill": 2377.2806072684825
+   },
+   "1000": {
+    "truth_marginal": 225.1379569161113,
+    "naive_attributed": 154.8201249991638,
+    "main_bill": 2902.8311385161214
+   }
+  }
+ },
+ {
+  "id": "s09_repeated_scans",
+  "category": "regression",
+  "pools": {
+   "own_context": {
+    "truth_marginal": 3.417873458522081,
+    "truth_main_bill": 2378.1848907434337,
+    "est_marginal": -0.09126956706768397,
+    "naive_attributed": 0.3647840001782594,
+    "truth_by_pool": {
+     "transform_wh": 3.419434000189483,
+     "bi_wh": -0.0015605416674588923
+    }
+   },
+   "snowflake_dedicated": {
+    "truth_marginal": 3.417873458522081,
+    "truth_main_bill": 2378.1848907434337,
+    "est_marginal": -0.09126956706768397,
+    "naive_attributed": 0.3647840001782594,
+    "truth_by_pool": {
+     "transform_wh": 3.419434000189483,
+     "bi_wh": -0.0015605416674588923
+    }
+   },
+   "snowflake_always_on_bi": {
+    "truth_marginal": 3.41943400018954,
+    "truth_main_bill": 4524.794952400757,
+    "est_marginal": -0.08985229291738506,
+    "naive_attributed": 0.3647840001782594,
+    "truth_by_pool": {
+     "transform_wh": 3.419434000189483,
+     "bi_wh": 0.0
+    }
+   },
+   "attributed_per_second": {
+    "truth_marginal": 0.3647840001595739,
+    "truth_main_bill": 122.08977640075003,
+    "est_marginal": -3.3690146408461175,
+    "naive_attributed": 0.3647840001782603,
+    "truth_by_pool": {
+     "transform_wh": 3.4194340001781995,
+     "bi_wh": -3.0546500000186327
+    }
+   },
+   "bigquery_on_demand": {
+    "truth_marginal": 0.8185452315956354,
+    "truth_main_bill": 625.0995194922292,
+    "est_marginal": 0.8185452315956354,
+    "naive_attributed": 0.8185452315956354,
+    "truth_by_pool": {
+     "transform_wh": 0.8185452315956354,
+     "bi_wh": 0.0
+    }
+   },
+   "bigquery_editions": {
+    "truth_marginal": -4.800833333333685,
+    "truth_main_bill": 4381.9825,
+    "est_marginal": 0.6500000000005457,
+    "naive_attributed": 0.24374500000000432,
+    "truth_by_pool": {
+     "transform_wh": 1.7999999999999972,
+     "bi_wh": -6.600833333333867
+    }
+   },
+   "databricks_sql_serverless": {
+    "truth_marginal": 4.785022841932005,
+    "truth_main_bill": 5164.858847040807,
+    "est_marginal": -0.12777739389457565,
+    "naive_attributed": 0.5106976002495633,
+    "truth_by_pool": {
+     "transform_wh": 4.787207600265447,
+     "bi_wh": -0.0021847583338967524
+    }
+   }
+  },
+  "kappa": {
+   "10": {
+    "truth_marginal": 0.3417873458365648,
+    "naive_attributed": 0.03647840001782604,
+    "main_bill": 2329.6574279529063
+   },
+   "100": {
+    "truth_marginal": 3.417873458522081,
+    "naive_attributed": 0.3647840001782594,
+    "main_bill": 2378.1848907434337
+   },
+   "1000": {
+    "truth_marginal": 33.0273935850596,
+    "naive_attributed": 3.6478400017826047,
+    "main_bill": 2911.5441962774653
+   }
+  }
+ },
+ {
+  "id": "s10_table_to_view",
+  "category": "adversarial",
+  "pools": {
+   "own_context": {
+    "truth_marginal": -11.064453233339918,
+    "truth_main_bill": 2373.4491474516985,
+    "est_marginal": -10.950186869876688,
+    "naive_attributed": 56.77954499998234,
+    "truth_by_pool": {
+     "transform_wh": -11.092955000006867,
+     "bi_wh": 0.028501766666977346
+    }
+   },
+   "snowflake_dedicated": {
+    "truth_marginal": -11.064453233339918,
+    "truth_main_bill": 2373.4491474516985,
+    "est_marginal": -10.950186869876688,
+    "naive_attributed": 56.77954499998234,
+    "truth_by_pool": {
+     "transform_wh": -11.092955000006867,
+     "bi_wh": 0.028501766666977346
+    }
+   },
+   "snowflake_always_on_bi": {
+    "truth_marginal": -11.09295500000735,
+    "truth_main_bill": 4520.060625400691,
+    "est_marginal": -10.978072179450464,
+    "naive_attributed": 56.77954499998234,
+    "truth_by_pool": {
+     "transform_wh": -11.092955000006867,
+     "bi_wh": 0.0
+    }
+   },
+   "attributed_per_second": {
+    "truth_marginal": 56.77954500000024,
+    "truth_main_bill": 114.11979940066286,
+    "est_marginal": 56.48926315820711,
+    "naive_attributed": 56.77954499998234,
+    "truth_by_pool": {
+     "transform_wh": -11.09295500001469,
+     "bi_wh": 67.87250000001492
+    }
+   },
+   "bigquery_on_demand": {
+    "truth_marginal": 166.48466994898604,
+    "truth_main_bill": 625.0995194922292,
+    "est_marginal": 166.48466994898604,
+    "naive_attributed": 166.48288181045257,
+    "truth_by_pool": {
+     "transform_wh": -0.5619945920898317,
+     "bi_wh": 167.04666454107587
+    }
+   },
+   "bigquery_editions": {
+    "truth_marginal": -9.450833333333321,
+    "truth_main_bill": 4380.2325,
+    "est_marginal": -9.375833333333503,
+    "naive_attributed": 14.357057187499999,
+    "truth_by_pool": {
+     "transform_wh": -2.8500000000000014,
+     "bi_wh": -6.600833333332957
+    }
+   },
+   "databricks_sql_serverless": {
+    "truth_marginal": -15.490234526675522,
+    "truth_main_bill": 5158.228806432378,
+    "est_marginal": -15.330261617828,
+    "naive_attributed": 79.49136299997527,
+    "truth_by_pool": {
+     "transform_wh": -15.530137000009745,
+     "bi_wh": 0.03990247333422303
+    }
+   }
+  },
+  "kappa": {
+   "10": {
+    "truth_marginal": -1.1064453233429958,
+    "naive_attributed": 5.677954499998235,
+    "main_bill": 2329.1838536237256
+   },
+   "100": {
+    "truth_marginal": -11.064453233339918,
+    "naive_attributed": 56.77954499998234,
+    "main_bill": 2373.4491474516985
+   },
+   "1000": {
+    "truth_marginal": -106.7323002758003,
+    "naive_attributed": 567.7954499998235,
+    "main_bill": 2865.7556966933344
+   }
+  }
+ },
+ {
+  "id": "s11_view_to_table",
+  "category": "improvement",
+  "pools": {
+   "own_context": {
+    "truth_marginal": 0.31238626277854564,
+    "truth_main_bill": 2366.0426948681193,
+    "est_marginal": 0.3165296307470271,
+    "naive_attributed": -25.230640499760277,
+    "truth_by_pool": {
+     "transform_wh": 0.3265845002337642,
+     "bi_wh": -0.014198237454820628
+    }
+   },
+   "snowflake_dedicated": {
+    "truth_marginal": 0.31238626277854564,
+    "truth_main_bill": 2366.0426948681193,
+    "est_marginal": 0.3165296307470271,
+    "naive_attributed": -25.230640499760277,
+    "truth_by_pool": {
+     "transform_wh": 0.3265845002337642,
+     "bi_wh": -0.014198237454820628
+    }
+   },
+   "snowflake_always_on_bi": {
+    "truth_marginal": 0.32658450023427577,
+    "truth_main_bill": 4512.651075400446,
+    "est_marginal": 0.3311000574794889,
+    "naive_attributed": -25.230640499760277,
+    "truth_by_pool": {
+     "transform_wh": 0.3265845002337642,
+     "bi_wh": 0.0
+    }
+   },
+   "attributed_per_second": {
+    "truth_marginal": -25.230640499722796,
+    "truth_main_bill": 114.6662244003977,
+    "est_marginal": -26.007657067066916,
+    "naive_attributed": -25.230640499760277,
+    "truth_by_pool": {
+     "transform_wh": 0.32658450023973273,
+     "bi_wh": -25.55722499996253
+    }
+   },
+   "bigquery_on_demand": {
+    "truth_marginal": -66.88602299391277,
+    "truth_main_bill": 625.0995194922292,
+    "est_marginal": -66.88602299391277,
+    "naive_attributed": -67.38737209843748,
+    "truth_by_pool": {
+     "transform_wh": 0.2236990735582367,
+     "bi_wh": -67.10972206747101
+    }
+   },
+   "bigquery_editions": {
+    "truth_marginal": 0.2000000000007276,
+    "truth_main_bill": 4372.381666666666,
+    "est_marginal": 0.0,
+    "naive_attributed": -13.453805874999997,
+    "truth_by_pool": {
+     "transform_wh": 0.5499999999999972,
+     "bi_wh": -0.3499999999994543
+    }
+   },
+   "databricks_sql_serverless": {
+    "truth_marginal": 0.43734076789041865,
+    "truth_main_bill": 5147.859772815367,
+    "est_marginal": 0.44314148304601986,
+    "naive_attributed": -35.32289669966438,
+    "truth_by_pool": {
+     "transform_wh": 0.4572183003269856,
+     "bi_wh": -0.019877532437021728
+    }
+   }
+  },
+  "kappa": {
+   "10": {
+    "truth_marginal": 0.0312386041832724,
+    "naive_attributed": -2.5230640499760275,
+    "main_bill": 2328.4432083653664
+   },
+   "100": {
+    "truth_marginal": 0.31238626277854564,
+    "naive_attributed": -25.230640499760277,
+    "main_bill": 2366.0426948681193
+   },
+   "1000": {
+    "truth_marginal": 2.9546429628790065,
+    "naive_attributed": -252.30640499760275,
+    "main_bill": 2794.1766695243314
+   }
+  }
+ },
+ {
+  "id": "s12_manual_predicate_pushdown",
+  "category": "ambiguous",
+  "pools": {
+   "own_context": {
+    "truth_marginal": 0.052072000004955044,
+    "truth_main_bill": 2367.1843696599467,
+    "est_marginal": -0.4950077945545672,
+    "naive_attributed": 0.030697000000000044,
+    "truth_by_pool": {
+     "transform_wh": 0.05207200000478451,
+     "bi_wh": 0.0
+    }
+   },
+   "snowflake_dedicated": {
+    "truth_marginal": 0.052072000004955044,
+    "truth_main_bill": 2367.1843696599467,
+    "est_marginal": -0.4950077945545672,
+    "naive_attributed": 0.030697000000000044,
+    "truth_by_pool": {
+     "transform_wh": 0.05207200000478451,
+     "bi_wh": 0.0
+    }
+   },
+   "snowflake_always_on_bi": {
+    "truth_marginal": 0.05207200000404555,
+    "truth_main_bill": 4513.792858400608,
+    "est_marginal": -0.495007794555022,
+    "naive_attributed": 0.030697000000000044,
+    "truth_by_pool": {
+     "transform_wh": 0.05207200000478451,
+     "bi_wh": 0.0
+    }
+   },
+   "attributed_per_second": {
+    "truth_marginal": 0.030697000003428343,
+    "truth_main_bill": 115.59515740057935,
+    "est_marginal": -0.5272796291248625,
+    "naive_attributed": 0.03069700000000004,
+    "truth_by_pool": {
+     "transform_wh": 0.05207200000003098,
+     "bi_wh": -0.021374999996609745
+    }
+   },
+   "bigquery_on_demand": {
+    "truth_marginal": 0.0,
+    "truth_main_bill": 625.0995194922292,
+    "est_marginal": 0.0,
+    "naive_attributed": 0.0,
+    "truth_by_pool": {
+     "transform_wh": 0.0,
+     "bi_wh": 0.0
+    }
+   },
+   "bigquery_editions": {
+    "truth_marginal": 0.0,
+    "truth_main_bill": 4372.381666666666,
+    "est_marginal": 0.0,
+    "naive_attributed": 0.01011206249999999,
+    "truth_by_pool": {
+     "transform_wh": 0.0,
+     "bi_wh": 0.0
+    }
+   },
+   "databricks_sql_serverless": {
+    "truth_marginal": 0.07290080000620947,
+    "truth_main_bill": 5149.458117523926,
+    "est_marginal": -0.6930109123768489,
+    "naive_attributed": 0.04297580000000005,
+    "truth_by_pool": {
+     "transform_wh": 0.07290080000666421,
+     "bi_wh": 0.0
+    }
+   }
+  },
+  "kappa": {
+   "10": {
+    "truth_marginal": 0.0052071999953113846,
+    "naive_attributed": 0.003069700000000005,
+    "main_bill": 2328.5573758445485
+   },
+   "100": {
+    "truth_marginal": 0.052072000004955044,
+    "naive_attributed": 0.030697000000000044,
+    "main_bill": 2367.1843696599467
+   },
+   "1000": {
+    "truth_marginal": 0.5033626666695454,
+    "naive_attributed": 0.3069700000000005,
+    "main_bill": 2805.211957442615
+   }
+  }
+ },
+ {
+  "id": "s13_select_fewer_columns",
+  "category": "improvement",
+  "pools": {
+   "own_context": {
+    "truth_marginal": -29.681432499991388,
+    "truth_main_bill": 2407.2790926599414,
+    "est_marginal": -31.370007172808982,
+    "naive_attributed": -29.663982500000003,
+    "truth_by_pool": {
+     "transform_wh": -29.681432499991217,
+     "bi_wh": 0.0
+    }
+   },
+   "snowflake_dedicated": {
+    "truth_marginal": -29.681432499991388,
+    "truth_main_bill": 2407.2790926599414,
+    "est_marginal": -31.370007172808982,
+    "naive_attributed": -29.663982500000003,
+    "truth_by_pool": {
+     "transform_wh": -29.681432499991217,
+     "bi_wh": 0.0
+    }
+   },
+   "snowflake_always_on_bi": {
+    "truth_marginal": -29.68143249999048,
+    "truth_main_bill": 4553.887581400601,
+    "est_marginal": -31.370007172808982,
+    "naive_attributed": -29.663982500000003,
+    "truth_by_pool": {
+     "transform_wh": -29.681432499991217,
+     "bi_wh": 0.0
+    }
+   },
+   "attributed_per_second": {
+    "truth_marginal": -29.663982500022456,
+    "truth_main_bill": 156.001180400569,
+    "est_marginal": -31.20555890217939,
+    "naive_attributed": -29.663982500000003,
+    "truth_by_pool": {
+     "transform_wh": -29.68143249999997,
+     "bi_wh": 0.017449999977529274
+    }
+   },
+   "bigquery_on_demand": {
+    "truth_marginal": -3.1211227858453867,
+    "truth_main_bill": 625.0995194922292,
+    "est_marginal": -3.1211227858453867,
+    "naive_attributed": -3.121122785845471,
+    "truth_by_pool": {
+     "transform_wh": -3.121122785845463,
+     "bi_wh": 0.0
+    }
+   },
+   "bigquery_editions": {
+    "truth_marginal": -7.449999999999818,
+    "truth_main_bill": 4382.331666666666,
+    "est_marginal": -9.375,
+    "naive_attributed": -3.117973874999999,
+    "truth_by_pool": {
+     "transform_wh": -7.450000000000003,
+     "bi_wh": 0.0
+    }
+   },
+   "databricks_sql_serverless": {
+    "truth_marginal": -41.55400549998831,
+    "truth_main_bill": 5205.590729723919,
+    "est_marginal": -43.918010041933485,
+    "naive_attributed": -41.5295755,
+    "truth_by_pool": {
+     "transform_wh": -41.55400549998785,
+     "bi_wh": 0.0
+    }
+   }
+  },
+  "kappa": {
+   "10": {
+    "truth_marginal": -2.968143249988316,
+    "naive_attributed": -2.9663982500000006,
+    "main_bill": 2332.5668481445437
+   },
+   "100": {
+    "truth_marginal": -29.681432499991388,
+    "naive_attributed": -29.663982500000003,
+    "main_bill": 2407.2790926599414
+   },
+   "1000": {
+    "truth_marginal": -285.19647066687776,
+    "naive_attributed": -296.63982500000003,
+    "main_bill": 3191.070236276164
+   }
+  }
+ },
+ {
+  "id": "s14_join_preaggregation",
+  "category": "improvement",
+  "pools": {
+   "own_context": {
+    "truth_marginal": -0.7259060666665391,
+    "truth_main_bill": 2367.257690559949,
+    "est_marginal": -0.5051659301852851,
+    "naive_attributed": -0.7259060666666668,
+    "truth_by_pool": {
+     "transform_wh": -0.7259060666666528,
+     "bi_wh": 0.0
+    }
+   },
+   "snowflake_dedicated": {
+    "truth_marginal": -0.7259060666665391,
+    "truth_main_bill": 2367.257690559949,
+    "est_marginal": -0.5051659301852851,
+    "naive_attributed": -0.7259060666666668,
+    "truth_by_pool": {
+     "transform_wh": -0.7259060666666528,
+     "bi_wh": 0.0
+    }
+   },
+   "snowflake_always_on_bi": {
+    "truth_marginal": -0.7259060666665391,
+    "truth_main_bill": 4513.8661793006095,
+    "est_marginal": -0.5051659301852851,
+    "naive_attributed": -0.7259060666666668,
+    "truth_by_pool": {
+     "transform_wh": -0.7259060666666528,
+     "bi_wh": 0.0
+    }
+   },
+   "attributed_per_second": {
+    "truth_marginal": -0.725906066666667,
+    "truth_main_bill": 115.68655330055024,
+    "est_marginal": -0.5051659301853846,
+    "naive_attributed": -0.7259060666666667,
+    "truth_by_pool": {
+     "transform_wh": -0.725906066666667,
+     "bi_wh": 0.0
+    }
+   },
+   "bigquery_on_demand": {
+    "truth_marginal": 0.0,
+    "truth_main_bill": 625.0995194922292,
+    "est_marginal": 0.0,
+    "naive_attributed": 0.0,
+    "truth_by_pool": {
+     "transform_wh": 0.0,
+     "bi_wh": 0.0
+    }
+   },
+   "bigquery_editions": {
+    "truth_marginal": -0.363333333333685,
+    "truth_main_bill": 4373.048333333333,
+    "est_marginal": -0.2516666666660967,
+    "naive_attributed": -0.2863131687500001,
+    "truth_by_pool": {
+     "transform_wh": -0.36333333333332973,
+     "bi_wh": 0.0
+    }
+   },
+   "databricks_sql_serverless": {
+    "truth_marginal": -1.0162684933338824,
+    "truth_main_bill": 5149.5607667839295,
+    "est_marginal": -0.7072323022593991,
+    "naive_attributed": -1.0162684933333332,
+    "truth_by_pool": {
+     "transform_wh": -1.0162684933334276,
+     "bi_wh": 0.0
+    }
+   }
+  },
+  "kappa": {
+   "10": {
+    "truth_marginal": -0.07259060666638106,
+    "naive_attributed": -0.07259060666666668,
+    "main_bill": 2328.564707934543
+   },
+   "100": {
+    "truth_marginal": -0.7259060666665391,
+    "naive_attributed": -0.7259060666666668,
+    "main_bill": 2367.257690559949
+   },
+   "1000": {
+    "truth_marginal": -7.1010976666666465,
+    "naive_attributed": -7.259060666666668,
+    "main_bill": 2805.9755422759486
+   }
+  }
+ },
+ {
+  "id": "s15_include_returns",
+  "category": "regression",
+  "pools": {
+   "own_context": {
+    "truth_marginal": -0.6731755000050725,
+    "truth_main_bill": 2411.715129159952,
+    "est_marginal": -0.5598049192990402,
+    "naive_attributed": -0.5376255000000005,
+    "truth_by_pool": {
+     "transform_wh": -0.6731755000049304,
+     "bi_wh": 0.0
+    }
+   },
+   "snowflake_dedicated": {
+    "truth_marginal": -0.6731755000050725,
+    "truth_main_bill": 2411.715129159952,
+    "est_marginal": -0.5598049192990402,
+    "naive_attributed": -0.5376255000000005,
+    "truth_by_pool": {
+     "transform_wh": -0.6731755000049304,
+     "bi_wh": 0.0
+    }
+   },
+   "snowflake_always_on_bi": {
+    "truth_marginal": -0.6731755000046178,
+    "truth_main_bill": 4558.323617900613,
+    "est_marginal": -0.5598049192985854,
+    "naive_attributed": -0.5376255000000005,
+    "truth_by_pool": {
+     "transform_wh": -0.6731755000049304,
+     "bi_wh": 0.0
+    }
+   },
+   "attributed_per_second": {
+    "truth_marginal": -0.5376255000225001,
+    "truth_main_bill": 160.42864190057628,
+    "est_marginal": -0.6367387357860252,
+    "naive_attributed": -0.5376255000000005,
+    "truth_by_pool": {
+     "transform_wh": -0.6731754999997293,
+     "bi_wh": 0.13554999997724337
+    }
+   },
+   "bigquery_on_demand": {
+    "truth_marginal": 0.0,
+    "truth_main_bill": 625.0995194922292,
+    "est_marginal": 0.0,
+    "naive_attributed": 0.0,
+    "truth_by_pool": {
+     "transform_wh": 0.0,
+     "bi_wh": 0.0
+    }
+   },
+   "bigquery_editions": {
+    "truth_marginal": -0.1749999999992724,
+    "truth_main_bill": 4383.406666666666,
+    "est_marginal": -0.024999999999636202,
+    "naive_attributed": 0.0922012499999987,
+    "truth_by_pool": {
+     "transform_wh": -0.17499999999999005,
+     "bi_wh": 0.0
+    }
+   },
+   "databricks_sql_serverless": {
+    "truth_marginal": -0.9424457000068287,
+    "truth_main_bill": 5211.8011808239335,
+    "est_marginal": -0.7837268870189291,
+    "naive_attributed": -0.7526757000000006,
+    "truth_by_pool": {
+     "transform_wh": -0.9424457000068287,
+     "bi_wh": 0.0
+    }
+   }
+  },
+  "kappa": {
+   "10": {
+    "truth_marginal": -0.06731755001965212,
+    "naive_attributed": -0.05376255000000005,
+    "main_bill": 2333.010451794559
+   },
+   "100": {
+    "truth_marginal": -0.6731755000050725,
+    "naive_attributed": -0.5376255000000005,
+    "main_bill": 2411.715129159952
+   },
+   "1000": {
+    "truth_marginal": -6.731755000014346,
+    "naive_attributed": -5.376255000000005,
+    "main_bill": 3235.4306012761617
+   }
+  }
+ },
+ {
+  "id": "s16_new_model",
+  "category": "regression",
+  "pools": {
+   "own_context": {
+    "truth_marginal": 7.124694499997986,
+    "truth_main_bill": 2365.924733159949,
+    "est_marginal": 7.559055000000171,
+    "naive_attributed": 7.1246944999999995,
+    "truth_by_pool": {
+     "transform_wh": 7.124694499997986,
+     "bi_wh": 0.0
+    }
+   },
+   "snowflake_dedicated": {
+    "truth_marginal": 7.124694499997986,
+    "truth_main_bill": 2365.924733159949,
+    "est_marginal": 7.559055000000171,
+    "naive_attributed": 7.1246944999999995,
+    "truth_by_pool": {
+     "transform_wh": 7.124694499997986,
+     "bi_wh": 0.0
+    }
+   },
+   "snowflake_always_on_bi": {
+    "truth_marginal": 7.124694499998441,
+    "truth_main_bill": 4512.5332219006095,
+    "est_marginal": 7.5590549999997165,
+    "naive_attributed": 7.1246944999999995,
+    "truth_by_pool": {
+     "transform_wh": 7.124694499997986,
+     "bi_wh": 0.0
+    }
+   },
+   "attributed_per_second": {
+    "truth_marginal": 7.124694499997844,
+    "truth_main_bill": 114.35359590055025,
+    "est_marginal": 7.5590549999970165,
+    "naive_attributed": 7.124694499999999,
+    "truth_by_pool": {
+     "transform_wh": 7.124694499997844,
+     "bi_wh": 0.0
+    }
+   },
+   "bigquery_on_demand": {
+    "truth_marginal": 0.6750873694727488,
+    "truth_main_bill": 625.0995194922292,
+    "est_marginal": 0.6750873694727488,
+    "naive_attributed": 0.6750873694727488,
+    "truth_by_pool": {
+     "transform_wh": 0.6750873694727488,
+     "bi_wh": 0.0
+    }
+   },
+   "bigquery_editions": {
+    "truth_marginal": 0.875,
+    "truth_main_bill": 4372.381666666666,
+    "est_marginal": 0.9750000000003638,
+    "naive_attributed": 1.7762249374999999,
+    "truth_by_pool": {
+     "transform_wh": 0.875,
+     "bi_wh": 0.0
+    }
+   },
+   "databricks_sql_serverless": {
+    "truth_marginal": 9.974572299996908,
+    "truth_main_bill": 5147.69462642393,
+    "est_marginal": 10.58267700000033,
+    "naive_attributed": 9.974572299999998,
+    "truth_by_pool": {
+     "transform_wh": 9.974572299997362,
+     "bi_wh": 0.0
+    }
+   }
+  },
+  "kappa": {
+   "10": {
+    "truth_marginal": 0.7124694499975703,
+    "naive_attributed": 0.71246945,
+    "main_bill": 2328.431412194543
+   },
+   "100": {
+    "truth_marginal": 7.124694499997986,
+    "naive_attributed": 7.1246944999999995,
+    "main_bill": 2365.924733159949
+   },
+   "1000": {
+    "truth_marginal": 68.87204683333584,
+    "naive_attributed": 71.246945,
+    "main_bill": 2793.0354712759486
+   }
+  }
+ },
+ {
+  "id": "s17_monthly_job_regression",
+  "category": "regression",
+  "pools": {
+   "own_context": {
+    "truth_marginal": 1.4670375166670055,
+    "truth_main_bill": 2367.375646659949,
+    "est_marginal": 1.4195314845915163,
+    "naive_attributed": 1.467037516666667,
+    "truth_by_pool": {
+     "transform_wh": 1.4670375166666645,
+     "bi_wh": 0.0
+    }
+   },
+   "snowflake_dedicated": {
+    "truth_marginal": 1.4670375166670055,
+    "truth_main_bill": 2367.375646659949,
+    "est_marginal": 1.4195314845915163,
+    "naive_attributed": 1.467037516666667,
+    "truth_by_pool": {
+     "transform_wh": 1.4670375166666645,
+     "bi_wh": 0.0
+    }
+   },
+   "snowflake_always_on_bi": {
+    "truth_marginal": 1.4670375166670055,
+    "truth_main_bill": 4513.984135400609,
+    "est_marginal": 1.419531484591971,
+    "naive_attributed": 1.467037516666667,
+    "truth_by_pool": {
+     "transform_wh": 1.4670375166666645,
+     "bi_wh": 0.0
+    }
+   },
+   "attributed_per_second": {
+    "truth_marginal": 1.4670375166666645,
+    "truth_main_bill": 115.80450940055024,
+    "est_marginal": 1.4195314845918006,
+    "naive_attributed": 1.4670375166666667,
+    "truth_by_pool": {
+     "transform_wh": 1.4670375166666716,
+     "bi_wh": 0.0
+    }
+   },
+   "bigquery_on_demand": {
+    "truth_marginal": 0.0,
+    "truth_main_bill": 625.0995194922292,
+    "est_marginal": 0.0,
+    "naive_attributed": 0.0,
+    "truth_by_pool": {
+     "transform_wh": 0.0,
+     "bi_wh": 0.0
+    }
+   },
+   "bigquery_editions": {
+    "truth_marginal": 0.7333333333335759,
+    "truth_main_bill": 4373.108333333333,
+    "est_marginal": 0.7100000000000364,
+    "naive_attributed": 0.6642885749999998,
+    "truth_by_pool": {
+     "transform_wh": 0.7333333333333343,
+     "bi_wh": 0.0
+    }
+   },
+   "databricks_sql_serverless": {
+    "truth_marginal": 2.053852523333262,
+    "truth_main_bill": 5149.7259053239295,
+    "est_marginal": 1.9873440784294871,
+    "naive_attributed": 2.053852523333333,
+    "truth_by_pool": {
+     "transform_wh": 2.053852523333262,
+     "bi_wh": 0.0
+    }
+   }
+  },
+  "kappa": {
+   "10": {
+    "truth_marginal": 0.14670375166633676,
+    "naive_attributed": 0.1467037516666667,
+    "main_bill": 2328.5765035445434
+   },
+   "100": {
+    "truth_marginal": 1.4670375166670055,
+    "naive_attributed": 1.467037516666667,
+    "main_bill": 2367.375646659949
+   },
+   "1000": {
+    "truth_marginal": 14.43883516666665,
+    "naive_attributed": 14.67037516666667,
+    "main_bill": 2807.081526275949
+   }
+  }
+ },
+ {
+  "id": "s18_frequent_cheap_view",
+  "category": "regression",
+  "pools": {
+   "own_context": {
+    "truth_marginal": -0.06890122529648579,
+    "truth_main_bill": 2366.0262782845734,
+    "est_marginal": 0.01346429190652998,
+    "naive_attributed": 12.201666499704123,
+    "truth_by_pool": {
+     "transform_wh": -0.07258350029587746,
+     "bi_wh": 0.003682274999391666
+    }
+   },
+   "snowflake_dedicated": {
+    "truth_marginal": -0.06890122529648579,
+    "truth_main_bill": 2366.0262782845734,
+    "est_marginal": 0.01346429190652998,
+    "naive_attributed": 12.201666499704123,
+    "truth_by_pool": {
+     "transform_wh": -0.07258350029587746,
+     "bi_wh": 0.003682274999391666
+    }
+   },
+   "snowflake_always_on_bi": {
+    "truth_marginal": -0.07258350029587746,
+    "truth_main_bill": 4512.633694900233,
+    "est_marginal": 0.010388160120783141,
+    "naive_attributed": 12.201666499704123,
+    "truth_by_pool": {
+     "transform_wh": -0.07258350029587746,
+     "bi_wh": 0.0
+    }
+   },
+   "attributed_per_second": {
+    "truth_marginal": 12.201666499689253,
+    "truth_main_bill": 118.02781890035718,
+    "est_marginal": 10.264160779492215,
+    "naive_attributed": 12.201666499704123,
+    "truth_by_pool": {
+     "transform_wh": -0.07258350029587746,
+     "bi_wh": 12.274249999985116
+    }
+   },
+   "bigquery_on_demand": {
+    "truth_marginal": 0.9843006409937516,
+    "truth_main_bill": 625.279981430955,
+    "est_marginal": 0.9843006409937516,
+    "naive_attributed": 0.9843006409937516,
+    "truth_by_pool": {
+     "transform_wh": 0.0,
+     "bi_wh": 0.9843006409937516
+    }
+   },
+   "bigquery_editions": {
+    "truth_marginal": 0.0,
+    "truth_main_bill": 4372.381666666666,
+    "est_marginal": 0.0,
+    "naive_attributed": 0.493625,
+    "truth_by_pool": {
+     "transform_wh": 0.0,
+     "bi_wh": 0.0
+    }
+   },
+   "databricks_sql_serverless": {
+    "truth_marginal": -0.09646171541498916,
+    "truth_main_bill": 5147.836789598403,
+    "est_marginal": 0.018850008669687668,
+    "naive_attributed": 17.08233309958577,
+    "truth_by_pool": {
+     "transform_wh": -0.10161690041422844,
+     "bi_wh": 0.005155184999239282
+    }
+   }
+  },
+  "kappa": {
+   "10": {
+    "truth_marginal": -0.0068901225290574075,
+    "naive_attributed": 1.2201666499704122,
+    "main_bill": 2328.4415667070125
+   },
+   "100": {
+    "truth_marginal": -0.06890122529648579,
+    "naive_attributed": 12.201666499704123,
+    "main_bill": 2366.0262782845734
+   },
+   "1000": {
+    "truth_marginal": -0.6811834195264055,
+    "naive_attributed": 122.01666499704123,
+    "main_bill": 2794.0126665222774
+   }
+  }
+ },
+ {
+  "id": "s19_idle_capacity_absorbs",
+  "category": "adversarial",
+  "pools": {
+   "own_context": {
+    "truth_marginal": -0.00011500028813316021,
+    "truth_main_bill": 4512.54278440037,
+    "est_marginal": -0.001366833500469511,
+    "naive_attributed": 16.742884999706412,
+    "truth_by_pool": {
+     "transform_wh": -0.00011500028816158192,
+     "bi_wh": 0.0
+    }
+   },
+   "snowflake_dedicated": {
+    "truth_marginal": 0.0049078997108154,
+    "truth_main_bill": 2365.93857988471,
+    "est_marginal": 0.0004550689641291683,
+    "naive_attributed": 16.742884999706412,
+    "truth_by_pool": {
+     "transform_wh": -0.00011500028816158192,
+     "bi_wh": 0.00502289999894856
+    }
+   },
+   "snowflake_always_on_bi": {
+    "truth_marginal": -0.00011500028813316021,
+    "truth_main_bill": 4512.54278440037,
+    "est_marginal": -0.001366833500469511,
+    "naive_attributed": 16.742884999706412,
+    "truth_by_pool": {
+     "transform_wh": -0.00011500028816158192,
+     "bi_wh": 0.0
+    }
+   },
+   "attributed_per_second": {
+    "truth_marginal": 16.7428849998295,
+    "truth_main_bill": 128.6439084003477,
+    "est_marginal": 6.071641381893258,
+    "naive_attributed": 16.742884999706412,
+    "truth_by_pool": {
+     "transform_wh": -0.00011500029359012842,
+     "bi_wh": 16.743000000123104
+    }
+   },
+   "bigquery_on_demand": {
+    "truth_marginal": 0.9843006409937516,
+    "truth_main_bill": 625.279981430955,
+    "est_marginal": 0.9843006409937516,
+    "naive_attributed": 0.9843006409937516,
+    "truth_by_pool": {
+     "transform_wh": 0.0,
+     "bi_wh": 0.9843006409937516
+    }
+   },
+   "bigquery_editions": {
+    "truth_marginal": 0.0,
+    "truth_main_bill": 4372.381666666666,
+    "est_marginal": 0.0,
+    "naive_attributed": 0.82875,
+    "truth_by_pool": {
+     "transform_wh": 0.0,
+     "bi_wh": 0.0
+    }
+   },
+   "databricks_sql_serverless": {
+    "truth_marginal": 0.006871059594232065,
+    "truth_main_bill": 5147.714011838595,
+    "est_marginal": 0.000637096550235583,
+    "naive_attributed": 23.440038999588975,
+    "truth_by_pool": {
+     "transform_wh": -0.00016100040375022218,
+     "bi_wh": 0.007032059998437035
+    }
+   }
+  },
+  "kappa": {
+   "10": {
+    "truth_marginal": 0.00049078997108154,
+    "naive_attributed": 1.6742884999706413,
+    "main_bill": 2328.4327968670223
+   },
+   "100": {
+    "truth_marginal": 0.0049078997108154,
+    "naive_attributed": 16.742884999706412,
+    "main_bill": 2365.93857988471
+   },
+   "1000": {
+    "truth_marginal": 0.026793330487180356,
+    "naive_attributed": 167.42884999706413,
+    "main_bill": 2793.151710023662
+   }
+  }
+ },
+ {
+  "id": "s20_bytes_up_capacity_pricing",
+  "category": "adversarial",
+  "pools": {
+   "own_context": {
+    "truth_marginal": 0.0,
+    "truth_main_bill": 6493.3915112593395,
+    "est_marginal": 0.0,
+    "naive_attributed": 1.6343345000000016,
+    "truth_by_pool": {
+     "transform_wh": 0.0,
+     "bi_wh": 0.0
+    }
+   },
+   "snowflake_dedicated": {
+    "truth_marginal": 20.21682900000087,
+    "truth_main_bill": 2413.3413571599476,
+    "est_marginal": 14.487498855281956,
+    "naive_attributed": 20.310579000000008,
+    "truth_by_pool": {
+     "transform_wh": 20.216829000000843,
+     "bi_wh": 0.0
+    }
+   },
+   "snowflake_always_on_bi": {
+    "truth_marginal": 20.21682900000087,
+    "truth_main_bill": 4559.949845900608,
+    "est_marginal": 14.487498855281956,
+    "naive_attributed": 20.310579000000008,
+    "truth_by_pool": {
+     "transform_wh": 20.216829000000843,
+     "bi_wh": 0.0
+    }
+   },
+   "attributed_per_second": {
+    "truth_marginal": 20.31057899997822,
+    "truth_main_bill": 162.48576990056856,
+    "est_marginal": 14.417976738662219,
+    "naive_attributed": 20.310579000000008,
+    "truth_by_pool": {
+     "transform_wh": 20.21682900000006,
+     "bi_wh": 0.09374999997817213
+    }
+   },
+   "bigquery_on_demand": {
+    "truth_marginal": 1.7938200844463381,
+    "truth_main_bill": 625.0995194922292,
+    "est_marginal": 1.7938200844463381,
+    "naive_attributed": 1.7938200844463108,
+    "truth_by_pool": {
+     "transform_wh": 1.793820084446324,
+     "bi_wh": 0.0
+    }
+   },
+   "bigquery_editions": {
+    "truth_marginal": 5.074999999999818,
+    "truth_main_bill": 4383.806666666666,
+    "est_marginal": 3.625,
+    "naive_attributed": 1.5200970000000016,
+    "truth_by_pool": {
+     "transform_wh": 5.074999999999989,
+     "bi_wh": 0.0
+    }
+   },
+   "databricks_sql_serverless": {
+    "truth_marginal": 28.30356060000122,
+    "truth_main_bill": 5214.077900023927,
+    "est_marginal": 20.282498397395102,
+    "naive_attributed": 28.434810600000002,
+    "truth_by_pool": {
+     "transform_wh": 28.303560600000765,
+     "bi_wh": 0.0
+    }
+   }
+  },
+  "kappa": {
+   "10": {
+    "truth_marginal": 2.021682900018277,
+    "naive_attributed": 2.0310579000000004,
+    "main_bill": 2333.173074594537
+   },
+   "100": {
+    "truth_marginal": 20.21682900000087,
+    "naive_attributed": 20.310579000000008,
+    "main_bill": 2413.3413571599476
+   },
+   "1000": {
+    "truth_marginal": 195.22209000001385,
+    "naive_attributed": 203.10579000000007,
+    "main_bill": 3251.692881276153
+   }
+  }
+ },
+ {
+  "id": "s21_cosmetic_refactor",
+  "category": "neutral",
+  "pools": {
+   "own_context": {
+    "truth_marginal": 0.1075301916839635,
+    "truth_main_bill": 2380.035083435058,
+    "est_marginal": -0.32482307058808146,
+    "naive_attributed": -0.4436164999859544,
+    "truth_by_pool": {
+     "transform_wh": 0.10800850001780304,
+     "bi_wh": -0.000478308333640598
+    }
+   },
+   "snowflake_dedicated": {
+    "truth_marginal": 0.1075301916839635,
+    "truth_main_bill": 2380.035083435058,
+    "est_marginal": -0.32482307058808146,
+    "naive_attributed": -0.4436164999859544,
+    "truth_by_pool": {
+     "transform_wh": 0.10800850001780304,
+     "bi_wh": -0.000478308333640598
+    }
+   },
+   "snowflake_always_on_bi": {
+    "truth_marginal": 0.10800850001851359,
+    "truth_main_bill": 4526.641236400715,
+    "est_marginal": -0.32539322040793195,
+    "naive_attributed": -0.4436164999859544,
+    "truth_by_pool": {
+     "transform_wh": 0.10800850001780304,
+     "bi_wh": 0.0
+    }
+   },
+   "attributed_per_second": {
+    "truth_marginal": -0.44361649991168406,
+    "truth_main_bill": 133.46506040068027,
+    "est_marginal": 1.259294574627944,
+    "naive_attributed": -0.4436164999859543,
+    "truth_by_pool": {
+     "transform_wh": 0.10800850001402296,
+     "bi_wh": -0.551624999925707
+    }
+   },
+   "bigquery_on_demand": {
+    "truth_marginal": 0.0,
+    "truth_main_bill": 625.0995194922292,
+    "est_marginal": 0.0,
+    "naive_attributed": 0.0,
+    "truth_by_pool": {
+     "transform_wh": 0.0,
+     "bi_wh": 0.0
+    }
+   },
+   "bigquery_editions": {
+    "truth_marginal": -0.125,
+    "truth_main_bill": 4376.206666666667,
+    "est_marginal": -0.3000000000001819,
+    "naive_attributed": -0.558401374999997,
+    "truth_by_pool": {
+     "transform_wh": -0.07500000000000284,
+     "bi_wh": -0.049999999999272404
+    }
+   },
+   "databricks_sql_serverless": {
+    "truth_marginal": 0.15054226835763984,
+    "truth_main_bill": 5167.449116809082,
+    "est_marginal": -0.4547522988232231,
+    "naive_attributed": -0.6210630999803362,
+    "truth_by_pool": {
+     "transform_wh": 0.15121190002491858,
+     "bi_wh": -0.0006696316677334835
+    }
+   }
+  },
+  "kappa": {
+   "10": {
+    "truth_marginal": 0.010753019182629941,
+    "naive_attributed": -0.04436164999859544,
+    "main_bill": 2329.842447222046
+   },
+   "100": {
+    "truth_marginal": 0.1075301916839635,
+    "naive_attributed": -0.4436164999859544,
+    "main_bill": 2380.035083435058
+   },
+   "1000": {
+    "truth_marginal": 1.032408000131909,
+    "naive_attributed": -4.4361649998595425,
+    "main_bill": 2929.4564797653843
+   }
+  }
+ },
+ {
+  "id": "s22_sort_for_determinism",
+  "category": "regression",
+  "pools": {
+   "own_context": {
+    "truth_marginal": -23.576148000009198,
+    "truth_main_bill": 2418.3399471599514,
+    "est_marginal": -16.528908449561186,
+    "naive_attributed": -23.544223,
+    "truth_by_pool": {
+     "transform_wh": -23.576148000009255,
+     "bi_wh": 0.0
+    }
+   },
+   "snowflake_dedicated": {
+    "truth_marginal": -23.576148000009198,
+    "truth_main_bill": 2418.3399471599514,
+    "est_marginal": -16.528908449561186,
+    "naive_attributed": -23.544223,
+    "truth_by_pool": {
+     "transform_wh": -23.576148000009255,
+     "bi_wh": 0.0
+    }
+   },
+   "snowflake_always_on_bi": {
+    "truth_marginal": -23.576148000009198,
+    "truth_main_bill": 4564.948435900612,
+    "est_marginal": -16.52890844956073,
+    "naive_attributed": -23.544223,
+    "truth_by_pool": {
+     "transform_wh": -23.576148000009255,
+     "bi_wh": 0.0
+    }
+   },
+   "attributed_per_second": {
+    "truth_marginal": -23.544222999996947,
+    "truth_main_bill": 167.5228349005697,
+    "est_marginal": -16.27656422277971,
+    "naive_attributed": -23.544222999999995,
+    "truth_by_pool": {
+     "transform_wh": -23.57614799999989,
+     "bi_wh": 0.03192500000295695
+    }
+   },
+   "bigquery_on_demand": {
+    "truth_marginal": 0.0,
+    "truth_main_bill": 625.0995194922292,
+    "est_marginal": 0.0,
+    "naive_attributed": 0.0,
+    "truth_by_pool": {
+     "transform_wh": 0.0,
+     "bi_wh": 0.0
+    }
+   },
+   "bigquery_editions": {
+    "truth_marginal": -4.475000000000364,
+    "truth_main_bill": 4385.131666666666,
+    "est_marginal": -1.25,
+    "naive_attributed": 1.3456536875000003,
+    "truth_by_pool": {
+     "transform_wh": -4.474999999999987,
+     "bi_wh": 0.0
+    }
+   },
+   "databricks_sql_serverless": {
+    "truth_marginal": -33.006607200012695,
+    "truth_main_bill": 5221.075926023933,
+    "est_marginal": -23.140471829385206,
+    "naive_attributed": -32.9619122,
+    "truth_by_pool": {
+     "transform_wh": -33.00660720001315,
+     "bi_wh": 0.0
+    }
+   }
+  },
+  "kappa": {
+   "10": {
+    "truth_marginal": -2.357614800002466,
+    "naive_attributed": -2.3544223000000004,
+    "main_bill": 2333.672933594557
+   },
+   "100": {
+    "truth_marginal": -23.576148000009198,
+    "naive_attributed": -23.544223,
+    "main_bill": 2418.3399471599514
+   },
+   "1000": {
+    "truth_marginal": -228.81528000000344,
+    "naive_attributed": -235.44223000000002,
+    "main_bill": 3301.678781276154
+   }
+  }
+ },
+ {
+  "id": "s23_macro_change",
+  "category": "neutral",
+  "pools": {
+   "own_context": {
+    "truth_marginal": 0.4353835748479469,
+    "truth_main_bill": 2423.5447695430576,
+    "est_marginal": -0.9081562487608608,
+    "naive_attributed": 1.0992151499683436,
+    "truth_by_pool": {
+     "transform_wh": 0.4351743998472273,
+     "bi_wh": 0.00020917500069117523
+    }
+   },
+   "snowflake_dedicated": {
+    "truth_marginal": 0.4353835748479469,
+    "truth_main_bill": 2423.5447695430576,
+    "est_marginal": -0.9081562487608608,
+    "naive_attributed": 1.0992151499683436,
+    "truth_by_pool": {
+     "transform_wh": 0.4351743998472273,
+     "bi_wh": 0.00020917500069117523
+    }
+   },
+   "snowflake_always_on_bi": {
+    "truth_marginal": 0.43517439984680095,
+    "truth_main_bill": 4570.151193233719,
+    "est_marginal": -0.908622470096816,
+    "naive_attributed": 1.0992151499683436,
+    "truth_by_pool": {
+     "transform_wh": 0.4351743998472273,
+     "bi_wh": 0.0
+    }
+   },
+   "attributed_per_second": {
+    "truth_marginal": 1.0992151499315526,
+    "truth_main_bill": 180.06450438370615,
+    "est_marginal": 0.6868691237302471,
+    "naive_attributed": 1.0992151499683436,
+    "truth_by_pool": {
+     "transform_wh": 0.4233401499661653,
+     "bi_wh": 0.6758749999654015
+    }
+   },
+   "bigquery_on_demand": {
+    "truth_marginal": 0.0,
+    "truth_main_bill": 625.0995194922292,
+    "est_marginal": 0.0,
+    "naive_attributed": 0.0,
+    "truth_by_pool": {
+     "transform_wh": 0.0,
+     "bi_wh": 0.0
+    }
+   },
+   "bigquery_editions": {
+    "truth_marginal": 0.13500000000021828,
+    "truth_main_bill": 4385.426666666666,
+    "est_marginal": -0.31666666666660603,
+    "naive_attributed": -0.025392810416668223,
+    "truth_by_pool": {
+     "transform_wh": 0.1349999999999909,
+     "bi_wh": 0.0
+    }
+   },
+   "databricks_sql_serverless": {
+    "truth_marginal": 0.6095370047878532,
+    "truth_main_bill": 5228.362677360281,
+    "est_marginal": -1.271418748265205,
+    "naive_attributed": 1.5389012099556807,
+    "truth_by_pool": {
+     "transform_wh": 0.609244159786158,
+     "bi_wh": 0.00029284500124049373
+    }
+   }
+  },
+  "kappa": {
+   "10": {
+    "truth_marginal": 0.04235493259466239,
+    "naive_attributed": 0.10992151499683436,
+    "main_bill": 2334.219014547626
+   },
+   "100": {
+    "truth_marginal": 0.4353835748479469,
+    "naive_attributed": 1.0992151499683436,
+    "main_bill": 2423.5447695430576
+   },
+   "1000": {
+    "truth_marginal": 4.33978624964675,
+    "naive_attributed": 10.992151499683434,
+    "main_bill": 3340.3972764391274
+   }
+  }
+ },
+ {
+  "id": "s24_var_default_change",
+  "category": "adversarial",
+  "pools": {
+   "own_context": {
+    "truth_marginal": 0.0,
+    "truth_main_bill": 2365.924733159949,
+    "est_marginal": 0.0,
+    "naive_attributed": 0.0,
+    "truth_by_pool": {
+     "transform_wh": 0.0,
+     "bi_wh": 0.0
+    }
+   },
+   "snowflake_dedicated": {
+    "truth_marginal": 0.0,
+    "truth_main_bill": 2365.924733159949,
+    "est_marginal": 0.0,
+    "naive_attributed": 0.0,
+    "truth_by_pool": {
+     "transform_wh": 0.0,
+     "bi_wh": 0.0
+    }
+   },
+   "snowflake_always_on_bi": {
+    "truth_marginal": 0.0,
+    "truth_main_bill": 4512.5332219006095,
+    "est_marginal": 0.0,
+    "naive_attributed": 0.0,
+    "truth_by_pool": {
+     "transform_wh": 0.0,
+     "bi_wh": 0.0
+    }
+   },
+   "attributed_per_second": {
+    "truth_marginal": 0.0,
+    "truth_main_bill": 114.35359590055025,
+    "est_marginal": 0.0,
+    "naive_attributed": 0.0,
+    "truth_by_pool": {
+     "transform_wh": 0.0,
+     "bi_wh": 0.0
+    }
+   },
+   "bigquery_on_demand": {
+    "truth_marginal": 0.0,
+    "truth_main_bill": 625.0995194922292,
+    "est_marginal": 0.0,
+    "naive_attributed": 0.0,
+    "truth_by_pool": {
+     "transform_wh": 0.0,
+     "bi_wh": 0.0
+    }
+   },
+   "bigquery_editions": {
+    "truth_marginal": 0.0,
+    "truth_main_bill": 4372.381666666666,
+    "est_marginal": 0.0,
+    "naive_attributed": 0.0,
+    "truth_by_pool": {
+     "transform_wh": 0.0,
+     "bi_wh": 0.0
+    }
+   },
+   "databricks_sql_serverless": {
+    "truth_marginal": 0.0,
+    "truth_main_bill": 5147.69462642393,
+    "est_marginal": 0.0,
+    "naive_attributed": 0.0,
+    "truth_by_pool": {
+     "transform_wh": 0.0,
+     "bi_wh": 0.0
+    }
+   }
+  },
+  "kappa": {
+   "10": {
+    "truth_marginal": 0.0,
+    "naive_attributed": 0.0,
+    "main_bill": 2328.431412194543
+   },
+   "100": {
+    "truth_marginal": 0.0,
+    "naive_attributed": 0.0,
+    "main_bill": 2365.924733159949
+   },
+   "1000": {
+    "truth_marginal": 0.0,
+    "naive_attributed": 0.0,
+    "main_bill": 2793.0354712759486
+   }
+  }
+ },
+ {
+  "id": "s25_config_inheritance",
+  "category": "regression",
+  "pools": {
+   "own_context": {
+    "truth_marginal": 317.078557699866,
+    "truth_main_bill": 2472.885032209282,
+    "est_marginal": 279.9242108518388,
+    "naive_attributed": 327.71603406648694,
+    "truth_by_pool": {
+     "transform_wh": 317.07843593319825,
+     "bi_wh": 0.00012176666814411874
+    }
+   },
+   "snowflake_dedicated": {
+    "truth_marginal": 317.078557699866,
+    "truth_main_bill": 2472.885032209282,
+    "est_marginal": 279.9242108518388,
+    "naive_attributed": 327.71603406648694,
+    "truth_by_pool": {
+     "transform_wh": 317.07843593319825,
+     "bi_wh": 0.00012176666814411874
+    }
+   },
+   "snowflake_always_on_bi": {
+    "truth_marginal": 317.0784359331983,
+    "truth_main_bill": 4619.482876633275,
+    "est_marginal": 279.92417118112826,
+    "naive_attributed": 327.71603406648694,
+    "truth_by_pool": {
+     "transform_wh": 317.07843593319825,
+     "bi_wh": 0.0
+    }
+   },
+   "attributed_per_second": {
+    "truth_marginal": 327.7160340665356,
+    "truth_main_bill": 252.26443121669422,
+    "est_marginal": 289.2884276731737,
+    "naive_attributed": 327.7160340664869,
+    "truth_by_pool": {
+     "transform_wh": 327.10660906645785,
+     "bi_wh": 0.6094250000777492
+    }
+   },
+   "bigquery_on_demand": {
+    "truth_marginal": 44.48886057844004,
+    "truth_main_bill": 625.0995194922292,
+    "est_marginal": 44.48886057844004,
+    "naive_attributed": 44.497801275156235,
+    "truth_by_pool": {
+     "transform_wh": 44.488860578439954,
+     "bi_wh": 0.0
+    }
+   },
+   "bigquery_editions": {
+    "truth_marginal": 86.04666666666617,
+    "truth_main_bill": 4399.106666666667,
+    "est_marginal": 76.6299999999992,
+    "naive_attributed": 42.19507622708331,
+    "truth_by_pool": {
+     "transform_wh": 86.04666666666667,
+     "bi_wh": 0.0
+    }
+   },
+   "databricks_sql_serverless": {
+    "truth_marginal": 368.3099807798126,
+    "truth_main_bill": 5297.439045092996,
+    "est_marginal": 316.2938951925735,
+    "naive_attributed": 458.80244769308166,
+    "truth_by_pool": {
+     "transform_wh": 368.30981030647763,
+     "bi_wh": 0.00017047333494701888
+    }
+   }
+  },
+  "kappa": {
+   "10": {
+    "truth_marginal": 26.673153033364997,
+    "naive_attributed": 32.7716034066487,
+    "main_bill": 2339.157397657553
+   },
+   "100": {
+    "truth_marginal": 317.078557699866,
+    "naive_attributed": 327.71603406648694,
+    "main_bill": 2472.885032209282
+   },
+   "1000": {
+    "truth_marginal": 3181.506394164927,
+    "naive_attributed": 3277.160340664869,
+    "main_bill": 3808.116603757836
+   }
+  }
+ },
+ {
+  "id": "s26_include_future_shipments",
+  "category": "regression",
+  "pools": {
+   "own_context": {
+    "truth_marginal": 19.60967550000123,
+    "truth_main_bill": 2394.8577676599457,
+    "est_marginal": 15.666128693459541,
+    "naive_attributed": 20.197500500000007,
+    "truth_by_pool": {
+     "transform_wh": 19.609675500001174,
+     "bi_wh": 0.0
+    }
+   },
+   "snowflake_dedicated": {
+    "truth_marginal": 19.60967550000123,
+    "truth_main_bill": 2394.8577676599457,
+    "est_marginal": 15.666128693459541,
+    "naive_attributed": 20.197500500000007,
+    "truth_by_pool": {
+     "transform_wh": 19.609675500001174,
+     "bi_wh": 0.0
+    }
+   },
+   "snowflake_always_on_bi": {
+    "truth_marginal": 19.609675500000776,
+    "truth_main_bill": 4541.466256400607,
+    "est_marginal": 15.666128693459541,
+    "naive_attributed": 20.197500500000007,
+    "truth_by_pool": {
+     "transform_wh": 19.609675500001174,
+     "bi_wh": 0.0
+    }
+   },
+   "attributed_per_second": {
+    "truth_marginal": 20.19750050000249,
+    "truth_main_bill": 144.32443040055864,
+    "est_marginal": 17.343649807095204,
+    "naive_attributed": 20.197500500000004,
+    "truth_by_pool": {
+     "transform_wh": 19.609675500000137,
+     "bi_wh": 0.5878250000023542
+    }
+   },
+   "bigquery_on_demand": {
+    "truth_marginal": 0.848074026927975,
+    "truth_main_bill": 625.0995194922292,
+    "est_marginal": 0.848074026927975,
+    "naive_attributed": 0.8534389087999561,
+    "truth_by_pool": {
+     "transform_wh": 0.8480740269278755,
+     "bi_wh": 0.0
+    }
+   },
+   "bigquery_editions": {
+    "truth_marginal": 4.550000000000182,
+    "truth_main_bill": 4377.831666666666,
+    "est_marginal": 3.550000000000182,
+    "naive_attributed": 1.1436868124999988,
+    "truth_by_pool": {
+     "transform_wh": 4.549999999999997,
+     "bi_wh": 0.0
+    }
+   },
+   "databricks_sql_serverless": {
+    "truth_marginal": 27.453545700001996,
+    "truth_main_bill": 5188.200874723925,
+    "est_marginal": 21.93258017084372,
+    "naive_attributed": 28.276500700000007,
+    "truth_by_pool": {
+     "transform_wh": 27.45354570000154,
+     "bi_wh": 0.0
+    }
+   }
+  },
+  "kappa": {
+   "10": {
+    "truth_marginal": 1.9609675500114463,
+    "naive_attributed": 2.0197500500000007,
+    "main_bill": 2331.324715644552
+   },
+   "100": {
+    "truth_marginal": 19.60967550000123,
+    "naive_attributed": 20.197500500000007,
+    "main_bill": 2394.8577676599457
+   },
+   "1000": {
+    "truth_marginal": 189.15055500001563,
+    "naive_attributed": 201.97500500000007,
+    "main_bill": 3073.8031862761586
+   }
+  }
+ }
+]

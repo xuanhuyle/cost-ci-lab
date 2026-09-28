@@ -65,3 +65,16 @@ def test_bigquery_editions_autoscale_rounds_to_50_and_holds_60s():
 def test_serverless_per_query_is_linear():
     r = serverless_per_query([Execution("q", 0, 3600)], price_per_unit_hour=2.0)
     assert r["dollars"] == 2.0
+
+
+def test_bigquery_editions_has_no_phantom_autoscale_from_float_residue():
+    # This seeded input leaves a +3.3e-13 residue in the cumulative slot demand after every job has
+    # ended; without the fix, ceil() billed a phantom 50-slot step for the rest of the month.
+    import random
+    rng = random.Random(1)
+    execs = [Execution(f"q{i}", rng.uniform(0, 5000), rng.uniform(1, 40)) for i in range(3000)]
+    for e in execs:
+        e.slot_s = e.duration_s * 25 * rng.uniform(0.3, 3.7)
+    r = bigquery_editions(execs, baseline_slots=0, max_slots=800)
+    busy_window = 5000 + 40 + 60 + 1
+    assert r["autoscale_slot_seconds"] <= 800 * busy_window

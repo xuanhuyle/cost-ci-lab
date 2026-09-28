@@ -42,10 +42,10 @@ def naive(pool: dict, ctx: dict, deltas: list[tuple[float, dict, dict]]) -> floa
         elif kind == "serverless_per_query":
             tot += runs * (p["seconds"] - m["seconds"]) * ctx["time_scale"] * pool["price_per_unit_hour"] / 3600
         elif kind == "bigquery_on_demand":
-            tot += runs * (p["bytes"] - m["bytes"]) * ctx["data_scale"] / TIB * pool["price_per_tib"]
+            tot += runs * (p["bytes"] - m["bytes"]) * ctx["data_scale"] / TIB * pool.get("price_per_tib", 6.25)
         elif kind == "bigquery_editions":
             tot += (runs * (p["cpu"] - m["cpu"]) * ctx["time_scale"] * SLOTS_PER_LAB_THREAD
-                    * pool["price_per_slot_hour"] / 3600)
+                    * pool.get("price_per_slot_hour", 0.06) / 3600)
     return tot
 
 

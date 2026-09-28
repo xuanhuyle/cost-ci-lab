@@ -1,9 +1,9 @@
 {
  "k_measured": {
-  "ab_full_abs": 4.464155139739102,
-  "pr_vs_history": 2.232822034282448,
-  "ab_key10": 2.143457743771702,
-  "hybrid": 4.312471834607905,
+  "ab_full_abs": 4.601621674579022,
+  "pr_vs_history": 2.4890623292271874,
+  "ab_key10": 1.6295700611706487,
+  "hybrid": 4.002837315414967,
   "static_cout": 0.0
  },
  "breakeven_runs_per_month": {
@@ -13,112 +13,112 @@
     "mean_regression": 0.5,
     "months_undetected": 1,
     "ci_runs_per_pr": 1,
-    "breakeven_runs_per_month": 178.56620558956408
+    "breakeven_runs_per_month": 184.06486698316087
    },
    {
     "p_regression": 0.05,
     "mean_regression": 0.5,
     "months_undetected": 1,
     "ci_runs_per_pr": 3,
-    "breakeven_runs_per_month": 535.6986167686922
+    "breakeven_runs_per_month": 552.1946009494826
    },
    {
     "p_regression": 0.05,
     "mean_regression": 0.5,
     "months_undetected": 3,
     "ci_runs_per_pr": 1,
-    "breakeven_runs_per_month": 59.522068529854685
+    "breakeven_runs_per_month": 61.354955661053616
    },
    {
     "p_regression": 0.05,
     "mean_regression": 0.5,
     "months_undetected": 3,
     "ci_runs_per_pr": 3,
-    "breakeven_runs_per_month": 178.56620558956405
+    "breakeven_runs_per_month": 184.06486698316084
    },
    {
     "p_regression": 0.05,
     "mean_regression": 1.0,
     "months_undetected": 1,
     "ci_runs_per_pr": 1,
-    "breakeven_runs_per_month": 89.28310279478204
+    "breakeven_runs_per_month": 92.03243349158043
    },
    {
     "p_regression": 0.05,
     "mean_regression": 1.0,
     "months_undetected": 1,
     "ci_runs_per_pr": 3,
-    "breakeven_runs_per_month": 267.8493083843461
+    "breakeven_runs_per_month": 276.0973004747413
    },
    {
     "p_regression": 0.05,
     "mean_regression": 1.0,
     "months_undetected": 3,
     "ci_runs_per_pr": 1,
-    "breakeven_runs_per_month": 29.761034264927343
+    "breakeven_runs_per_month": 30.677477830526808
    },
    {
     "p_regression": 0.05,
     "mean_regression": 1.0,
     "months_undetected": 3,
     "ci_runs_per_pr": 3,
-    "breakeven_runs_per_month": 89.28310279478202
+    "breakeven_runs_per_month": 92.03243349158042
    },
    {
     "p_regression": 0.2,
     "mean_regression": 0.5,
     "months_undetected": 1,
     "ci_runs_per_pr": 1,
-    "breakeven_runs_per_month": 44.64155139739102
+    "breakeven_runs_per_month": 46.01621674579022
    },
    {
     "p_regression": 0.2,
     "mean_regression": 0.5,
     "months_undetected": 1,
     "ci_runs_per_pr": 3,
-    "breakeven_runs_per_month": 133.92465419217305
+    "breakeven_runs_per_month": 138.04865023737065
    },
    {
     "p_regression": 0.2,
     "mean_regression": 0.5,
     "months_undetected": 3,
     "ci_runs_per_pr": 1,
-    "breakeven_runs_per_month": 14.880517132463671
+    "breakeven_runs_per_month": 15.338738915263404
    },
    {
     "p_regression": 0.2,
     "mean_regression": 0.5,
     "months_undetected": 3,
     "ci_runs_per_pr": 3,
-    "breakeven_runs_per_month": 44.64155139739101
+    "breakeven_runs_per_month": 46.01621674579021
    },
    {
     "p_regression": 0.2,
     "mean_regression": 1.0,
     "months_undetected": 1,
     "ci_runs_per_pr": 1,
-    "breakeven_runs_per_month": 22.32077569869551
+    "breakeven_runs_per_month": 23.00810837289511
    },
    {
     "p_regression": 0.2,
     "mean_regression": 1.0,
     "months_undetected": 1,
     "ci_runs_per_pr": 3,
-    "breakeven_runs_per_month": 66.96232709608653
+    "breakeven_runs_per_month": 69.02432511868533
    },
    {
     "p_regression": 0.2,
     "mean_regression": 1.0,
     "months_undetected": 3,
     "ci_runs_per_pr": 1,
-    "breakeven_runs_per_month": 7.440258566231836
+    "breakeven_runs_per_month": 7.669369457631702
    },
    {
     "p_regression": 0.2,
     "mean_regression": 1.0,
     "months_undetected": 3,
     "ci_runs_per_pr": 3,
-    "breakeven_runs_per_month": 22.320775698695506
+    "breakeven_runs_per_month": 23.008108372895105
    }
   ],
   "pr_vs_history": [
@@ -127,112 +127,112 @@
     "mean_regression": 0.5,
     "months_undetected": 1,
     "ci_runs_per_pr": 1,
-    "breakeven_runs_per_month": 89.31288137129792
+    "breakeven_runs_per_month": 99.56249316908749
    },
    {
     "p_regression": 0.05,
     "mean_regression": 0.5,
     "months_undetected": 1,
     "ci_runs_per_pr": 3,
-    "breakeven_runs_per_month": 267.93864411389376
+    "breakeven_runs_per_month": 298.6874795072625
    },
    {
     "p_regression": 0.05,
     "mean_regression": 0.5,
     "months_undetected": 3,
     "ci_runs_per_pr": 1,
-    "breakeven_runs_per_month": 29.770960457099303
+    "breakeven_runs_per_month": 33.18749772302916
    },
    {
     "p_regression": 0.05,
     "mean_regression": 0.5,
     "months_undetected": 3,
     "ci_runs_per_pr": 3,
-    "breakeven_runs_per_month": 89.31288137129792
+    "breakeven_runs_per_month": 99.56249316908747
    },
    {
     "p_regression": 0.05,
     "mean_regression": 1.0,
     "months_undetected": 1,
     "ci_runs_per_pr": 1,
-    "breakeven_runs_per_month": 44.65644068564896
+    "breakeven_runs_per_month": 49.781246584543744
    },
    {
     "p_regression": 0.05,
     "mean_regression": 1.0,
     "months_undetected": 1,
     "ci_runs_per_pr": 3,
-    "breakeven_runs_per_month": 133.96932205694688
+    "breakeven_runs_per_month": 149.34373975363124
    },
    {
     "p_regression": 0.05,
     "mean_regression": 1.0,
     "months_undetected": 3,
     "ci_runs_per_pr": 1,
-    "breakeven_runs_per_month": 14.885480228549651
+    "breakeven_runs_per_month": 16.59374886151458
    },
    {
     "p_regression": 0.05,
     "mean_regression": 1.0,
     "months_undetected": 3,
     "ci_runs_per_pr": 3,
-    "breakeven_runs_per_month": 44.65644068564896
+    "breakeven_runs_per_month": 49.78124658454374
    },
    {
     "p_regression": 0.2,
     "mean_regression": 0.5,
     "months_undetected": 1,
     "ci_runs_per_pr": 1,
-    "breakeven_runs_per_month": 22.32822034282448
+    "breakeven_runs_per_month": 24.890623292271872
    },
    {
     "p_regression": 0.2,
     "mean_regression": 0.5,
     "months_undetected": 1,
     "ci_runs_per_pr": 3,
-    "breakeven_runs_per_month": 66.98466102847344
+    "breakeven_runs_per_month": 74.67186987681562
    },
    {
     "p_regression": 0.2,
     "mean_regression": 0.5,
     "months_undetected": 3,
     "ci_runs_per_pr": 1,
-    "breakeven_runs_per_month": 7.442740114274826
+    "breakeven_runs_per_month": 8.29687443075729
    },
    {
     "p_regression": 0.2,
     "mean_regression": 0.5,
     "months_undetected": 3,
     "ci_runs_per_pr": 3,
-    "breakeven_runs_per_month": 22.32822034282448
+    "breakeven_runs_per_month": 24.89062329227187
    },
    {
     "p_regression": 0.2,
     "mean_regression": 1.0,
     "months_undetected": 1,
     "ci_runs_per_pr": 1,
-    "breakeven_runs_per_month": 11.16411017141224
+    "breakeven_runs_per_month": 12.445311646135936
    },
    {
     "p_regression": 0.2,
     "mean_regression": 1.0,
     "months_undetected": 1,
     "ci_runs_per_pr": 3,
-    "breakeven_runs_per_month": 33.49233051423672
+    "breakeven_runs_per_month": 37.33593493840781
    },
    {
     "p_regression": 0.2,
     "mean_regression": 1.0,
     "months_undetected": 3,
     "ci_runs_per_pr": 1,
-    "breakeven_runs_per_month": 3.721370057137413
+    "breakeven_runs_per_month": 4.148437215378645
    },
    {
     "p_regression": 0.2,
     "mean_regression": 1.0,
     "months_undetected": 3,
     "ci_runs_per_pr": 3,
-    "breakeven_runs_per_month": 11.16411017141224
+    "breakeven_runs_per_month": 12.445311646135934
    }
   ],
   "ab_key10": [
@@ -241,112 +241,112 @@
     "mean_regression": 0.5,
     "months_undetected": 1,
     "ci_runs_per_pr": 1,
-    "breakeven_runs_per_month": 85.73830975086808
+    "breakeven_runs_per_month": 65.18280244682595
    },
    {
     "p_regression": 0.05,
     "mean_regression": 0.5,
     "months_undetected": 1,
     "ci_runs_per_pr": 3,
-    "breakeven_runs_per_month": 257.21492925260424
+    "breakeven_runs_per_month": 195.54840734047787
    },
    {
     "p_regression": 0.05,
     "mean_regression": 0.5,
     "months_undetected": 3,
     "ci_runs_per_pr": 1,
-    "breakeven_runs_per_month": 28.57943658362269
+    "breakeven_runs_per_month": 21.727600815608646
    },
    {
     "p_regression": 0.05,
     "mean_regression": 0.5,
     "months_undetected": 3,
     "ci_runs_per_pr": 3,
-    "breakeven_runs_per_month": 85.73830975086808
+    "breakeven_runs_per_month": 65.18280244682595
    },
    {
     "p_regression": 0.05,
     "mean_regression": 1.0,
     "months_undetected": 1,
     "ci_runs_per_pr": 1,
-    "breakeven_runs_per_month": 42.86915487543404
+    "breakeven_runs_per_month": 32.59140122341297
    },
    {
     "p_regression": 0.05,
     "mean_regression": 1.0,
     "months_undetected": 1,
     "ci_runs_per_pr": 3,
-    "breakeven_runs_per_month": 128.60746462630212
+    "breakeven_runs_per_month": 97.77420367023893
    },
    {
     "p_regression": 0.05,
     "mean_regression": 1.0,
     "months_undetected": 3,
     "ci_runs_per_pr": 1,
-    "breakeven_runs_per_month": 14.289718291811345
+    "breakeven_runs_per_month": 10.863800407804323
    },
    {
     "p_regression": 0.05,
     "mean_regression": 1.0,
     "months_undetected": 3,
     "ci_runs_per_pr": 3,
-    "breakeven_runs_per_month": 42.86915487543404
+    "breakeven_runs_per_month": 32.59140122341297
    },
    {
     "p_regression": 0.2,
     "mean_regression": 0.5,
     "months_undetected": 1,
     "ci_runs_per_pr": 1,
-    "breakeven_runs_per_month": 21.43457743771702
+    "breakeven_runs_per_month": 16.295700611706486
    },
    {
     "p_regression": 0.2,
     "mean_regression": 0.5,
     "months_undetected": 1,
     "ci_runs_per_pr": 3,
-    "breakeven_runs_per_month": 64.30373231315106
+    "breakeven_runs_per_month": 48.887101835119466
    },
    {
     "p_regression": 0.2,
     "mean_regression": 0.5,
     "months_undetected": 3,
     "ci_runs_per_pr": 1,
-    "breakeven_runs_per_month": 7.144859145905673
+    "breakeven_runs_per_month": 5.4319002039021616
    },
    {
     "p_regression": 0.2,
     "mean_regression": 0.5,
     "months_undetected": 3,
     "ci_runs_per_pr": 3,
-    "breakeven_runs_per_month": 21.43457743771702
+    "breakeven_runs_per_month": 16.295700611706486
    },
    {
     "p_regression": 0.2,
     "mean_regression": 1.0,
     "months_undetected": 1,
     "ci_runs_per_pr": 1,
-    "breakeven_runs_per_month": 10.71728871885851
+    "breakeven_runs_per_month": 8.147850305853243
    },
    {
     "p_regression": 0.2,
     "mean_regression": 1.0,
     "months_undetected": 1,
     "ci_runs_per_pr": 3,
-    "breakeven_runs_per_month": 32.15186615657553
+    "breakeven_runs_per_month": 24.443550917559733
    },
    {
     "p_regression": 0.2,
     "mean_regression": 1.0,
     "months_undetected": 3,
     "ci_runs_per_pr": 1,
-    "breakeven_runs_per_month": 3.5724295729528364
+    "breakeven_runs_per_month": 2.7159501019510808
    },
    {
     "p_regression": 0.2,
     "mean_regression": 1.0,
     "months_undetected": 3,
     "ci_runs_per_pr": 3,
-    "breakeven_runs_per_month": 10.71728871885851
+    "breakeven_runs_per_month": 8.147850305853243
    }
   ],
   "hybrid": [
@@ -355,112 +355,112 @@
     "mean_regression": 0.5,
     "months_undetected": 1,
     "ci_runs_per_pr": 1,
-    "breakeven_runs_per_month": 172.4988733843162
+    "breakeven_runs_per_month": 160.11349261659865
    },
    {
     "p_regression": 0.05,
     "mean_regression": 0.5,
     "months_undetected": 1,
     "ci_runs_per_pr": 3,
-    "breakeven_runs_per_month": 517.4966201529486
+    "breakeven_runs_per_month": 480.34047784979595
    },
    {
     "p_regression": 0.05,
     "mean_regression": 0.5,
     "months_undetected": 3,
     "ci_runs_per_pr": 1,
-    "breakeven_runs_per_month": 57.49962446143872
+    "breakeven_runs_per_month": 53.37116420553288
    },
    {
     "p_regression": 0.05,
     "mean_regression": 0.5,
     "months_undetected": 3,
     "ci_runs_per_pr": 3,
-    "breakeven_runs_per_month": 172.49887338431617
+    "breakeven_runs_per_month": 160.11349261659865
    },
    {
     "p_regression": 0.05,
     "mean_regression": 1.0,
     "months_undetected": 1,
     "ci_runs_per_pr": 1,
-    "breakeven_runs_per_month": 86.2494366921581
+    "breakeven_runs_per_month": 80.05674630829932
    },
    {
     "p_regression": 0.05,
     "mean_regression": 1.0,
     "months_undetected": 1,
     "ci_runs_per_pr": 3,
-    "breakeven_runs_per_month": 258.7483100764743
+    "breakeven_runs_per_month": 240.17023892489797
    },
    {
     "p_regression": 0.05,
     "mean_regression": 1.0,
     "months_undetected": 3,
     "ci_runs_per_pr": 1,
-    "breakeven_runs_per_month": 28.74981223071936
+    "breakeven_runs_per_month": 26.68558210276644
    },
    {
     "p_regression": 0.05,
     "mean_regression": 1.0,
     "months_undetected": 3,
     "ci_runs_per_pr": 3,
-    "breakeven_runs_per_month": 86.24943669215808
+    "breakeven_runs_per_month": 80.05674630829932
    },
    {
     "p_regression": 0.2,
     "mean_regression": 0.5,
     "months_undetected": 1,
     "ci_runs_per_pr": 1,
-    "breakeven_runs_per_month": 43.12471834607905
+    "breakeven_runs_per_month": 40.02837315414966
    },
    {
     "p_regression": 0.2,
     "mean_regression": 0.5,
     "months_undetected": 1,
     "ci_runs_per_pr": 3,
-    "breakeven_runs_per_month": 129.37415503823715
+    "breakeven_runs_per_month": 120.08511946244899
    },
    {
     "p_regression": 0.2,
     "mean_regression": 0.5,
     "months_undetected": 3,
     "ci_runs_per_pr": 1,
-    "breakeven_runs_per_month": 14.37490611535968
+    "breakeven_runs_per_month": 13.34279105138322
    },
    {
     "p_regression": 0.2,
     "mean_regression": 0.5,
     "months_undetected": 3,
     "ci_runs_per_pr": 3,
-    "breakeven_runs_per_month": 43.12471834607904
+    "breakeven_runs_per_month": 40.02837315414966
    },
    {
     "p_regression": 0.2,
     "mean_regression": 1.0,
     "months_undetected": 1,
     "ci_runs_per_pr": 1,
-    "breakeven_runs_per_month": 21.562359173039525
+    "breakeven_runs_per_month": 20.01418657707483
    },
    {
     "p_regression": 0.2,
     "mean_regression": 1.0,
     "months_undetected": 1,
     "ci_runs_per_pr": 3,
-    "breakeven_runs_per_month": 64.68707751911857
+    "breakeven_runs_per_month": 60.04255973122449
    },
    {
     "p_regression": 0.2,
     "mean_regression": 1.0,
     "months_undetected": 3,
     "ci_runs_per_pr": 1,
-    "breakeven_runs_per_month": 7.18745305767984
+    "breakeven_runs_per_month": 6.67139552569161
    },
    {
     "p_regression": 0.2,
     "mean_regression": 1.0,
     "months_undetected": 3,
     "ci_runs_per_pr": 3,
-    "breakeven_runs_per_month": 21.56235917303952
+    "breakeven_runs_per_month": 20.01418657707483
    }
   ],
   "static_cout": [
