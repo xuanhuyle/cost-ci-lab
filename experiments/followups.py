@@ -37,6 +37,7 @@ def main():
                       if r["missed_by_dbt"]]
             if missed:
                 step(["experiments.run_benchmark", "--detection", "union", "--only", *missed], log)
+            step(["experiments.remeasure_consumers"], log)
             step(["experiments.measure_baseline"], log)
         step(["experiments.analyze"], log)
         step(["experiments.economics_run"], log)

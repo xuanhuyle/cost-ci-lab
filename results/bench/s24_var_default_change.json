@@ -1,0 +1,208 @@
+{
+ "scenario": {
+  "id": "s24_var_default_change",
+  "title": "Change the revenue_lookback_days var default from 3 to 45 in dbt_project.yml",
+  "category": "adversarial",
+  "description": "Same production effect as s03, but the change lives in project config, not in the model file. Tests whether change detection sees it.",
+  "overlay": {
+   "dbt_project.yml": "dbt_project.yml"
+  },
+  "delete": [],
+  "context_overrides": {}
+ },
+ "changes": {
+  "changed_files": [],
+  "modified": [],
+  "modified_by": {
+   "body": [],
+   "configs": [],
+   "macros": [],
+   "relation": [],
+   "persisted_descriptions": [],
+   "contract": []
+  },
+  "modified_plus": [],
+  "new_models": [],
+  "removed_models": [],
+  "consumers": []
+ },
+ "context": {
+  "run_date": "1998-08-02",
+  "time_scale": 100,
+  "data_scale": 100,
+  "jobs": [
+   {
+    "id": "revenue_hourly",
+    "models": [
+     "fct_daily_revenue"
+    ],
+    "runs_per_month": 720,
+    "pool": "transform_wh",
+    "start_minute": 5
+   },
+   {
+    "id": "monthly_ltv",
+    "tags": [
+     "monthly"
+    ],
+    "runs_per_month": 1,
+    "pool": "transform_wh",
+    "start_minute": 180
+   },
+   {
+    "id": "daily_build",
+    "default": true,
+    "runs_per_month": 30,
+    "pool": "transform_wh",
+    "start_minute": 120
+   }
+  ],
+  "consumers": [
+   {
+    "id": "bi_customer_lookup",
+    "sql": "select * from {{ ref('dim_customers') }} where customer_key = 4242",
+    "runs_per_month": 60000,
+    "pool": "bi_wh"
+   },
+   {
+    "id": "bi_segments_dashboard",
+    "sql": "select * from {{ ref('rpt_customer_segments') }} order by customer_count desc",
+    "runs_per_month": 9000,
+    "pool": "bi_wh"
+   },
+   {
+    "id": "bi_kpi_tiles",
+    "sql": "select * from {{ ref('rpt_daily_kpis') }} order by ship_date",
+    "runs_per_month": 30000,
+    "pool": "bi_wh"
+   },
+   {
+    "id": "bi_nation_trend",
+    "sql": "select nation_name, ship_month, sum(net_revenue) as net_revenue from {{ ref('mart_revenue_by_nation') }} group by 1, 2",
+    "runs_per_month": 3000,
+    "pool": "bi_wh"
+   }
+  ],
+  "pools": {
+   "transform_wh": {
+    "kind": "snowflake_warehouse",
+    "credits_per_hour": 4,
+    "price_per_credit": 3.0,
+    "auto_suspend_s": 60
+   },
+   "bi_wh": {
+    "kind": "snowflake_warehouse",
+    "credits_per_hour": 2,
+    "price_per_credit": 3.0,
+    "auto_suspend_s": 300,
+    "max_clusters": 2,
+    "business_hours": [
+     8,
+     20
+    ]
+   }
+  }
+ },
+ "workloads": {
+  "main": [],
+  "pr": []
+ },
+ "timing": {
+  "prepare_s": 19.03219790000003,
+  "dbt_calls": [
+   [
+    "parse",
+    4.210711300023831
+   ],
+   [
+    "ls",
+    2.1221598999691196
+   ],
+   [
+    "ls",
+    1.856571099953726
+   ],
+   [
+    "ls",
+    1.6974851000122726
+   ],
+   [
+    "ls",
+    1.9009933999623172
+   ],
+   [
+    "ls",
+    1.7419056999497116
+   ],
+   [
+    "ls",
+    1.7834487999789417
+   ],
+   [
+    "ls",
+    1.7991605999995954
+   ],
+   [
+    "ls",
+    1.67315210000379
+   ]
+  ],
+  "env_s": {
+   "prod": 0.5372091000317596,
+   "bern01": 0.13659540005028248,
+   "key01": 0.14038380002602935,
+   "key10": 0.1421350000309758,
+   "recent90": 0.14971980004338548
+  }
+ },
+ "envs": {
+  "prod": {
+   "env": "prod",
+   "reps": 8,
+   "runs": {
+    "main": {},
+    "pr": {}
+   },
+   "explain": {
+    "main": {},
+    "pr": {}
+   }
+  },
+  "bern01": {
+   "env": "bern01",
+   "reps": 3,
+   "runs": {
+    "main": {},
+    "pr": {}
+   },
+   "explain": {}
+  },
+  "key01": {
+   "env": "key01",
+   "reps": 3,
+   "runs": {
+    "main": {},
+    "pr": {}
+   },
+   "explain": {}
+  },
+  "key10": {
+   "env": "key10",
+   "reps": 3,
+   "runs": {
+    "main": {},
+    "pr": {}
+   },
+   "explain": {}
+  },
+  "recent90": {
+   "env": "recent90",
+   "reps": 3,
+   "runs": {
+    "main": {},
+    "pr": {}
+   },
+   "explain": {}
+  }
+ }
+}

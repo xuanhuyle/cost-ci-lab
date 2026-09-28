@@ -57,6 +57,10 @@ the 1 TiB/month free tier.
 - (a) Use project `<id>` with account `<which>` under the cap above.
 - (b) Do not use GCP.
 
+The probe is ready: `live/bigquery/probe.py`. It refuses to run without `--project` and
+`--approved`, dry-runs every query first, skips anything above `--max-gb`, and sets
+`maximum_bytes_billed` on every job. It takes about 10 minutes.
+
 ## 3. Real production telemetry (the test the lab cannot do)
 
 **Why:** H1 (attribution), H3 (frequency and history anchoring) and H4 (calibration) ultimately need

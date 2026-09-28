@@ -125,3 +125,68 @@ These are the design consequences of `RESULTS.md`:
    number is.
 5. **Calibration works on usage ratios (weeks), not dollars (months).** Dollar-level ground truth is
    confounded by other changes landing in the same pool.
+
+## 6. Post-merge calibration loop (Phase 10)
+
+```text
+PR analysed ─► Prediction stored (per workload: CI ratio, strategy, conditions; per pool: Δ$ range)
+     │
+merge + deploy ─► first N production runs of each affected workload (query tag / job run id)
+     │
+realised per-run usage (≤1 h: Snowflake QUERY_HISTORY 45 min, Databricks query history, BigQuery JOBS)
+     │
+realised pool $ (3–24 h: WAREHOUSE_METERING_HISTORY, system.billing.usage, RESERVATIONS_TIMELINE)
+     │
+error = log(realised ratio / predicted ratio)  per workload  ─►  corrections + noise-model update
+```
+
+What each level can reasonably calibrate:
+
+| Level | Calibratable? | Signal | Why |
+|---|---|---|---|
+| Per workload | **Yes** | Each merged PR touching it yields one (predicted, realised) pair. Its run history continuously updates its noise model. | Recurring workloads repeat (E-020: most warehouse queries are repeats). Noise and CI-vs-production transfer are workload properties. |
+| Per warehouse / pool | **Yes** | Every PR landing on the pool; metering vs replayed bill | CI-vs-production condition gaps (size, concurrency, cache) and billing-model fidelity are pool properties |
+| Per workload class (materialisation, change type) | Weakly | Small-n groups | The lab shows class-level biases for cheap strategies, but sign errors are scenario-specific and cannot be corrected by a factor (E7) |
+| Per repository / customer | As aggregates of the above | — | No new signal beyond workloads and pools |
+| Per provider, cross-customer | **No claim** | — | No evidence of a transferable signal. It cannot be tested without multi-customer data, and the mechanisms observed (layout, data distribution, pool load) are customer-specific |
+
+Design rule: calibrate the *ratio* (usage) and the *pool replay* separately. A dollar-level residual
+mixes estimator error, billing-model error and unrelated changes that landed in the same pool.
+
+## 7. Portability (Phase 12): which workload families can a common product support?
+
+**Grading.** "Estimate quality" means the quality of a pre-merge **monthly-$** estimate that is
+decision-useful. Usage deltas can usually be measured on every family below; what varies is whether
+they can be turned into trustworthy dollars in CI time.
+- A grade needs three things: a CI execution path, a per-run attribution path, and a
+  billing-function path.
+- Grades combine documented platform primitives (`PLATFORM_FEASIBILITY.md`) with lab mechanisms
+  (`RESULTS.md`).
+- They are `INFERRED`. None was validated on a live platform.
+
+| Platform | Workload family | Grade | Why |
+|---|---|---|---|
+| Snowflake | dbt SQL models on a **dedicated** warehouse, scheduled ≥ daily | **HIGH** | Zero-copy clone + `--defer` + `dbt clone` for incremental targets; real-time `execution_time`; the billing function is fully documented and replayable (uptime, 60 s minimum, auto-suspend) |
+| Snowflake | dbt models on a warehouse **shared** with other teams | MEDIUM | The usage delta is measurable; marginal $ depends on the pool's background load (replayable from `QUERY_HISTORY` / `WAREHOUSE_EVENTS_HISTORY`); attribution is an allocation that excludes idle time |
+| Snowflake | BI / consumer queries on busy BI warehouses | LOW for $ (MEDIUM for usage) | Changes are absorbed by uptime that is already paid for, until multi-cluster scale-out, whose timing is not published |
+| Snowflake | Adaptive warehouses (GA 2026-06) | MEDIUM | Per-query credits are metered (`QUERY_METERING_HISTORY`, ≤1 h), so attribution ≈ marginal. But no formula is published: a CI run's credits are observable ~1 h after it, not at once |
+| Snowflake | Serverless features: auto-clustering, MVs, dynamic tables, serverless tasks | LOW / NOT_VIABLE | Outside query attribution; the vendor's own estimators are ±50–100%; refresh work depends on the data |
+| Databricks | dbt SQL on a **dedicated serverless SQL warehouse** | MEDIUM | Task time is available in near real time (Query History API); billing is at warehouse × hour grain, so per-query $ is apportioned; negotiated prices are invisible |
+| Databricks | Serverless jobs / dbt tasks on job compute | MEDIUM | DBUs per `job_run_id` are native. Billing latency of up to 24 h makes the CI verdict depend on execution metrics, not DBUs. Performance mode changes DBUs |
+| Databricks | Classic job clusters | LOW–MEDIUM | DBUs per run exist, but VM, disk and network cost is billed by the cloud provider (a join via tags); spot, autoscaling and startup add noise |
+| Databricks | Shared all-purpose clusters | **NOT_VIABLE** | Docs: per-job cost cannot be exact; `run_as` is the cluster creator; many tenants |
+| Databricks | Non-SQL Spark (Python/Scala) | LOW | No `query.history` rows on classic compute; execution is the only estimator; attribution only through job-scoped compute |
+| BigQuery | Any query or dbt model under **on-demand** pricing | **HIGH** (already commodity) | Dry-run bytes ≈ the bill, with upper-bound caveats for clustered tables and scripts; `dbt-costgate` already does this |
+| BigQuery | Editions, autoscale-only reservation | MEDIUM | Slot-ms is noisy and billed as allocated 50-slot/60 s steps; replayable from `RESERVATIONS_TIMELINE` |
+| BigQuery | Editions with baseline / commitments shared across teams | LOW | Marginal $ is 0 until saturation, then a step; per-job $ does not exist |
+
+**Verdict on a common commercial product.**
+- A single product *can* span the HIGH and MEDIUM families on all three platforms with one engine:
+  change detection, workload mapping, the strategy policy, pool replay, uncertainty and calibration.
+  It needs three thin platform adapters (measurement, telemetry, billing).
+- The product's *reliable* region is small: dedicated or per-query-billed compute running scheduled
+  SQL. Everything shared, prepaid or non-SQL degrades to "usage delta plus an explicitly
+  policy-dependent $ range".
+- Databricks is the least favourable of the three for a synchronous CI verdict. Billing latency is
+  up to 24 h, the disk cache cannot be disabled, VM cost sits outside the Databricks bill, and
+  negotiated prices are invisible.

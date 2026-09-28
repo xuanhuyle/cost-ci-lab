@@ -48,6 +48,29 @@ Lab experiment IDs (E1–E8) refer to `RESULTS.md`; evidence IDs (E-0xx) refer t
 | 29 | Plan / optimizer drift | UNC | Snowflake Optima and BigQuery history-based optimisation: the first CI run is not steady state (`DOCUMENTED`) |
 | 30 | Telemetry latency | DET (design) | Read real-time execution metrics in CI; reconcile $ asynchronously (3–24 h) |
 
+## Lab evidence behind the classifications (`MEASURED (local engine)` unless stated)
+
+- **Consumers flip the verdict (row 20).** A dbt-DAG-only estimate, even on a full production
+  clone, reads s10 (table→view) as −4% when the truth is +152%, and s11 (view→table) as 0% when the
+  truth is −89%. Adding the BI consumers of the changed relations gives +143% and −92%.
+- **Static plans get signs wrong (rows 27, 11).**
+  - s14 (join pre-aggregation, truth −29%): the C_out estimate says +127%.
+  - s17 (window functions, truth +56% per run): static and bytes both say 0%. The change is
+    compute-bound and moves no bytes.
+- **Bytes ≠ compute (row 10).** s02 (pruning defeated): logical bytes +230%, engine time ≈ +4%.
+  A byte-priced platform would bill +230%; a time-billed one ≈ +4%.
+- **Samples get signs wrong (row 27).**
+  - s14: the key-consistent-sample two-point estimate says +21% (truth −29%).
+  - s01 (widened window): the 10% sample says +297% (truth +116%).
+  - s06 (super-linear join, truth +1,413%): the 1% key-consistent sample says +4%.
+- **Resource definition matters (rows 4, 28).** For the same model and change, the latency ratio
+  and the CPU-work ratio differ by up to ~3× (s01 `int_order_lines`: 2.45× vs 6.9×). Parallel
+  efficiency differs between MAIN and PR and changes with data size.
+- **Data-dependent no-op (row 18).** In s15, a filter removal that reads as "+33% rows" removes
+  nothing on this data; the truth is ≈0. Only execution reveals this.
+- **Cross-workload physical effects (row 23).** An unchanged downstream model's cost in the 10%
+  sample moved 0.19×–1× with identical logic after its upstream table's physical order changed (s08).
+
 ## Details and evidence
 
 The evidence for each row is in `RESULTS.md` (lab), `PLATFORM_FEASIBILITY.md` and the research notes

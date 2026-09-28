@@ -1,0 +1,1365 @@
+{
+ "scenario": {
+  "id": "s19_idle_capacity_absorbs",
+  "title": "Same KPI-view change as s18, on an always-on BI warehouse with spare capacity",
+  "category": "adversarial",
+  "description": "Runtime per query rises exactly as in s18, but the BI warehouse never suspends, so marginal spend is ~zero until capacity saturates.",
+  "overlay": {
+   "models/reports/rpt_daily_kpis.sql": "rpt_daily_kpis.sql"
+  },
+  "delete": [],
+  "context_overrides": {
+   "pools.bi_wh.auto_suspend_s": null
+  }
+ },
+ "changes": {
+  "changed_files": [],
+  "modified": [
+   "rpt_daily_kpis"
+  ],
+  "modified_by": {
+   "body": [
+    "rpt_daily_kpis"
+   ],
+   "configs": [],
+   "macros": [],
+   "relation": [],
+   "persisted_descriptions": [],
+   "contract": []
+  },
+  "modified_plus": [
+   "rpt_daily_kpis"
+  ],
+  "new_models": [],
+  "removed_models": [],
+  "consumers": [
+   "bi_kpi_tiles"
+  ]
+ },
+ "context": {
+  "run_date": "1998-08-02",
+  "time_scale": 100,
+  "data_scale": 100,
+  "jobs": [
+   {
+    "id": "revenue_hourly",
+    "models": [
+     "fct_daily_revenue"
+    ],
+    "runs_per_month": 720,
+    "pool": "transform_wh",
+    "start_minute": 5
+   },
+   {
+    "id": "monthly_ltv",
+    "tags": [
+     "monthly"
+    ],
+    "runs_per_month": 1,
+    "pool": "transform_wh",
+    "start_minute": 180
+   },
+   {
+    "id": "daily_build",
+    "default": true,
+    "runs_per_month": 30,
+    "pool": "transform_wh",
+    "start_minute": 120
+   }
+  ],
+  "consumers": [
+   {
+    "id": "bi_customer_lookup",
+    "sql": "select * from {{ ref('dim_customers') }} where customer_key = 4242",
+    "runs_per_month": 60000,
+    "pool": "bi_wh"
+   },
+   {
+    "id": "bi_segments_dashboard",
+    "sql": "select * from {{ ref('rpt_customer_segments') }} order by customer_count desc",
+    "runs_per_month": 9000,
+    "pool": "bi_wh"
+   },
+   {
+    "id": "bi_kpi_tiles",
+    "sql": "select * from {{ ref('rpt_daily_kpis') }} order by ship_date",
+    "runs_per_month": 30000,
+    "pool": "bi_wh"
+   },
+   {
+    "id": "bi_nation_trend",
+    "sql": "select nation_name, ship_month, sum(net_revenue) as net_revenue from {{ ref('mart_revenue_by_nation') }} group by 1, 2",
+    "runs_per_month": 3000,
+    "pool": "bi_wh"
+   }
+  ],
+  "pools": {
+   "transform_wh": {
+    "kind": "snowflake_warehouse",
+    "credits_per_hour": 4,
+    "price_per_credit": 3.0,
+    "auto_suspend_s": 60
+   },
+   "bi_wh": {
+    "kind": "snowflake_warehouse",
+    "credits_per_hour": 2,
+    "price_per_credit": 3.0,
+    "auto_suspend_s": null,
+    "max_clusters": 2,
+    "business_hours": [
+     8,
+     20
+    ]
+   }
+  }
+ },
+ "workloads": {
+  "main": [
+   {
+    "id": "model:rpt_daily_kpis",
+    "kind": "model",
+    "name": "rpt_daily_kpis",
+    "sql": "select\n    ship_date,\n    net_revenue,\n    returned_revenue,\n    line_count,\n    avg(net_revenue) over (order by ship_date rows between 6 preceding and current row) as net_revenue_7d_avg\nfrom \"lab\".\"prod\".\"fct_daily_revenue\"\nwhere ship_date > cast(\n\n    (cast('1998-08-02' as date) + cast(-30 as bigint) * interval 1 day) as date)",
+    "materialized": "view",
+    "unique_key": null,
+    "job": "daily_build",
+    "runs_per_month": 30,
+    "pool": "transform_wh"
+   },
+   {
+    "id": "consumer:bi_kpi_tiles",
+    "kind": "consumer",
+    "name": "bi_kpi_tiles",
+    "sql": "select * from \"lab\".\"ci_main\".\"rpt_daily_kpis\" order by ship_date",
+    "materialized": null,
+    "unique_key": null,
+    "job": null,
+    "runs_per_month": 30000,
+    "pool": "bi_wh"
+   }
+  ],
+  "pr": [
+   {
+    "id": "model:rpt_daily_kpis",
+    "kind": "model",
+    "name": "rpt_daily_kpis",
+    "sql": "select\n    cur.ship_date,\n    cur.net_revenue,\n    cur.returned_revenue,\n    cur.line_count,\n    avg(cur.net_revenue) over (order by cur.ship_date rows between 6 preceding and current row)  as net_revenue_7d_avg,\n    avg(cur.net_revenue) over (order by cur.ship_date rows between 27 preceding and current row) as net_revenue_28d_avg,\n    prev.net_revenue                                                                            as net_revenue_last_year\nfrom \"lab\".\"prod\".\"fct_daily_revenue\" cur\nleft join \"lab\".\"prod\".\"fct_daily_revenue\" prev\n  on prev.ship_date = cast(\n\n    (cur.ship_date + cast(-364 as bigint) * interval 1 day) as date)\nwhere cur.ship_date > cast(\n\n    (cast('1998-08-02' as date) + cast(-30 as bigint) * interval 1 day) as date)",
+    "materialized": "view",
+    "unique_key": null,
+    "job": "daily_build",
+    "runs_per_month": 30,
+    "pool": "transform_wh"
+   },
+   {
+    "id": "consumer:bi_kpi_tiles",
+    "kind": "consumer",
+    "name": "bi_kpi_tiles",
+    "sql": "select * from \"lab\".\"ci_pr\".\"rpt_daily_kpis\" order by ship_date",
+    "materialized": null,
+    "unique_key": null,
+    "job": null,
+    "runs_per_month": 30000,
+    "pool": "bi_wh"
+   }
+  ]
+ },
+ "timing": {
+  "prepare_s": 25.06330270000035,
+  "dbt_calls": [
+   [
+    "parse",
+    3.9922250999952666
+   ],
+   [
+    "ls",
+    1.74631140002748
+   ],
+   [
+    "ls",
+    1.7817744999774732
+   ],
+   [
+    "ls",
+    1.6776614999980666
+   ],
+   [
+    "ls",
+    1.8530890999827534
+   ],
+   [
+    "ls",
+    1.7114916000282392
+   ],
+   [
+    "ls",
+    1.631318200030364
+   ],
+   [
+    "ls",
+    2.041616900009103
+   ],
+   [
+    "ls",
+    1.6440747000160627
+   ],
+   [
+    "compile",
+    4.595927999995183
+   ],
+   [
+    "compile",
+    2.0745452999835834
+   ]
+  ],
+  "env_s": {
+   "prod": 0.9310699999914505,
+   "bern01": 0.6649639999959618,
+   "key01": 0.59338930004742,
+   "key10": 0.5528142999974079,
+   "recent90": 0.5780185000039637
+  }
+ },
+ "envs": {
+  "prod": {
+   "env": "prod",
+   "reps": 8,
+   "runs": {
+    "main": {
+     "model:rpt_daily_kpis": [
+      {
+       "latency_s": 0.0035552000044845045,
+       "cpu_s": 0.0,
+       "rows_scanned": 0,
+       "logical_bytes": 0.0,
+       "peak_mem_bytes": 0,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 0,
+       "wall_s": 0.0035552000044845045,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.0026496000355109572,
+       "cpu_s": 0.0,
+       "rows_scanned": 0,
+       "logical_bytes": 0.0,
+       "peak_mem_bytes": 0,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 0,
+       "wall_s": 0.0026496000355109572,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.002400800003670156,
+       "cpu_s": 0.0,
+       "rows_scanned": 0,
+       "logical_bytes": 0.0,
+       "peak_mem_bytes": 0,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 0,
+       "wall_s": 0.002400800003670156,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.005394800042267889,
+       "cpu_s": 0.0,
+       "rows_scanned": 0,
+       "logical_bytes": 0.0,
+       "peak_mem_bytes": 0,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 0,
+       "wall_s": 0.005394800042267889,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.002817500033415854,
+       "cpu_s": 0.0,
+       "rows_scanned": 0,
+       "logical_bytes": 0.0,
+       "peak_mem_bytes": 0,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 0,
+       "wall_s": 0.002817500033415854,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.00221360003342852,
+       "cpu_s": 0.0,
+       "rows_scanned": 0,
+       "logical_bytes": 0.0,
+       "peak_mem_bytes": 0,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 0,
+       "wall_s": 0.00221360003342852,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.002990800014231354,
+       "cpu_s": 0.0,
+       "rows_scanned": 0,
+       "logical_bytes": 0.0,
+       "peak_mem_bytes": 0,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 0,
+       "wall_s": 0.002990800014231354,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.003325300000142306,
+       "cpu_s": 0.0,
+       "rows_scanned": 0,
+       "logical_bytes": 0.0,
+       "peak_mem_bytes": 0,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 0,
+       "wall_s": 0.003325300000142306,
+       "statements": 1
+      }
+     ],
+     "consumer:bi_kpi_tiles": [
+      {
+       "latency_s": 0.0056775,
+       "cpu_s": 0.0007176,
+       "rows_scanned": 2405,
+       "logical_bytes": 115440.0,
+       "peak_mem_bytes": 49430784,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 30,
+       "wall_s": 0.0061144999926909804,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.0075957,
+       "cpu_s": 0.0011751,
+       "rows_scanned": 2405,
+       "logical_bytes": 115440.0,
+       "peak_mem_bytes": 49430784,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 30,
+       "wall_s": 0.007771999982651323,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.0047274,
+       "cpu_s": 0.0005262999999999999,
+       "rows_scanned": 2405,
+       "logical_bytes": 115440.0,
+       "peak_mem_bytes": 49520640,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 30,
+       "wall_s": 0.005156399973202497,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.004171,
+       "cpu_s": 0.000537,
+       "rows_scanned": 2405,
+       "logical_bytes": 115440.0,
+       "peak_mem_bytes": 49520640,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 30,
+       "wall_s": 0.004698199976701289,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.004991,
+       "cpu_s": 0.0005491000000000001,
+       "rows_scanned": 2405,
+       "logical_bytes": 115440.0,
+       "peak_mem_bytes": 49520640,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 30,
+       "wall_s": 0.0054852000321261585,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.0048359,
+       "cpu_s": 0.0006450000000000002,
+       "rows_scanned": 2405,
+       "logical_bytes": 115440.0,
+       "peak_mem_bytes": 49520640,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 30,
+       "wall_s": 0.005177700018975884,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.0034445,
+       "cpu_s": 0.00043919999999999994,
+       "rows_scanned": 2405,
+       "logical_bytes": 115440.0,
+       "peak_mem_bytes": 49520640,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 30,
+       "wall_s": 0.003911699983291328,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.0080665,
+       "cpu_s": 0.0011442,
+       "rows_scanned": 2405,
+       "logical_bytes": 115440.0,
+       "peak_mem_bytes": 49520640,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 30,
+       "wall_s": 0.009503699955530465,
+       "statements": 1
+      }
+     ]
+    },
+    "pr": {
+     "model:rpt_daily_kpis": [
+      {
+       "latency_s": 0.0033718000049702823,
+       "cpu_s": 0.0,
+       "rows_scanned": 0,
+       "logical_bytes": 0.0,
+       "peak_mem_bytes": 0,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 0,
+       "wall_s": 0.0033718000049702823,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.003491799987386912,
+       "cpu_s": 0.0,
+       "rows_scanned": 0,
+       "logical_bytes": 0.0,
+       "peak_mem_bytes": 0,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 0,
+       "wall_s": 0.003491799987386912,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.002783999952953309,
+       "cpu_s": 0.0,
+       "rows_scanned": 0,
+       "logical_bytes": 0.0,
+       "peak_mem_bytes": 0,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 0,
+       "wall_s": 0.002783999952953309,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.0031543999793939292,
+       "cpu_s": 0.0,
+       "rows_scanned": 0,
+       "logical_bytes": 0.0,
+       "peak_mem_bytes": 0,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 0,
+       "wall_s": 0.0031543999793939292,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.0028597000055015087,
+       "cpu_s": 0.0,
+       "rows_scanned": 0,
+       "logical_bytes": 0.0,
+       "peak_mem_bytes": 0,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 0,
+       "wall_s": 0.0028597000055015087,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.0029255999834276736,
+       "cpu_s": 0.0,
+       "rows_scanned": 0,
+       "logical_bytes": 0.0,
+       "peak_mem_bytes": 0,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 0,
+       "wall_s": 0.0029255999834276736,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.0028504999936558306,
+       "cpu_s": 0.0,
+       "rows_scanned": 0,
+       "logical_bytes": 0.0,
+       "peak_mem_bytes": 0,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 0,
+       "wall_s": 0.0028504999936558306,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.023115699994377792,
+       "cpu_s": 0.0,
+       "rows_scanned": 0,
+       "logical_bytes": 0.0,
+       "peak_mem_bytes": 0,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 0,
+       "wall_s": 0.023115699994377792,
+       "statements": 1
+      }
+     ],
+     "consumer:bi_kpi_tiles": [
+      {
+       "latency_s": 0.0093933,
+       "cpu_s": 0.0016356,
+       "rows_scanned": 4810,
+       "logical_bytes": 173160.0,
+       "peak_mem_bytes": 49430784,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 30,
+       "wall_s": 0.010138899961020797,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.0077909,
+       "cpu_s": 0.0012982,
+       "rows_scanned": 4810,
+       "logical_bytes": 173160.0,
+       "peak_mem_bytes": 49520640,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 30,
+       "wall_s": 0.00832799996715039,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.0066537,
+       "cpu_s": 0.0010298000000000002,
+       "rows_scanned": 4810,
+       "logical_bytes": 173160.0,
+       "peak_mem_bytes": 49520640,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 30,
+       "wall_s": 0.007148600008804351,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.0087626,
+       "cpu_s": 0.0015867000000000003,
+       "rows_scanned": 4810,
+       "logical_bytes": 173160.0,
+       "peak_mem_bytes": 49520640,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 30,
+       "wall_s": 0.009513100027106702,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.0076932,
+       "cpu_s": 0.001217,
+       "rows_scanned": 4810,
+       "logical_bytes": 173160.0,
+       "peak_mem_bytes": 49520640,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 30,
+       "wall_s": 0.008781999989878386,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.0084129,
+       "cpu_s": 0.0014358000000000003,
+       "rows_scanned": 4810,
+       "logical_bytes": 173160.0,
+       "peak_mem_bytes": 49520640,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 30,
+       "wall_s": 0.008942399988882244,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.0073818,
+       "cpu_s": 0.0013444000000000002,
+       "rows_scanned": 4810,
+       "logical_bytes": 173160.0,
+       "peak_mem_bytes": 49520640,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 30,
+       "wall_s": 0.008296399959363043,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.0130967,
+       "cpu_s": 0.0020478000000000002,
+       "rows_scanned": 4810,
+       "logical_bytes": 173160.0,
+       "peak_mem_bytes": 49520640,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 30,
+       "wall_s": 0.01450500002829358,
+       "statements": 1
+      }
+     ]
+    }
+   },
+   "explain": {
+    "main": {
+     "model:rpt_daily_kpis": [],
+     "consumer:bi_kpi_tiles": [
+      {
+       "op": "PROJECTION",
+       "ec": 0.0,
+       "table": null
+      },
+      {
+       "op": "ORDER_BY",
+       "ec": 0.0,
+       "table": null
+      },
+      {
+       "op": "PROJECTION",
+       "ec": 481.0,
+       "table": null
+      },
+      {
+       "op": "PROJECTION",
+       "ec": 481.0,
+       "table": null
+      },
+      {
+       "op": "WINDOW",
+       "ec": 0.0,
+       "table": null
+      },
+      {
+       "op": "SEQ_SCAN",
+       "ec": 481.0,
+       "table": "lab.prod.fct_daily_revenue"
+      }
+     ]
+    },
+    "pr": {
+     "model:rpt_daily_kpis": [],
+     "consumer:bi_kpi_tiles": [
+      {
+       "op": "PROJECTION",
+       "ec": 0.0,
+       "table": null
+      },
+      {
+       "op": "ORDER_BY",
+       "ec": 0.0,
+       "table": null
+      },
+      {
+       "op": "PROJECTION",
+       "ec": 2405.0,
+       "table": null
+      },
+      {
+       "op": "PROJECTION",
+       "ec": 2405.0,
+       "table": null
+      },
+      {
+       "op": "PROJECTION",
+       "ec": 2405.0,
+       "table": null
+      },
+      {
+       "op": "WINDOW",
+       "ec": 0.0,
+       "table": null
+      },
+      {
+       "op": "HASH_JOIN",
+       "ec": 2405.0,
+       "table": null
+      },
+      {
+       "op": "SEQ_SCAN",
+       "ec": 2405.0,
+       "table": "lab.prod.fct_daily_revenue"
+      },
+      {
+       "op": "SEQ_SCAN",
+       "ec": 481.0,
+       "table": "lab.prod.fct_daily_revenue"
+      }
+     ]
+    }
+   }
+  },
+  "bern01": {
+   "env": "bern01",
+   "reps": 3,
+   "runs": {
+    "main": {
+     "model:rpt_daily_kpis": [
+      {
+       "latency_s": 0.01733210001839325,
+       "cpu_s": 0.0,
+       "rows_scanned": 0,
+       "logical_bytes": 0.0,
+       "peak_mem_bytes": 0,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 0,
+       "wall_s": 0.01733210001839325,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.011807900038547814,
+       "cpu_s": 0.0,
+       "rows_scanned": 0,
+       "logical_bytes": 0.0,
+       "peak_mem_bytes": 0,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 0,
+       "wall_s": 0.011807900038547814,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.011031600006390363,
+       "cpu_s": 0.0,
+       "rows_scanned": 0,
+       "logical_bytes": 0.0,
+       "peak_mem_bytes": 0,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 0,
+       "wall_s": 0.011031600006390363,
+       "statements": 1
+      }
+     ],
+     "consumer:bi_kpi_tiles": [
+      {
+       "latency_s": 0.007727,
+       "cpu_s": 0.0008668,
+       "rows_scanned": 2401,
+       "logical_bytes": 115248.0,
+       "peak_mem_bytes": 13775104,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 30,
+       "wall_s": 0.00928080000448972,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.0066113,
+       "cpu_s": 0.0008052000000000001,
+       "rows_scanned": 2401,
+       "logical_bytes": 115248.0,
+       "peak_mem_bytes": 13775104,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 30,
+       "wall_s": 0.007405500044114888,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.0071051,
+       "cpu_s": 0.0008999000000000001,
+       "rows_scanned": 2401,
+       "logical_bytes": 115248.0,
+       "peak_mem_bytes": 13775104,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 30,
+       "wall_s": 0.008026199997402728,
+       "statements": 1
+      }
+     ]
+    },
+    "pr": {
+     "model:rpt_daily_kpis": [
+      {
+       "latency_s": 0.024450000026263297,
+       "cpu_s": 0.0,
+       "rows_scanned": 0,
+       "logical_bytes": 0.0,
+       "peak_mem_bytes": 0,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 0,
+       "wall_s": 0.024450000026263297,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.003826199972536415,
+       "cpu_s": 0.0,
+       "rows_scanned": 0,
+       "logical_bytes": 0.0,
+       "peak_mem_bytes": 0,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 0,
+       "wall_s": 0.003826199972536415,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.012251100037246943,
+       "cpu_s": 0.0,
+       "rows_scanned": 0,
+       "logical_bytes": 0.0,
+       "peak_mem_bytes": 0,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 0,
+       "wall_s": 0.012251100037246943,
+       "statements": 1
+      }
+     ],
+     "consumer:bi_kpi_tiles": [
+      {
+       "latency_s": 0.0154904,
+       "cpu_s": 0.0023076000000000004,
+       "rows_scanned": 4802,
+       "logical_bytes": 172872.0,
+       "peak_mem_bytes": 13775104,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 30,
+       "wall_s": 0.016440299979876727,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.0120868,
+       "cpu_s": 0.0020871,
+       "rows_scanned": 4802,
+       "logical_bytes": 172872.0,
+       "peak_mem_bytes": 13775104,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 30,
+       "wall_s": 0.013249000010546297,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.0140334,
+       "cpu_s": 0.0025705,
+       "rows_scanned": 4802,
+       "logical_bytes": 172872.0,
+       "peak_mem_bytes": 13775104,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 30,
+       "wall_s": 0.015086899977177382,
+       "statements": 1
+      }
+     ]
+    }
+   },
+   "explain": {}
+  },
+  "key01": {
+   "env": "key01",
+   "reps": 3,
+   "runs": {
+    "main": {
+     "model:rpt_daily_kpis": [
+      {
+       "latency_s": 0.02114850003272295,
+       "cpu_s": 0.0,
+       "rows_scanned": 0,
+       "logical_bytes": 0.0,
+       "peak_mem_bytes": 0,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 0,
+       "wall_s": 0.02114850003272295,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.0039898999966681,
+       "cpu_s": 0.0,
+       "rows_scanned": 0,
+       "logical_bytes": 0.0,
+       "peak_mem_bytes": 0,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 0,
+       "wall_s": 0.0039898999966681,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.003843699989374727,
+       "cpu_s": 0.0,
+       "rows_scanned": 0,
+       "logical_bytes": 0.0,
+       "peak_mem_bytes": 0,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 0,
+       "wall_s": 0.003843699989374727,
+       "statements": 1
+      }
+     ],
+     "consumer:bi_kpi_tiles": [
+      {
+       "latency_s": 0.0076392,
+       "cpu_s": 0.0011005,
+       "rows_scanned": 2405,
+       "logical_bytes": 115440.0,
+       "peak_mem_bytes": 13738240,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 30,
+       "wall_s": 0.008469099993817508,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.0064965,
+       "cpu_s": 0.0008431000000000002,
+       "rows_scanned": 2405,
+       "logical_bytes": 115440.0,
+       "peak_mem_bytes": 13738240,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 30,
+       "wall_s": 0.007414699997752905,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.0063107,
+       "cpu_s": 0.0008347000000000001,
+       "rows_scanned": 2405,
+       "logical_bytes": 115440.0,
+       "peak_mem_bytes": 13774848,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 30,
+       "wall_s": 0.007092499989084899,
+       "statements": 1
+      }
+     ]
+    },
+    "pr": {
+     "model:rpt_daily_kpis": [
+      {
+       "latency_s": 0.0062269000336527824,
+       "cpu_s": 0.0,
+       "rows_scanned": 0,
+       "logical_bytes": 0.0,
+       "peak_mem_bytes": 0,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 0,
+       "wall_s": 0.0062269000336527824,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.004491599975153804,
+       "cpu_s": 0.0,
+       "rows_scanned": 0,
+       "logical_bytes": 0.0,
+       "peak_mem_bytes": 0,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 0,
+       "wall_s": 0.004491599975153804,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.0038989000022411346,
+       "cpu_s": 0.0,
+       "rows_scanned": 0,
+       "logical_bytes": 0.0,
+       "peak_mem_bytes": 0,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 0,
+       "wall_s": 0.0038989000022411346,
+       "statements": 1
+      }
+     ],
+     "consumer:bi_kpi_tiles": [
+      {
+       "latency_s": 0.013887,
+       "cpu_s": 0.0021407999999999996,
+       "rows_scanned": 4810,
+       "logical_bytes": 173160.0,
+       "peak_mem_bytes": 13738240,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 30,
+       "wall_s": 0.014717300015036017,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.0121663,
+       "cpu_s": 0.0020218000000000002,
+       "rows_scanned": 4810,
+       "logical_bytes": 173160.0,
+       "peak_mem_bytes": 13762560,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 30,
+       "wall_s": 0.013214900041930377,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.0115032,
+       "cpu_s": 0.0018165000000000002,
+       "rows_scanned": 4810,
+       "logical_bytes": 173160.0,
+       "peak_mem_bytes": 13774848,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 30,
+       "wall_s": 0.012921600020490587,
+       "statements": 1
+      }
+     ]
+    }
+   },
+   "explain": {}
+  },
+  "key10": {
+   "env": "key10",
+   "reps": 3,
+   "runs": {
+    "main": {
+     "model:rpt_daily_kpis": [
+      {
+       "latency_s": 0.0036702000070363283,
+       "cpu_s": 0.0,
+       "rows_scanned": 0,
+       "logical_bytes": 0.0,
+       "peak_mem_bytes": 0,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 0,
+       "wall_s": 0.0036702000070363283,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.0021951000089757144,
+       "cpu_s": 0.0,
+       "rows_scanned": 0,
+       "logical_bytes": 0.0,
+       "peak_mem_bytes": 0,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 0,
+       "wall_s": 0.0021951000089757144,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.0033353999606333673,
+       "cpu_s": 0.0,
+       "rows_scanned": 0,
+       "logical_bytes": 0.0,
+       "peak_mem_bytes": 0,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 0,
+       "wall_s": 0.0033353999606333673,
+       "statements": 1
+      }
+     ],
+     "consumer:bi_kpi_tiles": [
+      {
+       "latency_s": 0.0072377,
+       "cpu_s": 0.0010723,
+       "rows_scanned": 2405,
+       "logical_bytes": 115440.0,
+       "peak_mem_bytes": 22143232,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 30,
+       "wall_s": 0.007907600025646389,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.004657,
+       "cpu_s": 0.0006565000000000001,
+       "rows_scanned": 2405,
+       "logical_bytes": 115440.0,
+       "peak_mem_bytes": 22143232,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 30,
+       "wall_s": 0.005100299953483045,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.0071506,
+       "cpu_s": 0.0009310999999999999,
+       "rows_scanned": 2405,
+       "logical_bytes": 115440.0,
+       "peak_mem_bytes": 22143232,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 30,
+       "wall_s": 0.007447300013154745,
+       "statements": 1
+      }
+     ]
+    },
+    "pr": {
+     "model:rpt_daily_kpis": [
+      {
+       "latency_s": 0.011388000042643398,
+       "cpu_s": 0.0,
+       "rows_scanned": 0,
+       "logical_bytes": 0.0,
+       "peak_mem_bytes": 0,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 0,
+       "wall_s": 0.011388000042643398,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.003910200030077249,
+       "cpu_s": 0.0,
+       "rows_scanned": 0,
+       "logical_bytes": 0.0,
+       "peak_mem_bytes": 0,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 0,
+       "wall_s": 0.003910200030077249,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.003101099980995059,
+       "cpu_s": 0.0,
+       "rows_scanned": 0,
+       "logical_bytes": 0.0,
+       "peak_mem_bytes": 0,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 0,
+       "wall_s": 0.003101099980995059,
+       "statements": 1
+      }
+     ],
+     "consumer:bi_kpi_tiles": [
+      {
+       "latency_s": 0.0120311,
+       "cpu_s": 0.0020007000000000002,
+       "rows_scanned": 4810,
+       "logical_bytes": 173160.0,
+       "peak_mem_bytes": 22143232,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 30,
+       "wall_s": 0.013045799976680428,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.0125633,
+       "cpu_s": 0.0020105999999999995,
+       "rows_scanned": 4810,
+       "logical_bytes": 173160.0,
+       "peak_mem_bytes": 22143232,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 30,
+       "wall_s": 0.013669700012542307,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.0090017,
+       "cpu_s": 0.0015595000000000001,
+       "rows_scanned": 4810,
+       "logical_bytes": 173160.0,
+       "peak_mem_bytes": 22143232,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 30,
+       "wall_s": 0.010186699975747615,
+       "statements": 1
+      }
+     ]
+    }
+   },
+   "explain": {}
+  },
+  "recent90": {
+   "env": "recent90",
+   "reps": 3,
+   "runs": {
+    "main": {
+     "model:rpt_daily_kpis": [
+      {
+       "latency_s": 0.0035038000205531716,
+       "cpu_s": 0.0,
+       "rows_scanned": 0,
+       "logical_bytes": 0.0,
+       "peak_mem_bytes": 0,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 0,
+       "wall_s": 0.0035038000205531716,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.0030311999726109207,
+       "cpu_s": 0.0,
+       "rows_scanned": 0,
+       "logical_bytes": 0.0,
+       "peak_mem_bytes": 0,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 0,
+       "wall_s": 0.0030311999726109207,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.0033981999731622636,
+       "cpu_s": 0.0,
+       "rows_scanned": 0,
+       "logical_bytes": 0.0,
+       "peak_mem_bytes": 0,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 0,
+       "wall_s": 0.0033981999731622636,
+       "statements": 1
+      }
+     ],
+     "consumer:bi_kpi_tiles": [
+      {
+       "latency_s": 0.0076098,
+       "cpu_s": 0.0012196,
+       "rows_scanned": 90,
+       "logical_bytes": 4320.0,
+       "peak_mem_bytes": 16425216,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 30,
+       "wall_s": 0.008464600017759949,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.0070986,
+       "cpu_s": 0.001054,
+       "rows_scanned": 90,
+       "logical_bytes": 4320.0,
+       "peak_mem_bytes": 16425216,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 30,
+       "wall_s": 0.007826099987141788,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.0074352,
+       "cpu_s": 0.0010551000000000002,
+       "rows_scanned": 90,
+       "logical_bytes": 4320.0,
+       "peak_mem_bytes": 16425216,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 30,
+       "wall_s": 0.00821689999429509,
+       "statements": 1
+      }
+     ]
+    },
+    "pr": {
+     "model:rpt_daily_kpis": [
+      {
+       "latency_s": 0.004683899984229356,
+       "cpu_s": 0.0,
+       "rows_scanned": 0,
+       "logical_bytes": 0.0,
+       "peak_mem_bytes": 0,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 0,
+       "wall_s": 0.004683899984229356,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.0039802000392228365,
+       "cpu_s": 0.0,
+       "rows_scanned": 0,
+       "logical_bytes": 0.0,
+       "peak_mem_bytes": 0,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 0,
+       "wall_s": 0.0039802000392228365,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.005168900010176003,
+       "cpu_s": 0.0,
+       "rows_scanned": 0,
+       "logical_bytes": 0.0,
+       "peak_mem_bytes": 0,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 0,
+       "wall_s": 0.005168900010176003,
+       "statements": 1
+      }
+     ],
+     "consumer:bi_kpi_tiles": [
+      {
+       "latency_s": 0.0113639,
+       "cpu_s": 0.0016308,
+       "rows_scanned": 90,
+       "logical_bytes": 4320.0,
+       "peak_mem_bytes": 16425216,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 30,
+       "wall_s": 0.012416900019161403,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.0119926,
+       "cpu_s": 0.0016213,
+       "rows_scanned": 90,
+       "logical_bytes": 4320.0,
+       "peak_mem_bytes": 16425216,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 30,
+       "wall_s": 0.012978599988855422,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.0124087,
+       "cpu_s": 0.0017588000000000003,
+       "rows_scanned": 90,
+       "logical_bytes": 4320.0,
+       "peak_mem_bytes": 16425216,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 30,
+       "wall_s": 0.01331959996605292,
+       "statements": 1
+      }
+     ]
+    }
+   },
+   "explain": {}
+  }
+ }
+}

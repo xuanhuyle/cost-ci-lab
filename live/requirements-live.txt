@@ -1,2 +1,3 @@
 snowflake-connector-python>=3.12
 dbt-snowflake>=1.9
+google-cloud-bigquery>=3.25

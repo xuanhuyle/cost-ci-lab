@@ -190,12 +190,14 @@ def analyse():
             per["hybrid"], path = hybrid(sd, wid, (sec_per_cout, sec_per_byte), ci_cost)
             path_counts[path] += 1
             one_run += m or p
-            m_ci, p_ci = (med(_vals(sd.runs("prod"), v, wid, CI_REP)) or 0.0 for v in ("main", "pr"))
+            # consumers re-measured as median-of-K executions per rep: charge all K executions
+            k_exec = 5 if (meta["kind"] == "consumer" and sd.rec.get("protocol", {}).get("consumers")) else 1
+            m_ci, p_ci = (k_exec * (med(_vals(sd.runs("prod"), v, wid, CI_REP)) or 0.0) for v in ("main", "pr"))
             for k in ("ab_full_abs", "ab_full_anchored"):
                 est_ci[k] += 2 * (m_ci + p_ci)            # warm-up + measured run, both variants
             est_ci["pr_vs_history"] += 2 * p_ci
             for env in ("bern01", "key01", "key10", "recent90"):
-                me, pe = (med(_vals(sd.runs(env), v, wid)) or 0.0 for v in ("main", "pr"))
+                me, pe = (k_exec * (med(_vals(sd.runs(env), v, wid)) or 0.0) for v in ("main", "pr"))
                 est_ci[f"ab_{env}"] += 4 * (me + pe)      # warm-up + 3 reps, both variants
             est_ci["ab_two_point"] = est_ci["ab_key01"] + est_ci["ab_key10"]
             for k in est_names:

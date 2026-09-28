@@ -1,0 +1,867 @@
+{
+ "scenario": {
+  "id": "s17_monthly_job_regression",
+  "title": "Add rolling windows, ranks and medians to the monthly LTV job",
+  "category": "regression",
+  "description": "Large per-run increase in an infrequent (monthly) job. Per-run and monthly materiality disagree.",
+  "overlay": {
+   "models/marts/customer_ltv_monthly.sql": "customer_ltv_monthly.sql"
+  },
+  "delete": [],
+  "context_overrides": {}
+ },
+ "changes": {
+  "changed_files": [],
+  "modified": [
+   "customer_ltv_monthly"
+  ],
+  "modified_by": {
+   "body": [
+    "customer_ltv_monthly"
+   ],
+   "configs": [],
+   "macros": [],
+   "relation": [],
+   "persisted_descriptions": [],
+   "contract": []
+  },
+  "modified_plus": [
+   "customer_ltv_monthly"
+  ],
+  "new_models": [],
+  "removed_models": [],
+  "consumers": []
+ },
+ "context": {
+  "run_date": "1998-08-02",
+  "time_scale": 100,
+  "data_scale": 100,
+  "jobs": [
+   {
+    "id": "revenue_hourly",
+    "models": [
+     "fct_daily_revenue"
+    ],
+    "runs_per_month": 720,
+    "pool": "transform_wh",
+    "start_minute": 5
+   },
+   {
+    "id": "monthly_ltv",
+    "tags": [
+     "monthly"
+    ],
+    "runs_per_month": 1,
+    "pool": "transform_wh",
+    "start_minute": 180
+   },
+   {
+    "id": "daily_build",
+    "default": true,
+    "runs_per_month": 30,
+    "pool": "transform_wh",
+    "start_minute": 120
+   }
+  ],
+  "consumers": [
+   {
+    "id": "bi_customer_lookup",
+    "sql": "select * from {{ ref('dim_customers') }} where customer_key = 4242",
+    "runs_per_month": 60000,
+    "pool": "bi_wh"
+   },
+   {
+    "id": "bi_segments_dashboard",
+    "sql": "select * from {{ ref('rpt_customer_segments') }} order by customer_count desc",
+    "runs_per_month": 9000,
+    "pool": "bi_wh"
+   },
+   {
+    "id": "bi_kpi_tiles",
+    "sql": "select * from {{ ref('rpt_daily_kpis') }} order by ship_date",
+    "runs_per_month": 30000,
+    "pool": "bi_wh"
+   },
+   {
+    "id": "bi_nation_trend",
+    "sql": "select nation_name, ship_month, sum(net_revenue) as net_revenue from {{ ref('mart_revenue_by_nation') }} group by 1, 2",
+    "runs_per_month": 3000,
+    "pool": "bi_wh"
+   }
+  ],
+  "pools": {
+   "transform_wh": {
+    "kind": "snowflake_warehouse",
+    "credits_per_hour": 4,
+    "price_per_credit": 3.0,
+    "auto_suspend_s": 60
+   },
+   "bi_wh": {
+    "kind": "snowflake_warehouse",
+    "credits_per_hour": 2,
+    "price_per_credit": 3.0,
+    "auto_suspend_s": 300,
+    "max_clusters": 2,
+    "business_hours": [
+     8,
+     20
+    ]
+   }
+  }
+ },
+ "workloads": {
+  "main": [
+   {
+    "id": "model:customer_ltv_monthly",
+    "kind": "model",
+    "name": "customer_ltv_monthly",
+    "sql": "\n\nwith lines as (\n    select\n        o.customer_key,\n        o.order_key,\n        o.order_date,\n        (l.extended_price * (1 - l.discount)) as revenue\n    from \"lab\".\"prod\".\"stg_orders\" o\n    join \"lab\".\"prod\".\"stg_lineitem\" l on l.order_key = o.order_key\n    where o.order_date <= cast('1998-08-02' as date)\n),\nmonthly as (\n    select\n        customer_key,\n        date_trunc('month', order_date) as order_month,\n        sum(revenue)              as revenue,\n        count(distinct order_key) as order_count\n    from lines\n    group by 1, 2\n)\nselect\n    customer_key,\n    order_month,\n    revenue,\n    order_count,\n    sum(revenue) over (partition by customer_key order by order_month\n                       rows between unbounded preceding and current row) as cumulative_revenue,\n    min(order_month) over (partition by customer_key)                     as cohort_month\nfrom monthly",
+    "materialized": "table",
+    "unique_key": null,
+    "job": "monthly_ltv",
+    "runs_per_month": 1,
+    "pool": "transform_wh"
+   }
+  ],
+  "pr": [
+   {
+    "id": "model:customer_ltv_monthly",
+    "kind": "model",
+    "name": "customer_ltv_monthly",
+    "sql": "\n\nwith lines as (\n    select\n        o.customer_key,\n        o.order_key,\n        o.order_date,\n        (l.extended_price * (1 - l.discount)) as revenue\n    from \"lab\".\"prod\".\"stg_orders\" o\n    join \"lab\".\"prod\".\"stg_lineitem\" l on l.order_key = o.order_key\n    where o.order_date <= cast('1998-08-02' as date)\n),\nmonthly as (\n    select\n        customer_key,\n        date_trunc('month', order_date) as order_month,\n        sum(revenue)              as revenue,\n        count(distinct order_key) as order_count\n    from lines\n    group by 1, 2\n)\nselect\n    customer_key,\n    order_month,\n    revenue,\n    order_count,\n    sum(revenue) over (partition by customer_key order by order_month\n                       rows between unbounded preceding and current row) as cumulative_revenue,\n    min(order_month) over (partition by customer_key)                     as cohort_month,\n    sum(revenue) over (partition by customer_key order by order_month\n                       rows between 2 preceding and current row)          as revenue_3m,\n    sum(revenue) over (partition by customer_key order by order_month\n                       rows between 11 preceding and current row)         as revenue_12m,\n    rank() over (partition by order_month order by revenue desc)          as monthly_rank,\n    ntile(10) over (partition by order_month order by revenue desc)       as monthly_decile,\n    median(revenue) over (partition by order_month)                       as monthly_median_revenue\nfrom monthly",
+    "materialized": "table",
+    "unique_key": null,
+    "job": "monthly_ltv",
+    "runs_per_month": 1,
+    "pool": "transform_wh"
+   }
+  ]
+ },
+ "timing": {
+  "prepare_s": 25.131193000008352,
+  "dbt_calls": [
+   [
+    "parse",
+    4.07884070003638
+   ],
+   [
+    "ls",
+    1.8148961000260897
+   ],
+   [
+    "ls",
+    1.6743264999822713
+   ],
+   [
+    "ls",
+    1.6626412999466993
+   ],
+   [
+    "ls",
+    1.7684594999882393
+   ],
+   [
+    "ls",
+    1.6910506999702193
+   ],
+   [
+    "ls",
+    1.8423641999834217
+   ],
+   [
+    "ls",
+    1.798915899998974
+   ],
+   [
+    "ls",
+    1.8083116000052541
+   ],
+   [
+    "compile",
+    4.561329299991485
+   ],
+   [
+    "compile",
+    2.1269683000282384
+   ]
+  ],
+  "env_s": {
+   "prod": 176.78623780002818,
+   "bern01": 1.3400366999558173,
+   "key01": 1.9353621999616735,
+   "key10": 8.941874700016342,
+   "recent90": 3.9995492000016384
+  }
+ },
+ "envs": {
+  "prod": {
+   "env": "prod",
+   "reps": 8,
+   "runs": {
+    "main": {
+     "model:customer_ltv_monthly": [
+      {
+       "latency_s": 7.4809808,
+       "cpu_s": 25.092656800000004,
+       "rows_scanned": 14997996,
+       "logical_bytes": 551919840.0,
+       "peak_mem_bytes": 2842738688,
+       "spill_bytes": 0,
+       "bytes_written": 47710208,
+       "rows_out": 1,
+       "wall_s": 7.4824324999935925,
+       "statements": 1
+      },
+      {
+       "latency_s": 7.3482125,
+       "cpu_s": 24.62455849999999,
+       "rows_scanned": 14997996,
+       "logical_bytes": 551919840.0,
+       "peak_mem_bytes": 2842738688,
+       "spill_bytes": 0,
+       "bytes_written": 47448064,
+       "rows_out": 1,
+       "wall_s": 7.349237299989909,
+       "statements": 1
+      },
+      {
+       "latency_s": 6.1016818,
+       "cpu_s": 20.49999619999994,
+       "rows_scanned": 14997996,
+       "logical_bytes": 551919840.0,
+       "peak_mem_bytes": 2847227904,
+       "spill_bytes": 0,
+       "bytes_written": 47185920,
+       "rows_out": 1,
+       "wall_s": 6.103736800025217,
+       "statements": 1
+      },
+      {
+       "latency_s": 7.9824716,
+       "cpu_s": 27.19958599999999,
+       "rows_scanned": 14997996,
+       "logical_bytes": 551919840.0,
+       "peak_mem_bytes": 2847227904,
+       "spill_bytes": 0,
+       "bytes_written": 47710208,
+       "rows_out": 1,
+       "wall_s": 7.983531700039748,
+       "statements": 1
+      },
+      {
+       "latency_s": 8.238975,
+       "cpu_s": 28.1196842,
+       "rows_scanned": 14997996,
+       "logical_bytes": 551919840.0,
+       "peak_mem_bytes": 2847227904,
+       "spill_bytes": 0,
+       "bytes_written": 46923776,
+       "rows_out": 1,
+       "wall_s": 8.24001710000448,
+       "statements": 1
+      },
+      {
+       "latency_s": 7.4001608,
+       "cpu_s": 26.171071499999996,
+       "rows_scanned": 14997996,
+       "logical_bytes": 551919840.0,
+       "peak_mem_bytes": 2847227904,
+       "spill_bytes": 0,
+       "bytes_written": 47185920,
+       "rows_out": 1,
+       "wall_s": 7.401045600010548,
+       "statements": 1
+      },
+      {
+       "latency_s": 8.251073,
+       "cpu_s": 27.962518399999976,
+       "rows_scanned": 14997996,
+       "logical_bytes": 551919840.0,
+       "peak_mem_bytes": 2847227904,
+       "spill_bytes": 0,
+       "bytes_written": 47185920,
+       "rows_out": 1,
+       "wall_s": 8.252816200023517,
+       "statements": 1
+      },
+      {
+       "latency_s": 7.4435394,
+       "cpu_s": 25.214682899999904,
+       "rows_scanned": 14997996,
+       "logical_bytes": 551919840.0,
+       "peak_mem_bytes": 2847227904,
+       "spill_bytes": 0,
+       "bytes_written": 47185920,
+       "rows_out": 1,
+       "wall_s": 7.443689400039148,
+       "statements": 1
+      }
+     ]
+    },
+    "pr": {
+     "model:customer_ltv_monthly": [
+      {
+       "latency_s": 11.81652,
+       "cpu_s": 41.58125779999999,
+       "rows_scanned": 14997996,
+       "logical_bytes": 551919840.0,
+       "peak_mem_bytes": 2839191552,
+       "spill_bytes": 0,
+       "bytes_written": 69730304,
+       "rows_out": 1,
+       "wall_s": 11.817934199993033,
+       "statements": 1
+      },
+      {
+       "latency_s": 11.7469065,
+       "cpu_s": 41.20093119999999,
+       "rows_scanned": 14997996,
+       "logical_bytes": 551919840.0,
+       "peak_mem_bytes": 2843623424,
+       "spill_bytes": 0,
+       "bytes_written": 69468160,
+       "rows_out": 1,
+       "wall_s": 11.748225199989974,
+       "statements": 1
+      },
+      {
+       "latency_s": 10.5794866,
+       "cpu_s": 37.043361200000014,
+       "rows_scanned": 14997996,
+       "logical_bytes": 551919840.0,
+       "peak_mem_bytes": 2843623424,
+       "spill_bytes": 0,
+       "bytes_written": 69992448,
+       "rows_out": 1,
+       "wall_s": 10.579903799982276,
+       "statements": 1
+      },
+      {
+       "latency_s": 12.2368723,
+       "cpu_s": 43.213170999999925,
+       "rows_scanned": 14997996,
+       "logical_bytes": 551919840.0,
+       "peak_mem_bytes": 2847227904,
+       "spill_bytes": 0,
+       "bytes_written": 69468160,
+       "rows_out": 1,
+       "wall_s": 12.238204799999949,
+       "statements": 1
+      },
+      {
+       "latency_s": 12.2969709,
+       "cpu_s": 43.6626569,
+       "rows_scanned": 14997996,
+       "logical_bytes": 551919840.0,
+       "peak_mem_bytes": 2847227904,
+       "spill_bytes": 0,
+       "bytes_written": 69206016,
+       "rows_out": 1,
+       "wall_s": 12.29750529996818,
+       "statements": 1
+      },
+      {
+       "latency_s": 13.1981324,
+       "cpu_s": 43.014144699999996,
+       "rows_scanned": 14997996,
+       "logical_bytes": 551919840.0,
+       "peak_mem_bytes": 2847227904,
+       "spill_bytes": 0,
+       "bytes_written": 69206016,
+       "rows_out": 1,
+       "wall_s": 13.199336900026537,
+       "statements": 1
+      },
+      {
+       "latency_s": 12.1877686,
+       "cpu_s": 43.00529679999998,
+       "rows_scanned": 14997996,
+       "logical_bytes": 551919840.0,
+       "peak_mem_bytes": 2847227904,
+       "spill_bytes": 0,
+       "bytes_written": 69206016,
+       "rows_out": 1,
+       "wall_s": 12.188842600036878,
+       "statements": 1
+      },
+      {
+       "latency_s": 11.8009866,
+       "cpu_s": 41.40133969999999,
+       "rows_scanned": 14997996,
+       "logical_bytes": 551919840.0,
+       "peak_mem_bytes": 2847227904,
+       "spill_bytes": 0,
+       "bytes_written": 69468160,
+       "rows_out": 1,
+       "wall_s": 11.802637599990703,
+       "statements": 1
+      }
+     ]
+    }
+   },
+   "explain": {
+    "main": {
+     "model:customer_ltv_monthly": [
+      {
+       "op": "PROJECTION",
+       "ec": 189057.0,
+       "table": null
+      },
+      {
+       "op": "WINDOW",
+       "ec": 0.0,
+       "table": null
+      },
+      {
+       "op": "PROJECTION",
+       "ec": 189057.0,
+       "table": null
+      },
+      {
+       "op": "HASH_GROUP_BY",
+       "ec": 189057.0,
+       "table": null
+      },
+      {
+       "op": "PROJECTION",
+       "ec": 1759295.0,
+       "table": null
+      },
+      {
+       "op": "PROJECTION",
+       "ec": 1759295.0,
+       "table": null
+      },
+      {
+       "op": "PROJECTION",
+       "ec": 1759295.0,
+       "table": null
+      },
+      {
+       "op": "HASH_JOIN",
+       "ec": 1759295.0,
+       "table": null
+      },
+      {
+       "op": "SEQ_SCAN",
+       "ec": 11997996.0,
+       "table": "lab.raw.lineitem"
+      },
+      {
+       "op": "SEQ_SCAN",
+       "ec": 600000.0,
+       "table": "lab.raw.orders"
+      }
+     ]
+    },
+    "pr": {
+     "model:customer_ltv_monthly": [
+      {
+       "op": "PROJECTION",
+       "ec": 189057.0,
+       "table": null
+      },
+      {
+       "op": "WINDOW",
+       "ec": 0.0,
+       "table": null
+      },
+      {
+       "op": "WINDOW",
+       "ec": 0.0,
+       "table": null
+      },
+      {
+       "op": "PROJECTION",
+       "ec": 189057.0,
+       "table": null
+      },
+      {
+       "op": "HASH_GROUP_BY",
+       "ec": 189057.0,
+       "table": null
+      },
+      {
+       "op": "PROJECTION",
+       "ec": 1759295.0,
+       "table": null
+      },
+      {
+       "op": "PROJECTION",
+       "ec": 1759295.0,
+       "table": null
+      },
+      {
+       "op": "PROJECTION",
+       "ec": 1759295.0,
+       "table": null
+      },
+      {
+       "op": "HASH_JOIN",
+       "ec": 1759295.0,
+       "table": null
+      },
+      {
+       "op": "SEQ_SCAN",
+       "ec": 11997996.0,
+       "table": "lab.raw.lineitem"
+      },
+      {
+       "op": "SEQ_SCAN",
+       "ec": 600000.0,
+       "table": "lab.raw.orders"
+      }
+     ]
+    }
+   }
+  },
+  "bern01": {
+   "env": "bern01",
+   "reps": 3,
+   "runs": {
+    "main": {
+     "model:customer_ltv_monthly": [
+      {
+       "latency_s": 0.073248,
+       "cpu_s": 0.10725959999999998,
+       "rows_scanned": 149500,
+       "logical_bytes": 5503104.0,
+       "peak_mem_bytes": 64634848,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 1,
+       "wall_s": 0.07464429998071864,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.0750901,
+       "cpu_s": 0.11307430000000003,
+       "rows_scanned": 149500,
+       "logical_bytes": 5503104.0,
+       "peak_mem_bytes": 64634848,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 1,
+       "wall_s": 0.07650839997222647,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.0665819,
+       "cpu_s": 0.1099358,
+       "rows_scanned": 149500,
+       "logical_bytes": 5503104.0,
+       "peak_mem_bytes": 65439872,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 1,
+       "wall_s": 0.06832169997505844,
+       "statements": 1
+      }
+     ]
+    },
+    "pr": {
+     "model:customer_ltv_monthly": [
+      {
+       "latency_s": 0.1248179,
+       "cpu_s": 0.2889498,
+       "rows_scanned": 149500,
+       "logical_bytes": 5503104.0,
+       "peak_mem_bytes": 64634848,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 1,
+       "wall_s": 0.1263506999821402,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.1281049,
+       "cpu_s": 0.29663549999999994,
+       "rows_scanned": 149500,
+       "logical_bytes": 5503104.0,
+       "peak_mem_bytes": 65181696,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 1,
+       "wall_s": 0.12939239997649565,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.1344298,
+       "cpu_s": 0.30242310000000006,
+       "rows_scanned": 149500,
+       "logical_bytes": 5503104.0,
+       "peak_mem_bytes": 65439872,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 1,
+       "wall_s": 0.13606720004463568,
+       "statements": 1
+      }
+     ]
+    }
+   },
+   "explain": {}
+  },
+  "key01": {
+   "env": "key01",
+   "reps": 3,
+   "runs": {
+    "main": {
+     "model:customer_ltv_monthly": [
+      {
+       "latency_s": 0.107665,
+       "cpu_s": 0.1425004,
+       "rows_scanned": 147220,
+       "logical_bytes": 5418432.0,
+       "peak_mem_bytes": 98115584,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 1,
+       "wall_s": 0.10861960001057014,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.1130529,
+       "cpu_s": 0.16874240000000001,
+       "rows_scanned": 147220,
+       "logical_bytes": 5418432.0,
+       "peak_mem_bytes": 98115584,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 1,
+       "wall_s": 0.11396139999851584,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.1423832,
+       "cpu_s": 0.1561441,
+       "rows_scanned": 147220,
+       "logical_bytes": 5418432.0,
+       "peak_mem_bytes": 98115584,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 1,
+       "wall_s": 0.14333320001605898,
+       "statements": 1
+      }
+     ]
+    },
+    "pr": {
+     "model:customer_ltv_monthly": [
+      {
+       "latency_s": 0.1948463,
+       "cpu_s": 0.40304169999999995,
+       "rows_scanned": 147220,
+       "logical_bytes": 5418432.0,
+       "peak_mem_bytes": 96563200,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 1,
+       "wall_s": 0.19527000002563,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.211601,
+       "cpu_s": 0.4253001,
+       "rows_scanned": 147220,
+       "logical_bytes": 5418432.0,
+       "peak_mem_bytes": 98115584,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 1,
+       "wall_s": 0.21170929999789223,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.2785895,
+       "cpu_s": 0.38822230000000024,
+       "rows_scanned": 147220,
+       "logical_bytes": 5418432.0,
+       "peak_mem_bytes": 98115584,
+       "spill_bytes": 0,
+       "bytes_written": 1576960,
+       "rows_out": 1,
+       "wall_s": 0.27982360002351925,
+       "statements": 1
+      }
+     ]
+    }
+   },
+   "explain": {}
+  },
+  "key10": {
+   "env": "key10",
+   "reps": 3,
+   "runs": {
+    "main": {
+     "model:customer_ltv_monthly": [
+      {
+       "latency_s": 0.769138,
+       "cpu_s": 1.7246467999999997,
+       "rows_scanned": 1499786,
+       "logical_bytes": 55193472.0,
+       "peak_mem_bytes": 345436160,
+       "spill_bytes": 0,
+       "bytes_written": 4718592,
+       "rows_out": 1,
+       "wall_s": 0.7708978999871761,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.7922038,
+       "cpu_s": 1.7872471,
+       "rows_scanned": 1499786,
+       "logical_bytes": 55193472.0,
+       "peak_mem_bytes": 345436160,
+       "spill_bytes": 0,
+       "bytes_written": 4718592,
+       "rows_out": 1,
+       "wall_s": 0.7936198000097647,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.8078263,
+       "cpu_s": 1.8043679999999966,
+       "rows_scanned": 1499786,
+       "logical_bytes": 55193472.0,
+       "peak_mem_bytes": 345436160,
+       "spill_bytes": 0,
+       "bytes_written": 4718592,
+       "rows_out": 1,
+       "wall_s": 0.8086697999970056,
+       "statements": 1
+      }
+     ]
+    },
+    "pr": {
+     "model:customer_ltv_monthly": [
+      {
+       "latency_s": 1.3405973,
+       "cpu_s": 3.0826542000000003,
+       "rows_scanned": 1499786,
+       "logical_bytes": 55193472.0,
+       "peak_mem_bytes": 344051712,
+       "spill_bytes": 0,
+       "bytes_written": 7602176,
+       "rows_out": 1,
+       "wall_s": 1.342078399960883,
+       "statements": 1
+      },
+      {
+       "latency_s": 1.3460735,
+       "cpu_s": 3.0965316000000005,
+       "rows_scanned": 1499786,
+       "logical_bytes": 55193472.0,
+       "peak_mem_bytes": 345436160,
+       "spill_bytes": 0,
+       "bytes_written": 7602176,
+       "rows_out": 1,
+       "wall_s": 1.3462940999888815,
+       "statements": 1
+      },
+      {
+       "latency_s": 1.4501751,
+       "cpu_s": 3.337433800000001,
+       "rows_scanned": 1499786,
+       "logical_bytes": 55193472.0,
+       "peak_mem_bytes": 345436160,
+       "spill_bytes": 0,
+       "bytes_written": 7602176,
+       "rows_out": 1,
+       "wall_s": 1.4523233999498188,
+       "statements": 1
+      }
+     ]
+    }
+   },
+   "explain": {}
+  },
+  "recent90": {
+   "env": "recent90",
+   "reps": 3,
+   "runs": {
+    "main": {
+     "model:customer_ltv_monthly": [
+      {
+       "latency_s": 0.4117996,
+       "cpu_s": 0.5914447,
+       "rows_scanned": 866923,
+       "logical_bytes": 32881320.0,
+       "peak_mem_bytes": 242024448,
+       "spill_bytes": 0,
+       "bytes_written": 4722688,
+       "rows_out": 1,
+       "wall_s": 0.4127005999907851,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.2349679,
+       "cpu_s": 0.6263835,
+       "rows_scanned": 866923,
+       "logical_bytes": 32881320.0,
+       "peak_mem_bytes": 242024448,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 1,
+       "wall_s": 0.2359217000193894,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.3285707,
+       "cpu_s": 0.5652153999999999,
+       "rows_scanned": 866923,
+       "logical_bytes": 32881320.0,
+       "peak_mem_bytes": 243539968,
+       "spill_bytes": 0,
+       "bytes_written": 4722688,
+       "rows_out": 1,
+       "wall_s": 0.3294918999890797,
+       "statements": 1
+      }
+     ]
+    },
+    "pr": {
+     "model:customer_ltv_monthly": [
+      {
+       "latency_s": 0.4853593,
+       "cpu_s": 1.1914926000000001,
+       "rows_scanned": 866923,
+       "logical_bytes": 32881320.0,
+       "peak_mem_bytes": 219013120,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 1,
+       "wall_s": 0.48602690000552684,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.4483671,
+       "cpu_s": 1.0081723999999999,
+       "rows_scanned": 866923,
+       "logical_bytes": 32881320.0,
+       "peak_mem_bytes": 242024448,
+       "spill_bytes": 0,
+       "bytes_written": 4722688,
+       "rows_out": 1,
+       "wall_s": 0.4488584999926388,
+       "statements": 1
+      },
+      {
+       "latency_s": 0.4864594,
+       "cpu_s": 1.3615496999999999,
+       "rows_scanned": 866923,
+       "logical_bytes": 32881320.0,
+       "peak_mem_bytes": 242024448,
+       "spill_bytes": 0,
+       "bytes_written": 0,
+       "rows_out": 1,
+       "wall_s": 0.4869901000056416,
+       "statements": 1
+      }
+     ]
+    }
+   },
+   "explain": {}
+  }
+ }
+}
