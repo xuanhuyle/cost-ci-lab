@@ -1,0 +1,26 @@
+name: shop
+version: "1.0"
+config-version: 2
+profile: costci_lab
+
+model-paths: ["models"]
+macro-paths: ["macros"]
+target-path: target
+clean-targets: [target]
+
+vars:
+  run_date: "1998-08-02"        # lab "today" (TPC-H order dates end 1998-08-02)
+  source_schema: raw
+  revenue_lookback_days: 3      # incremental reprocessing window for fct_daily_revenue
+  order_lines_window_days: 180  # analysis window for int_order_lines
+
+models:
+  shop:
+    staging:
+      +materialized: table
+    intermediate:
+      +materialized: table
+    marts:
+      +materialized: table
+    reports:
+      +materialized: view

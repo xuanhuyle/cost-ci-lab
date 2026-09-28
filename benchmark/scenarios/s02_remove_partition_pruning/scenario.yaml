@@ -1,0 +1,6 @@
+id: s02_remove_partition_pruning
+title: Compare ship_date as strings (same result, defeats pruning)
+category: regression
+description: Semantically equivalent filter, but wrapping the clustering column in a cast prevents zone-map / partition pruning. Magnitude depends on physical layout.
+overlay:
+  models/intermediate/int_order_lines.sql: int_order_lines.sql

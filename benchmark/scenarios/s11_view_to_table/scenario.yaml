@@ -1,0 +1,6 @@
+id: s11_view_to_table
+title: Materialise rpt_customer_segments as a table
+category: improvement
+description: Adds a small daily build, removes the aggregation from 9,000 dashboard queries per month. DAG-only estimators see only the added build.
+overlay:
+  models/reports/rpt_customer_segments.sql: rpt_customer_segments.sql

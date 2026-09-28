@@ -1,0 +1,6 @@
+id: s13_select_fewer_columns
+title: Drop the two free-text comment columns from int_order_lines
+category: improvement
+description: Stops carrying long strings. Large reduction in bytes read/written, smaller reduction in compute.
+overlay:
+  models/intermediate/int_order_lines.sql: int_order_lines.sql

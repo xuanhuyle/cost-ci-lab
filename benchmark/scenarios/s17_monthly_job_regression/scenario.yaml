@@ -1,0 +1,6 @@
+id: s17_monthly_job_regression
+title: Add rolling windows, ranks and medians to the monthly LTV job
+category: regression
+description: Large per-run increase in an infrequent (monthly) job. Per-run and monthly materiality disagree.
+overlay:
+  models/marts/customer_ltv_monthly.sql: customer_ltv_monthly.sql

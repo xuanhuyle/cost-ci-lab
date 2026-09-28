@@ -1,0 +1,6 @@
+id: s03_expand_incremental_window
+title: Reprocess 45 days instead of 3 on every incremental run
+category: regression
+description: Lookback widened in SQL to capture late-arriving returns. The hourly job reprocesses 15x more days.
+overlay:
+  models/marts/fct_daily_revenue.sql: fct_daily_revenue.sql

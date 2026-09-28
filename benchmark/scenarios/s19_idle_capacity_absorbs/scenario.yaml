@@ -1,0 +1,8 @@
+id: s19_idle_capacity_absorbs
+title: Same KPI-view change as s18, on an always-on BI warehouse with spare capacity
+category: adversarial
+description: Runtime per query rises exactly as in s18, but the BI warehouse never suspends, so marginal spend is ~zero until capacity saturates.
+overlay:
+  models/reports/rpt_daily_kpis.sql: rpt_daily_kpis.sql
+context_overrides:
+  pools.bi_wh.auto_suspend_s: null

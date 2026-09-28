@@ -1,0 +1,67 @@
+# Synthetic production context for the lab.
+# Every value here is ASSUMED (illustrative). It stands in for what a real deployment would read
+# from platform telemetry: job schedules (orchestrator / query history), BI consumers of each
+# relation (Snowflake ACCESS_HISTORY / BigQuery JOBS referenced_tables / Databricks lineage), and
+# the capacity pool each workload runs on.
+
+run_date: "1998-08-02"
+
+# Unit conversion from the lab to "production". The lab's prod environment is TPC-H SF2 on a
+# 4-thread engine. We ASSUME production data is ~100x larger and runtime scales ~linearly, so
+# 1 lab-second ~ 100 production warehouse-seconds and 1 lab logical byte ~ 100 production bytes.
+# Ratio/direction metrics do not depend on these; dollar magnitudes and minimum-billing effects do
+# (see sensitivity analysis in results).
+time_scale: 100
+data_scale: 100
+
+jobs:
+  - id: revenue_hourly
+    models: [fct_daily_revenue]
+    runs_per_month: 720
+    pool: transform_wh
+    start_minute: 5          # runs at hh:05
+  - id: monthly_ltv
+    tags: [monthly]
+    runs_per_month: 1
+    pool: transform_wh
+    start_minute: 180        # 03:00 on the 1st
+  - id: daily_build
+    default: true            # every model not claimed by another job
+    runs_per_month: 30
+    pool: transform_wh
+    start_minute: 120        # 02:00
+
+consumers:                   # non-dbt workloads reading dbt relations (BI dashboards, apps)
+  - id: bi_customer_lookup
+    sql: "select * from {{ ref('dim_customers') }} where customer_key = 4242"
+    runs_per_month: 60000
+    pool: bi_wh
+  - id: bi_segments_dashboard
+    sql: "select * from {{ ref('rpt_customer_segments') }} order by customer_count desc"
+    runs_per_month: 9000
+    pool: bi_wh
+  - id: bi_kpi_tiles
+    sql: "select * from {{ ref('rpt_daily_kpis') }} order by ship_date"
+    runs_per_month: 30000
+    pool: bi_wh
+  - id: bi_nation_trend
+    sql: "select nation_name, ship_month, sum(net_revenue) as net_revenue from {{ ref('mart_revenue_by_nation') }} group by 1, 2"
+    runs_per_month: 3000
+    pool: bi_wh
+
+# Capacity pools. Billing rules are implemented in costci/pools.py from documented vendor rules;
+# prices are list prices recorded in docs/PLATFORM_FEASIBILITY.md. Scenarios may override the
+# pool kind to test the same code change under different economics.
+pools:
+  transform_wh:
+    kind: snowflake_warehouse
+    credits_per_hour: 4       # Medium
+    price_per_credit: 3.0
+    auto_suspend_s: 60
+  bi_wh:
+    kind: snowflake_warehouse
+    credits_per_hour: 2       # Small
+    price_per_credit: 3.0
+    auto_suspend_s: 300
+    max_clusters: 2
+    business_hours: [8, 20]

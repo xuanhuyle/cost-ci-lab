@@ -1,0 +1,6 @@
+id: s18_frequent_cheap_view
+title: Add 28-day average and year-over-year join to the KPI view
+category: regression
+description: Each dashboard query is individually cheap, but the view is queried 30,000 times a month on the BI warehouse.
+overlay:
+  models/reports/rpt_daily_kpis.sql: rpt_daily_kpis.sql

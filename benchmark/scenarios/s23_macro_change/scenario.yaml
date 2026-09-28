@@ -1,0 +1,6 @@
+id: s23_macro_change
+title: Round and null-guard the shared net_revenue macro
+category: neutral
+description: One macro edit silently changes every model that uses it (and their descendants). Cheap arithmetic; tests multi-model attribution and false positives.
+overlay:
+  macros/net_revenue.sql: net_revenue.sql

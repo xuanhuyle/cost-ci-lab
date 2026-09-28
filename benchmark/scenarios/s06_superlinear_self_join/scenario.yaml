@@ -1,0 +1,6 @@
+id: s06_superlinear_self_join
+title: Self-join order lines on (ship_date, ship_mode) to count peer volume
+category: adversarial
+description: Join on a low-cardinality key. Output grows with the square of rows per group, so cost grows super-linearly with data volume - small samples understate it.
+overlay:
+  models/marts/mart_part_profitability.sql: mart_part_profitability.sql

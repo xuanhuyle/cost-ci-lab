@@ -1,0 +1,6 @@
+id: s01_widen_date_filter
+title: Widen int_order_lines analysis window from 180 to 730 days
+category: regression
+description: Hard-codes a 2-year window. More rows scanned, joined and materialised; downstream marts read a bigger table.
+overlay:
+  models/intermediate/int_order_lines.sql: int_order_lines.sql

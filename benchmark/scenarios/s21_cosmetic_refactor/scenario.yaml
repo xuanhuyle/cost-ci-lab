@@ -1,0 +1,6 @@
+id: s21_cosmetic_refactor
+title: Reformat customer_features, rename CTE, add comments
+category: neutral
+description: No semantic change. dbt flags the model (and its descendants) as modified because the raw SQL text changed. Tests false positives.
+overlay:
+  models/intermediate/customer_features.sql: customer_features.sql

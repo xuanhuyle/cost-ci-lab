@@ -1,0 +1,6 @@
+id: s09_repeated_scans
+title: Split customer_features into three separately-scanned CTEs
+category: regression
+description: 'A "readability" refactor that scans orders three times and adds two joins.'
+overlay:
+  models/intermediate/customer_features.sql: customer_features.sql

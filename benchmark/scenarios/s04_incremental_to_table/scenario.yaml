@@ -1,0 +1,6 @@
+id: s04_incremental_to_table
+title: Switch fct_daily_revenue from incremental to full table rebuild
+category: regression
+description: Removes incremental logic "to simplify"; every hourly run now rebuilds all history.
+overlay:
+  models/marts/fct_daily_revenue.sql: fct_daily_revenue.sql

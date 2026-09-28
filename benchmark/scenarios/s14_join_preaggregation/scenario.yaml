@@ -1,0 +1,6 @@
+id: s14_join_preaggregation
+title: Pre-aggregate line items per order before joining to orders
+category: improvement
+description: Classic join optimisation in the monthly LTV job; fewer rows through the join and the distinct count.
+overlay:
+  models/marts/customer_ltv_monthly.sql: customer_ltv_monthly.sql

@@ -1,0 +1,6 @@
+id: s22_sort_for_determinism
+title: Add a full ORDER BY to int_order_lines "for deterministic output"
+category: regression
+description: Memory-hungry sort of a wide table. Used for the concurrency sub-experiment (isolated CI run vs production under memory/CPU contention).
+overlay:
+  models/intermediate/int_order_lines.sql: int_order_lines.sql

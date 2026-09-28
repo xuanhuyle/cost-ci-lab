@@ -1,0 +1,6 @@
+id: s05_many_to_many_join
+title: Join part suppliers on part_key only (many-to-many fan-out)
+category: regression
+description: Adds average supplier cost by joining stg_partsupp on part_key alone; every order line fans out to all suppliers of the part.
+overlay:
+  models/marts/mart_part_profitability.sql: mart_part_profitability.sql

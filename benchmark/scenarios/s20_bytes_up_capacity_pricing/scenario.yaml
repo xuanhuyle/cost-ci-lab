@@ -1,0 +1,8 @@
+id: s20_bytes_up_capacity_pricing
+title: Carry six more columns through int_order_lines, on prepaid capacity
+category: adversarial
+description: More bytes read and written, little extra compute. Under on-demand byte pricing spend rises; under prepaid slot/credit capacity with headroom it barely moves.
+overlay:
+  models/intermediate/int_order_lines.sql: int_order_lines.sql
+context_overrides:
+  pools.transform_wh.kind: bigquery_editions

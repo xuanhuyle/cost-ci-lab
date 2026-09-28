@@ -1,0 +1,6 @@
+id: s08_expensive_window
+title: Add per-customer window functions (lag, running sum, percent_rank)
+category: regression
+description: Compute-bound change - sorts every order within customer. Bytes scanned unchanged, so byte-based estimators see nothing.
+overlay:
+  models/intermediate/customer_features.sql: customer_features.sql

@@ -1,0 +1,6 @@
+id: s07_unnecessary_distinct
+title: Add SELECT DISTINCT over a wide, already-unique row set
+category: regression
+description: Defensive DISTINCT across 16 columns including long comment strings. Same bytes scanned, extra hashing/memory.
+overlay:
+  models/intermediate/int_order_lines.sql: int_order_lines.sql

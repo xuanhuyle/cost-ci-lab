@@ -1,0 +1,13 @@
+version: 2
+sources:
+  - name: tpch
+    schema: "{{ var('source_schema') }}"
+    tables:
+      - name: lineitem
+      - name: orders
+      - name: customer
+      - name: part
+      - name: partsupp
+      - name: supplier
+      - name: nation
+      - name: region

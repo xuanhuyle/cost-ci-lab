@@ -1,0 +1,6 @@
+id: s10_table_to_view
+title: Materialise dim_customers as a view instead of a table
+category: adversarial
+description: Build cost disappears from the daily job, but every BI query and downstream model now recomputes the join. DAG-only estimators see a saving.
+overlay:
+  models/marts/dim_customers.sql: dim_customers.sql

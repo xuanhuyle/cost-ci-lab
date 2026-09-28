@@ -1,0 +1,6 @@
+id: s15_include_returns
+title: Stop excluding returned items from int_order_lines
+category: regression
+description: Direct model cost barely changes (same scan), but it emits ~1/3 more rows, so unchanged downstream marts get more expensive. Tests downstream propagation.
+overlay:
+  models/intermediate/int_order_lines.sql: int_order_lines.sql

@@ -1,0 +1,6 @@
+id: s16_new_model
+title: Add a new daily churn mart
+category: regression
+description: Pure addition - there is no MAIN baseline, so ratio-based estimators cannot be anchored.
+overlay:
+  models/marts/mart_customer_churn.sql: mart_customer_churn.sql

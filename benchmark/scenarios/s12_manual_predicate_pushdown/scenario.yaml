@@ -1,0 +1,6 @@
+id: s12_manual_predicate_pushdown
+title: Move the recent-months filter from HAVING into WHERE
+category: ambiguous
+description: Hand-written predicate pushdown. Whether it saves anything depends on whether the optimiser already pushed the HAVING filter down.
+overlay:
+  models/marts/mart_revenue_by_nation.sql: mart_revenue_by_nation.sql

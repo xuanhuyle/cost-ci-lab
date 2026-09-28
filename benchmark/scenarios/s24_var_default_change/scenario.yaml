@@ -1,0 +1,6 @@
+id: s24_var_default_change
+title: Change the revenue_lookback_days var default from 3 to 45 in dbt_project.yml
+category: adversarial
+description: Same production effect as s03, but the change lives in project config, not in the model file. Tests whether change detection sees it.
+overlay:
+  dbt_project.yml: dbt_project.yml
