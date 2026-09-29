@@ -1,0 +1,653 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cost CI Verdict</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+<style>
+  :root {
+    --bg: #F4F6F9;
+    --surface: #FFFFFF;
+    --surface-2: #EEF1F5;
+    --ink: #12161D;
+    --ink-2: #475061;
+    --muted: #626B7C;
+    --rule: #D9DEE6;
+    --rule-strong: #C2C9D4;
+    --accent: #2451B7;
+    --accent-ink: #1C3F90;
+    --accent-tint: #E6ECFA;
+    --code-bg: #EEF1F6;
+    --good: #1B6E3E;   --good-tint: #E3F3E9;
+    --warn: #7A5000;   --warn-tint: #FBF0DA;
+    --low: #9C3F1A;    --low-tint: #FBE9E1;
+    --bad: #931D22;    --bad-tint: #F9E3E4;
+    --bar-accent: #2451B7;
+    --bar-muted: #8A93A4;
+    --threshold: #475061;
+    --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+    --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --bg: #0D1015;
+      --surface: #141922;
+      --surface-2: #1A202B;
+      --ink: #E6E9EF;
+      --ink-2: #B3BBC8;
+      --muted: #8E97A7;
+      --rule: #273041;
+      --rule-strong: #364154;
+      --accent: #88A6F4;
+      --accent-ink: #B9CBFA;
+      --accent-tint: #1B2640;
+      --code-bg: #1A202B;
+      --good: #5BC98A;   --good-tint: #13291D;
+      --warn: #E0B14E;   --warn-tint: #2B2212;
+      --low: #EE8E61;    --low-tint: #2E1A12;
+      --bad: #F07C82;    --bad-tint: #311417;
+      --bar-accent: #7F9FF3;
+      --bar-muted: #6E788B;
+      --threshold: #B3BBC8;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #0D1015;
+    --surface: #141922;
+    --surface-2: #1A202B;
+    --ink: #E6E9EF;
+    --ink-2: #B3BBC8;
+    --muted: #8E97A7;
+    --rule: #273041;
+    --rule-strong: #364154;
+    --accent: #88A6F4;
+    --accent-ink: #B9CBFA;
+    --accent-tint: #1B2640;
+    --code-bg: #1A202B;
+    --good: #5BC98A;   --good-tint: #13291D;
+    --warn: #E0B14E;   --warn-tint: #2B2212;
+    --low: #EE8E61;    --low-tint: #2E1A12;
+    --bad: #F07C82;    --bad-tint: #311417;
+    --bar-accent: #7F9FF3;
+    --bar-muted: #6E788B;
+    --threshold: #B3BBC8;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--serif);
+    font-size: 17px;
+    line-height: 1.6;
+    padding-inline: 20px;
+  }
+  .page { max-width: 880px; margin: 0 auto; padding-block: 48px 72px; }
+  h1, h2, h3, .sans { font-family: var(--sans); }
+  h1, h2, h3 { text-wrap: balance; color: var(--ink); }
+  h1 { font-size: 40px; line-height: 1.12; font-weight: 600; letter-spacing: -0.01em; margin: 10px 0 18px; }
+  h2 { font-size: 26px; line-height: 1.25; font-weight: 600; margin: 0 0 14px; }
+  h3 { font-size: 19px; line-height: 1.35; font-weight: 600; margin: 0 0 10px; }
+  p, li { max-width: 68ch; }
+  p { margin: 0 0 14px; }
+  ul, ol { margin: 0 0 14px; padding-left: 22px; }
+  li { margin-bottom: 6px; }
+  strong { font-weight: 600; }
+  a { color: var(--accent); text-underline-offset: 2px; }
+  a:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  code, .mono { font-family: var(--mono); font-size: 0.86em; }
+  code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; }
+
+  .eyebrow {
+    font-family: var(--mono); font-size: 12.5px; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--muted);
+  }
+  .question {
+    font-size: 21px; line-height: 1.5; color: var(--ink-2); font-style: italic;
+    border-left: 3px solid var(--rule-strong); padding-left: 16px; margin: 0 0 28px; max-width: 60ch;
+  }
+
+  section { padding-block: 36px 8px; border-top: 1px solid var(--rule); }
+  section.first { border-top: 0; padding-top: 8px; }
+
+  /* verdict scale: the brief's four outcomes */
+  .scale { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin: 0 0 18px; }
+  .option {
+    font-family: var(--sans); background: var(--surface); border: 1px solid var(--rule);
+    border-radius: 6px; padding: 12px 14px; display: flex; flex-direction: column; gap: 4px; color: var(--muted);
+  }
+  .option .letter { font-family: var(--mono); font-size: 13px; }
+  .option .name { font-size: 15px; font-weight: 500; line-height: 1.3; }
+  .option.is-verdict {
+    background: var(--accent-tint); border-color: var(--accent);
+    box-shadow: inset 0 0 0 1px var(--accent); color: var(--accent-ink);
+  }
+  .option.is-verdict .name { font-weight: 600; }
+  .option .tag {
+    align-self: flex-start; margin-top: 4px; font-size: 11px; font-weight: 600; letter-spacing: 0.06em;
+    text-transform: uppercase; color: var(--accent-ink);
+  }
+  .answer { font-size: 20px; line-height: 1.5; margin: 0 0 24px; max-width: 62ch; }
+
+  .glance { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 0 0 20px; }
+  .tile {
+    background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; padding: 16px;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .tile .value { font-family: var(--sans); font-size: 30px; line-height: 1.1; font-weight: 600; color: var(--ink); }
+  .tile .label { font-family: var(--sans); font-size: 13.5px; line-height: 1.45; color: var(--muted); }
+  .basis { font-family: var(--sans); font-size: 14px; line-height: 1.55; color: var(--ink-2); max-width: 78ch; }
+
+  .toc { display: flex; flex-wrap: wrap; gap: 6px 14px; font-family: var(--sans); font-size: 14px; margin: 22px 0 0; padding: 0; list-style: none; }
+  .toc li { margin: 0; }
+
+  /* works / fails */
+  .split { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px; margin-bottom: 8px; }
+  .split h3 { display: flex; align-items: center; gap: 10px; }
+
+  .chip {
+    display: inline-block; font-family: var(--sans); font-size: 11.5px; font-weight: 600; line-height: 1.6;
+    letter-spacing: 0.05em; text-transform: uppercase; padding: 1px 8px; border-radius: 999px; white-space: nowrap;
+  }
+  .chip.good { color: var(--good); background: var(--good-tint); }
+  .chip.warn { color: var(--warn); background: var(--warn-tint); }
+  .chip.low  { color: var(--low);  background: var(--low-tint); }
+  .chip.bad  { color: var(--bad);  background: var(--bad-tint); }
+  .chip.accent { color: var(--accent-ink); background: var(--accent-tint); }
+
+  /* tables */
+  .table-wrap { overflow-x: auto; margin: 0 0 18px; }
+  table { width: 100%; border-collapse: collapse; font-family: var(--sans); font-size: 14.5px; line-height: 1.5; }
+  th { text-align: left; font-weight: 600; color: var(--ink-2); border-bottom: 1px solid var(--rule-strong); padding: 8px 10px; vertical-align: bottom; }
+  td { border-bottom: 1px solid var(--rule); padding: 10px; vertical-align: top; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  td.nowrap { white-space: nowrap; }
+
+  /* trade-off chart: one row per strategy, two measures on separate scales */
+  .tradeoff { margin: 0 0 12px; background: var(--surface); border: 1px solid var(--rule); border-radius: 8px; padding: 18px 18px 10px; position: relative; }
+  .tradeoff figcaption { font-family: var(--sans); margin-bottom: 12px; }
+  .tradeoff figcaption .t { font-size: 17px; font-weight: 600; color: var(--ink); }
+  .tradeoff figcaption .s { font-size: 14px; color: var(--muted); line-height: 1.5; max-width: 80ch; margin-top: 4px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 18px; font-family: var(--sans); font-size: 13px; color: var(--ink-2); margin: 10px 0 8px; }
+  .legend span { display: inline-flex; align-items: center; gap: 7px; }
+  .sw { width: 14px; height: 10px; border-radius: 0 3px 3px 0; display: inline-block; }
+  .sw.prod { background: var(--bar-accent); }
+  .sw.other { background: var(--bar-muted); }
+  .sw.line { width: 1px; height: 14px; border-radius: 0; background: var(--threshold); }
+
+  .tt { font-family: var(--sans); }
+  .tt-head, .tt-row {
+    display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.35fr) minmax(0, 1.1fr) 76px;
+    gap: 16px; align-items: center;
+  }
+  .tt-head { font-size: 12.5px; font-weight: 600; color: var(--ink-2); padding: 6px 6px 8px; }
+  .tt-head .num { text-align: right; }
+  .tt-head .acc { position: relative; }
+  .tt-row { padding: 8px 6px; border-top: 1px solid var(--rule); border-radius: 4px; }
+  .tt-row:hover, .tt-row:focus-visible, .tt-row.is-active { background: var(--surface-2); }
+  .tt-row .name { font-size: 14.5px; color: var(--ink); line-height: 1.35; }
+  .tt-row .errs { text-align: right; font-size: 14px; color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .mcap { display: none; font-size: 12px; color: var(--muted); }
+  .track { position: relative; display: flex; align-items: center; gap: 8px; height: 22px; }
+  .track::before { content: ""; position: absolute; left: 0; top: -8px; bottom: -8px; width: 1px; background: var(--rule-strong); }
+  .bar { height: 14px; border-radius: 0 4px 4px 0; background: var(--bar-muted); width: calc((100% - 58px) * var(--v)); flex: none; }
+  .tt-row.is-prod .bar { background: var(--bar-accent); }
+  .val { font-size: 13.5px; color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .val.quiet { color: var(--muted); }
+  .threshold { position: absolute; top: -8px; bottom: -8px; width: 1px; background: var(--threshold); left: calc((100% - 58px) * 0.9); }
+  .tt-head .tlabel { position: absolute; bottom: -2px; left: calc((100% - 58px) * 0.9); transform: translateX(-50%); font-weight: 500; color: var(--ink-2); font-size: 11.5px; white-space: nowrap; }
+  .tt-note { font-family: var(--sans); font-size: 13px; color: var(--muted); margin: 10px 6px 4px; max-width: 90ch; }
+
+  .tip {
+    position: absolute; z-index: 5; pointer-events: none; max-width: 300px;
+    background: var(--surface); border: 1px solid var(--rule-strong); border-radius: 6px;
+    box-shadow: 0 6px 20px rgba(10, 14, 20, 0.14); padding: 10px 12px; font-family: var(--sans);
+  }
+  .tip .v { font-size: 14px; font-weight: 600; color: var(--ink); font-variant-numeric: tabular-nums; }
+  .tip .n { font-size: 13px; color: var(--ink-2); margin-top: 2px; }
+  .tip .d { font-size: 12.5px; color: var(--muted); margin-top: 6px; line-height: 1.45; }
+
+  /* formula and PR mock */
+  .formula {
+    font-family: var(--mono); font-size: 14.5px; line-height: 1.6; background: var(--code-bg);
+    border-radius: 6px; padding: 14px 16px; margin: 0 0 16px; overflow-x: auto; white-space: pre; color: var(--ink);
+  }
+  .pr-mock { border: 1px solid var(--rule-strong); border-radius: 8px; background: var(--surface); margin: 6px 0 18px; overflow: hidden; }
+  .pr-mock .bar-top {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 10px 14px;
+    background: var(--surface-2); border-bottom: 1px solid var(--rule); font-family: var(--sans); font-size: 13.5px; color: var(--ink-2);
+  }
+  .pr-mock .bar-top b { color: var(--ink); font-weight: 600; }
+  .pr-mock pre { margin: 0; padding: 14px 16px; font-family: var(--mono); font-size: 13px; line-height: 1.65; color: var(--ink); overflow-x: auto; }
+  .illus { font-family: var(--sans); font-size: 13px; color: var(--muted); margin: -8px 0 18px; }
+
+  .gostop { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 4px 0 16px; }
+  .gostop > div { background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; padding: 14px 16px; }
+  .gostop h4 { font-family: var(--sans); font-size: 14px; font-weight: 600; margin: 0 0 8px; display: flex; gap: 8px; align-items: center; }
+  .gostop ul { font-family: var(--sans); font-size: 14.5px; line-height: 1.5; margin: 0; }
+
+  footer { border-top: 1px solid var(--rule); margin-top: 36px; padding-top: 18px; font-family: var(--sans); font-size: 13.5px; line-height: 1.6; color: var(--muted); }
+  footer p { max-width: 90ch; }
+
+  @media (max-width: 720px) {
+    body { font-size: 16.5px; padding-inline: 16px; }
+    .page { padding-block: 32px 56px; }
+    h1 { font-size: 31px; }
+    h2 { font-size: 23px; }
+    .scale { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .glance, .split, .gostop { grid-template-columns: 1fr; }
+    .answer { font-size: 18.5px; }
+    .tt-head { display: none; }
+    .tt-row { grid-template-columns: 1fr 1fr; grid-template-areas: "name errs" "acc acc" "cost cost"; gap: 6px 12px; padding: 12px 4px; }
+    .tt-row .name { grid-area: name; }
+    .tt-row .errs { grid-area: errs; }
+    .tt-row .acc { grid-area: acc; }
+    .tt-row .cost { grid-area: cost; }
+    .mcap { display: block; margin-bottom: 2px; }
+    .track::before, .threshold { top: -2px; bottom: -2px; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; transition: none !important; } }
+</style>
+
+<main class="page">
+  <header id="verdict">
+    <div class="eyebrow">Technical due diligence · 28 September 2026</div>
+    <h1>Cost CI technical verdict</h1>
+    <p class="question">Can we build a pre-merge cost-diff engine whose estimates are reliable enough to influence engineering merge decisions?</p>
+
+    <div class="scale" role="list" aria-label="Possible outcomes defined in the brief; outcome B was selected">
+      <div class="option" role="listitem"><span class="letter">A</span><span class="name">Strong technical primitive</span></div>
+      <div class="option is-verdict" role="listitem" aria-current="true"><span class="letter">B</span><span class="name">Useful but narrow</span><span class="tag">Verdict</span></div>
+      <div class="option" role="listitem"><span class="letter">C</span><span class="name">Integration product</span></div>
+      <div class="option" role="listitem"><span class="letter">D</span><span class="name">Fundamentally unreliable</span></div>
+    </div>
+
+    <p class="answer">Yes, as a measurement-and-replay system for a narrow class of workloads. It cannot be built as a cheap predictor. Reliable numbers came only from running the changed models at production scale and replaying the warehouse bill.</p>
+
+    <div class="glance">
+      <div class="tile"><span class="value">100%</span><span class="label">Direction accuracy on the 16 material changes, full-clone A/B (lab)</span></div>
+      <div class="tile"><span class="value">2.5–4.6×</span><span class="label">Production runs of the affected models spent per CI analysis</span></div>
+      <div class="tile"><span class="value">40–70</span><span class="label">Runs per month a model needs before the check pays for itself</span></div>
+    </div>
+
+    <p class="basis"><strong>Evidence base.</strong> About 300 primary vendor sources, and a local lab: DuckDB with real dbt on TPC-H, 26 adversarial pull requests and 10 experiments. No live Snowflake, Databricks or BigQuery run was possible, so every platform-specific accuracy figure is inferred from the lab.</p>
+
+    <ul class="toc" aria-label="On this page">
+      <li><a href="#works">What works</a></li>
+      <li><a href="#tradeoff">Accuracy vs CI cost</a></li>
+      <li><a href="#why-b">Why B</a></li>
+      <li><a href="#q1">Buildable?</a></li>
+      <li><a href="#q2">Which workloads</a></li>
+      <li><a href="#q3">Accuracy</a></li>
+      <li><a href="#q4">Unpredictable</a></li>
+      <li><a href="#q5">Uncertainty</a></li>
+      <li><a href="#q6">Abstraction</a></li>
+      <li><a href="#q7">Hard vs commodity</a></li>
+      <li><a href="#q8">Narrowest V1</a></li>
+      <li><a href="#q9">Missing evidence</a></li>
+      <li><a href="#q10">Next step</a></li>
+    </ul>
+  </header>
+
+  <section id="works">
+    <h2>What works and what fails</h2>
+    <div class="split">
+      <div>
+        <h3><span class="chip good">Works</span> Run it at production scale</h3>
+        <ul>
+          <li>Run MAIN and PR on a zero-copy clone of production data, or run only the PR and compare it with the model's own production history.</li>
+          <li>Replay the capacity pool's billing over a month.</li>
+          <li>In the lab the full-clone A/B got the direction of every material change right and caught every large regression. Its median magnitude error was about 10%, and 96% of its estimates landed within one magnitude bucket.</li>
+          <li>The PR-only variant costs about half as much: 94% direction accuracy, one miss.</li>
+        </ul>
+      </div>
+      <div>
+        <h3><span class="chip bad">Fails</span> Estimate without running</h3>
+        <ul>
+          <li>Static query plans.</li>
+          <li>Dry-run-style byte counts.</li>
+          <li>Four ways of sampling the data.</li>
+          <li>Extrapolating from two sample sizes.</li>
+          <li>Each made wrong-sign or missed-material errors on realistic PRs. Learning a correction from past PRs made the sample-based methods worse.</li>
+        </ul>
+      </div>
+    </div>
+    <h3>Consequences</h3>
+    <ul>
+      <li><strong>CI cost.</strong> A reliable check costs 2.5–4.6 production runs of the affected workloads per analysis. It pays off only for models that run more than about 40–70 times a month.</li>
+      <li><strong>CI conditions.</strong> CI has to run on the production warehouse size. A smaller CI engine overstated changes by up to 136% and flipped one sign.</li>
+      <li><strong>Dollars.</strong> The dollar figure is unambiguous only on dedicated or per-query-billed compute. On shared or prepaid capacity, the marginal dollar depends on a pricing policy and can have the opposite sign to the attributed dollar.</li>
+    </ul>
+  </section>
+
+  <section id="tradeoff">
+    <h2>Accuracy costs production compute</h2>
+    <figure class="tradeoff" id="tradeoff-fig">
+      <figcaption>
+        <div class="t">Ten ways to estimate a PR's cost impact, measured on 26 pull requests</div>
+        <div class="s">Direction accuracy on the 16 material changes, CI cost in production-run equivalents (median per analysis), and how many of the 16 material changes each strategy got wrong or missed. Lab measurement on DuckDB with real dbt, not a live warehouse.</div>
+      </figcaption>
+      <div class="legend" aria-hidden="true">
+        <span><i class="sw prod"></i>Production-scale execution</span>
+        <span><i class="sw other"></i>Other strategies</span>
+        <span><i class="sw line"></i>90% direction bar</span>
+      </div>
+      <div class="tt" role="table" aria-label="Estimation strategies: direction accuracy, CI cost and errors">
+        <div class="tt-head" role="row">
+          <span role="columnheader">Strategy</span>
+          <span class="acc" role="columnheader">Direction accuracy<span class="tlabel" aria-hidden="true">90%</span></span>
+          <span role="columnheader">CI cost per analysis</span>
+          <span class="num" role="columnheader">Wrong or missed</span>
+        </div>
+        <div id="tt-rows" role="rowgroup"></div>
+      </div>
+      <p class="tt-note">"Wrong or missed" counts material changes where the strategy predicted the opposite direction or called the change immaterial. The hybrid screens statically, samples, and escalates risky workloads to a full clone, which is why it costs nearly as much.</p>
+      <div class="tip" id="tip" role="tooltip" hidden></div>
+    </figure>
+  </section>
+
+  <section id="why-b">
+    <h2>Why B, and not A, C or D</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Outcome</th><th>Fits?</th><th>Deciding evidence</th></tr></thead>
+        <tbody>
+          <tr><td class="nowrap"><strong>A</strong> Strong primitive</td><td><span class="chip bad">No</span></td><td>The only reliable estimator is running the change at production scale. That is simple in concept and costs production compute, so it is no reusable predictive core. Cheap estimators scored 62–88% on direction with sign errors, and calibration did not fix them. The dollar meaning depends on pool policy.</td></tr>
+          <tr><td class="nowrap"><strong>B</strong> Useful but narrow</td><td><span class="chip good">Yes</span></td><td>For scheduled SQL and dbt workloads on dedicated or per-query-billed compute, run often enough to pay for execution, production-scale estimates were decision-grade in the lab: 100% direction, 100% large-regression recall, 96% within one bucket, calibrated noise intervals. Outside that region quality drops to low or not viable.</td></tr>
+          <tr><td class="nowrap"><strong>C</strong> Integration product</td><td><span class="chip warn">Partly</span></td><td>Change detection, lineage, telemetry joins, price lists, PR comments and BigQuery on-demand dry runs are commodity. A product built only from those gets documented cases wrong: materialisation changes without consumer discovery, var changes with dbt state alone, millisecond queries measured once, and absorbed capacity reported as attributed dollars.</td></tr>
+          <tr><td class="nowrap"><strong>D</strong> Fundamentally unreliable</td><td><span class="chip bad">No</span></td><td>Within the narrow class, estimates were consistently useful and the confidence grades were informative. The unpredictability sits in identifiable conditions (see question 4).</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="q1">
+    <div class="eyebrow">Question 1</div>
+    <h3>Can this be built?</h3>
+    <p>Yes, as five pieces. All five were built and exercised end to end in the lab.</p>
+    <ul>
+      <li><strong>Change detection:</strong> dbt <code>state:modified</code> plus a diff of the compiled SQL.</li>
+      <li><strong>Workload mapping that includes consumers:</strong> dbt lineage plus the platform's access history.</li>
+      <li><strong>A measurement policy:</strong> skip workloads whose plans are identical, run the changed ones at production scale, and repeat cheap statements until the timing is stable.</li>
+      <li><strong>A monthly replay of the pool's billing</strong> with an explicit pricing policy.</li>
+      <li><strong>Graded intervals</strong> instead of point estimates.</li>
+    </ul>
+    <p>A model that predicts production cost from code, plans, bytes or samples was not decision-grade on this benchmark.</p>
+  </section>
+
+  <section id="q2">
+    <div class="eyebrow">Question 2</div>
+    <h3>For exactly which workload classes?</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Grade</th><th>Workloads</th><th>Why</th></tr></thead>
+        <tbody>
+          <tr><td><span class="chip good">High</span></td><td>Scheduled dbt and SQL models (tables, and incremental models with their target cloned) on a dedicated Snowflake warehouse. Any query under BigQuery on-demand, which dry runs already cover.</td><td>Needs more than about 40–70 runs a month, production history, and a clone on the production warehouse size.</td></tr>
+          <tr><td><span class="chip warn">Medium</span></td><td>Relations read by BI tools and apps; warehouses shared across teams; Snowflake Adaptive warehouses; Databricks serverless jobs and SQL warehouses; BigQuery autoscale-only reservations.</td><td>Usage changes are measurable. Dollars are a range that depends on pool state and pricing policy, or they only appear after the run.</td></tr>
+          <tr><td><span class="chip low">Low</span></td><td>Prepaid or baseline capacity with headroom; multi-cluster scale-out; classic Databricks job clusters; non-SQL Spark.</td><td>Marginal cost is zero until the capacity saturates, then jumps a step, or attribution is indirect.</td></tr>
+          <tr><td><span class="chip bad">Not viable</span></td><td>Shared all-purpose Databricks clusters; serverless side-costs such as auto-clustering and view refresh; sparse, seasonal or ad-hoc jobs; infrequent heavy jobs such as monthly runs.</td><td>No attribution path, vendor estimators off by 50–100%, unforecastable frequency, or a check that costs more than the risk.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="q3">
+    <div class="eyebrow">Question 3</div>
+    <h3>What accuracy is realistic?</h3>
+    <p>In the lab, measured on 26 pull requests:</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Estimator</th><th class="num">Direction</th><th class="num">Large-regression recall</th><th class="num">False warnings</th><th class="num">Within one bucket</th><th class="num">Median error</th></tr></thead>
+        <tbody>
+          <tr><td>Full-clone A/B with history</td><td class="num"><strong>100%</strong></td><td class="num"><strong>100%</strong></td><td class="num">20%</td><td class="num">96%</td><td class="num">about 10%</td></tr>
+          <tr><td>PR-only run vs history</td><td class="num">94%</td><td class="num">89%</td><td class="num">20%</td><td class="num">96%</td><td class="num">about 14%</td></tr>
+          <tr><td>Hybrid (static, samples, clone)</td><td class="num">88%</td><td class="num">100%</td><td class="num">10%</td><td class="num">88%</td><td class="num">about 13%</td></tr>
+          <tr><td>Plans, bytes, sampling, extrapolation</td><td class="num">62–88%</td><td class="num">78–100%</td><td class="num">0–60%</td><td class="num">69–85%</td><td class="num">27% to 6×</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>The full clone's false warnings all sat near the ±10% materiality threshold. On a real platform expect worse, because in the lab the clone <em>was</em> the production data. When the lab introduced real-world gaps deliberately:</p>
+    <ul>
+      <li>a smaller CI engine overstated ratios by up to 136% and flipped one sign;</li>
+      <li>concurrent production load shifted ratios by −18% to +58%;</li>
+      <li>cold single runs understated ratios by up to 29%.</li>
+    </ul>
+    <p>A realistic target is the right direction and a magnitude within one bucket for high-grade cases, reported as dollar ranges. The brief's 90% bars are plausible only for that class, measured at production scale.</p>
+  </section>
+
+  <section id="q4">
+    <div class="eyebrow">Question 4</div>
+    <h3>What cannot be predicted before deployment?</h3>
+    <ul>
+      <li><strong>Frequency changes made outside the repository, and seasonality.</strong> Unseen seasonal peaks were missed by 67%; sparse ad-hoc jobs were off by about 100%.</li>
+      <li><strong>The sign and size of scale-dependent changes when CI data is smaller than production.</strong> One change was 27% cheaper at production scale and a regression on samples. A 14× regression looked like +4% in a 1% sample.</li>
+      <li><strong>Marginal dollars on shared or prepaid capacity</strong> until someone chooses a pricing policy. Telemetry cannot supply that policy.</li>
+      <li><strong>Scale-out steps and contention</strong> caused by concurrent load, beyond an interval.</li>
+      <li><strong>Serverless side-costs</strong> such as auto-clustering and materialised-view refresh, where the vendors' own estimators are off by 50–100%.</li>
+      <li><strong>Python and Spark jobs on shared all-purpose clusters.</strong></li>
+      <li><strong>Negotiated Databricks prices</strong>, which the platform does not expose.</li>
+      <li><strong>Costs that only production conditions produce:</strong> optimiser learning, cache state, and effects between workloads.</li>
+    </ul>
+  </section>
+
+  <section id="q5">
+    <div class="eyebrow">Question 5</div>
+    <h3>Can uncertainty be represented honestly and usefully?</h3>
+    <p>For measurement noise, yes. 80% intervals built from measured run-to-run variance covered the true value 84% of the time for the full clone and 80% for the hybrid. The grade derived from each interval predicted correctness: high-grade calls were right on direction every time, medium-grade calls 67% of the time.</p>
+    <p>Honest reporting also needs three things:</p>
+    <ul>
+      <li>wider intervals for CI-versus-production gaps, frequency, and pricing policy;</li>
+      <li>a label saying whether the dollar figure is marginal or attributed;</li>
+      <li>a "not measurable" result for low and not-viable classes.</li>
+    </ul>
+    <p>A point estimate should never be shown on its own.</p>
+  </section>
+
+  <section id="q6">
+    <div class="eyebrow">Question 6</div>
+    <h3>Does a common abstraction survive across Snowflake, Databricks and BigQuery?</h3>
+    <p>Yes, with a different object from the one proposed. What survives is a usage change per workload, replayed through each capacity pool's billing function:</p>
+    <div class="formula">CostImpact = Σ over pools [ Bill(month with PR usage) − Bill(month with MAIN usage) ]</div>
+    <p>One engine can run this, with a thin adapter per platform for measurement, telemetry and billing. "Cost per query × frequency" fails as the abstraction. In the simulation, the same measured change cost +$208 a month on a Snowflake warehouse and +$1 under BigQuery on-demand. A change to dashboard queries showed +$57 attributed and −$11 marginal on a busy warehouse.</p>
+    <ul>
+      <li><strong>Snowflake (dedicated warehouses)</strong> is the cleanest fit.</li>
+      <li><strong>BigQuery on-demand</strong> is easy and already commodity.</li>
+      <li><strong>Databricks</strong> is the weakest for a CI verdict: billing arrives up to 24 hours late, the disk cache cannot be disabled, VM cost sits outside the platform, and negotiated prices are invisible.</li>
+    </ul>
+  </section>
+
+  <section id="q7">
+    <div class="eyebrow">Question 7</div>
+    <h3>What is hard, and what is commodity?</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Commodity</th><th>Non-trivial (where naive tools go wrong)</th></tr></thead>
+        <tbody>
+          <tr><td>Reading the dbt manifest, <code>state:modified</code>, lineage</td><td>Detecting changes in compiled SQL (vars, env, config) and finding consumers outside dbt</td></tr>
+          <tr><td>Query history, billing tables, per-model attribution (six or more tools do this after the fact)</td><td>Safe, representative execution: clone, defer, incremental state, cache control, interleaving, repetition. Hard to operate, simple in concept</td></tr>
+          <tr><td>Price lists; BigQuery dry run × price per TiB</td><td>Pricing the pool rather than the query: uptime, minimums, idle time, autoscale steps, prepaid baseline, with a stated marginal-or-attributed policy</td></tr>
+          <tr><td>PR comments and threshold gates</td><td>Uncertainty grades that include transfer, frequency and policy</td></tr>
+          <tr><td>Zero-copy clones and <code>dbt clone</code></td><td>Deciding what not to run, and capping spend on PRs that are expensive to measure</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Mostly integration and careful measurement engineering, with a thin modelling layer on top. The lab found no cheap predictive capability that is both valuable and hard to copy. Calibration signal is specific to each workload and pool, and nothing here shows it transfers between customers. dbt Labs already holds most of the ingredients, which is a platform risk.</p>
+  </section>
+
+  <section id="q8">
+    <div class="eyebrow">Question 8</div>
+    <h3>What is the narrowest credible V1?</h3>
+    <p><strong>A cost-regression gate for frequently run dbt models on dedicated Snowflake warehouses.</strong></p>
+    <ul>
+      <li><strong>Scope.</strong> Models that run at least daily, with hourly models as the sweet spot.</li>
+      <li><strong>Detection.</strong> <code>state:modified</code> combined with a compiled-SQL diff.</li>
+      <li><strong>What runs.</strong> Changed models, their direct children, and the queries that read changed tables (from <code>ACCESS_HISTORY</code>). Deeper descendants are screened and skipped when their plan and row counts are unchanged.</li>
+      <li><strong>Measurement.</strong> One PR-only run on a zero-copy clone, compared with production history, on a single-cluster CI warehouse of the production size, with the result cache off. Use an A/B run when history is thin or noisy. Repeat millisecond statements until stable.</li>
+      <li><strong>Economics.</strong> Replay the dedicated warehouse's billing. For dashboard queries on shared warehouses, report the usage change and an attributed dollar range, never a marginal figure.</li>
+      <li><strong>Output.</strong> Warn only on a rise of at least 50%, or above a dollar threshold, at high grade, and list the drivers. Everything else is informational. A per-PR compute cap applies, with an explicit "too expensive to measure" result.</li>
+      <li><strong>Out of scope.</strong> Databricks, BigQuery editions, Python models, serverless features, sparse or seasonal jobs, and any claim of predicting cost without running the change.</li>
+    </ul>
+    <div class="pr-mock" role="img" aria-label="Illustrative example of the V1 pull request comment">
+      <div class="bar-top"><b>cost-check</b><span class="chip good">High grade</span><span>PR #481 · TRANSFORM_WH (dedicated, M)</span></div>
+<pre>customer_features      3.2× per run   PR-only run on clone vs 30-run history
+  dim_customers        +4% per run    direct child, executed
+  3 dashboard queries  plan unchanged screened, not executed
+
+Monthly impact         +$1.8k to +$2.6k (marginal, dedicated warehouse)
+Gate                   warn: ≥ +50% at high grade → review requested</pre>
+    </div>
+    <p class="illus">Illustrative output format only. These numbers are invented for layout and are not a measured result.</p>
+  </section>
+
+  <section id="q9">
+    <div class="eyebrow">Question 9</div>
+    <h3>What evidence is still missing?</h3>
+    <ul>
+      <li><strong>Any live-platform measurement.</strong> Does a CI run predict the production warehouse's ratio on Snowflake? Is Snowflake's run-to-run noise like the lab's? Does Snowflake's per-query attribution track execution time? Does the billing replay reproduce the metered bill?</li>
+      <li><strong>A real PR corpus.</strong> The base rate of material regressions, their frequency mix, and how many changes a static screen could clear. The lab's 26 PRs were written by hand and carry no base rates.</li>
+      <li><strong>Real production telemetry.</strong> Schedules, consumers and shared-pool load decide how much spend sits in the high-grade class at all.</li>
+      <li><strong>A check of the billing replay against metered bills.</strong></li>
+      <li><strong>Tolerance.</strong> Will teams accept 2.5–4.6 production runs of CI compute, and the added wait, on every PR that touches their busiest models?</li>
+    </ul>
+  </section>
+
+  <section id="q10">
+    <div class="eyebrow">Question 10</div>
+    <h3>What is the next rational step?</h3>
+    <p>Narrow the concept and run one more technical experiment before building an MVP. Run customer discovery in parallel.</p>
+    <ul>
+      <li><strong>Technical, 1–2 days, at most 60 Snowflake credits.</strong> Run the prepared live Snowflake experiment. Then replay a real dbt repository's last 20–50 merged PRs and check whether the V1 gate would have flagged the changes that raised the bill.</li>
+      <li><strong>Discovery.</strong> Test the narrow offer: would a team pay three to five production runs of compute per PR on its busiest models to block large cost regressions, and does it want marginal or attributed dollars on shared warehouses?</li>
+      <li><strong>Not now.</strong> The multi-platform product, the combined Snowflake, Databricks, Anthropic and Datadog comment, and an ML cost predictor. The evidence does not support them.</li>
+    </ul>
+    <div class="gostop">
+      <div>
+        <h4><span class="chip good">Go</span> Build an MVP if both hold</h4>
+        <ul>
+          <li>High-grade verdicts keep at least 90% direction accuracy on the live platform.</li>
+          <li>The replayed PRs show material regressions in frequently run models often enough to justify the CI spend.</li>
+        </ul>
+      </div>
+      <div>
+        <h4><span class="chip bad">Stop</span> Stop if either holds</h4>
+        <ul>
+          <li>Live CI-to-production transfer errors push high-grade direction accuracy below about 90%.</li>
+          <li>Material regressions in frequently run models turn out to be rare. What remains then is dbt's cost insights plus alerting, which already exists.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p><strong>Evidence levels.</strong> Platform facts are documented from vendor sources. Lab figures were measured on a local engine (DuckDB 1.5.5 with dbt-core 1.12.5 on TPC-H SF2) and are not measurements of Snowflake, Databricks or BigQuery. Dollar figures come from a simulated month under the vendors' documented billing rules.</p>
+    <p>Source documents in the investigation repository: DECISION.md (this page), RESULTS.md, PLATFORM_FEASIBILITY.md, ARCHITECTURE.md, FAILURE_MODES.md and EVIDENCE_LOG.md.</p>
+  </footer>
+</main>
+
+<script>
+(function () {
+  var data = [
+    { name: "Full-clone A/B with history", acc: 100, cost: 4.6, errs: 0, prod: true,
+      desc: "One MAIN and one PR run on a zero-copy production clone; the ratio is applied to the model's production history." },
+    { name: "PR-only run vs history", acc: 94, cost: 2.5, errs: 1, prod: true,
+      desc: "One PR run on the clone, compared with the model's production history. No MAIN run." },
+    { name: "Hybrid", acc: 88, cost: 4.0, errs: 2, prod: false,
+      desc: "Static screen first, then key-consistent samples, escalating to a full clone when a workload looks risky." },
+    { name: "10% key-consistent sample", acc: 88, cost: 1.6, errs: 2, prod: false,
+      desc: "MAIN and PR on 10% of customers with all their orders and line items." },
+    { name: "Two-point extrapolation", acc: 81, cost: 2.0, errs: 3, prod: false,
+      desc: "A power law fitted through 1% and 10% samples, extrapolated to full scale." },
+    { name: "Bytes (dry-run analog)", acc: 75, cost: 0, errs: 4, prod: false,
+      desc: "Ratio of logical bytes scanned, the quantity a BigQuery dry run reports. No execution on BigQuery." },
+    { name: "1% key-consistent sample", acc: 75, cost: 0.5, errs: 4, prod: false,
+      desc: "MAIN and PR on 1% of customers with all their orders and line items." },
+    { name: "Last-90-days sample", acc: 75, cost: 3.4, errs: 4, prod: false,
+      desc: "Fact tables limited to their last 90 days, a common dbt CI pattern. Dimensions stay whole, so it is not cheap." },
+    { name: "1% Bernoulli sample", acc: 69, cost: 0.1, errs: 5, prod: false,
+      desc: "1% of rows sampled from each table independently." },
+    { name: "Static plan (EXPLAIN)", acc: 62, cost: 0, errs: 6, prod: false,
+      desc: "Ratio of the optimizer's estimated row counts. No execution." }
+  ];
+  var COST_MAX = 5;
+  var rows = document.getElementById("tt-rows");
+  var fig = document.getElementById("tradeoff-fig");
+  var tip = document.getElementById("tip");
+
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text != null) e.textContent = text;
+    return e;
+  }
+  function fmtCost(c) { return c === 0 ? "0, no execution" : c.toFixed(1) + "×"; }
+
+  data.forEach(function (d) {
+    var row = el("div", "tt-row" + (d.prod ? " is-prod" : ""));
+    row.setAttribute("role", "row");
+    row.tabIndex = 0;
+    row.setAttribute("aria-label", d.name + ": " + d.acc + "% direction accuracy, CI cost " + fmtCost(d.cost) +
+      ", " + d.errs + " of 16 material changes wrong or missed");
+
+    var name = el("span", "name", d.name);
+    name.setAttribute("role", "cell");
+
+    var acc = el("div", "acc");
+    acc.setAttribute("role", "cell");
+    acc.appendChild(el("span", "mcap", "Direction accuracy"));
+    var t1 = el("div", "track");
+    var b1 = el("span", "bar");
+    b1.style.setProperty("--v", String(d.acc / 100));
+    t1.appendChild(b1);
+    t1.appendChild(el("span", "val", d.acc + "%"));
+    t1.appendChild(el("span", "threshold"));
+    acc.appendChild(t1);
+
+    var cost = el("div", "cost");
+    cost.setAttribute("role", "cell");
+    cost.appendChild(el("span", "mcap", "CI cost per analysis"));
+    var t2 = el("div", "track");
+    var b2 = el("span", "bar");
+    b2.style.setProperty("--v", String(d.cost / COST_MAX));
+    t2.appendChild(b2);
+    t2.appendChild(el("span", "val" + (d.cost === 0 ? " quiet" : ""), fmtCost(d.cost)));
+    cost.appendChild(t2);
+
+    var errs = el("span", "errs", d.errs + " of 16");
+    errs.setAttribute("role", "cell");
+
+    row.appendChild(name);
+    row.appendChild(acc);
+    row.appendChild(cost);
+    row.appendChild(errs);
+    rows.appendChild(row);
+
+    function show(x, y) {
+      tip.textContent = "";
+      tip.appendChild(el("div", "v", d.acc + "% direction · " + fmtCost(d.cost) + " · " + d.errs + " of 16 wrong or missed"));
+      tip.appendChild(el("div", "n", d.name));
+      tip.appendChild(el("div", "d", d.desc));
+      tip.hidden = false;
+      var fr = fig.getBoundingClientRect();
+      var w = tip.offsetWidth, h = tip.offsetHeight;
+      var left = Math.min(Math.max(8, x - fr.left + 14), fr.width - w - 8);
+      var top = y - fr.top + 16;
+      if (top + h > fr.height - 8) top = y - fr.top - h - 12;
+      tip.style.left = left + "px";
+      tip.style.top = Math.max(8, top) + "px";
+    }
+    function hide() { tip.hidden = true; row.classList.remove("is-active"); }
+    row.addEventListener("pointermove", function (e) { row.classList.add("is-active"); show(e.clientX, e.clientY); });
+    row.addEventListener("pointerleave", hide);
+    row.addEventListener("focus", function () {
+      var r = row.getBoundingClientRect();
+      row.classList.add("is-active");
+      show(r.left + r.width * 0.35, r.bottom - 4);
+    });
+    row.addEventListener("blur", hide);
+  });
+})();
+</script>

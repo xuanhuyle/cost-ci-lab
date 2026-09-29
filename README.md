@@ -27,16 +27,17 @@ ten final questions.
 |---|---|
 | `docs/DECISION.md` | Final technical outcome (A/B/C/D) and the ten answers |
 | `docs/RESULTS.md` | All results; local/simulated results are kept apart from documented facts (no live results exist yet) |
+| `docs/pages/` | `verdict.html` and `results.html`: DECISION.md and RESULTS.md as standalone web pages with charts |
 | `docs/PLATFORM_FEASIBILITY.md` | Phase 1: what Snowflake / Databricks / BigQuery / dbt expose, with classifications and sources |
 | `docs/ARCHITECTURE.md` | Phase 2: is "cost impact of a change" a platform-independent object? Revised interface |
-| `docs/EXPERIMENT_DESIGN.md` | Lab, 25-PR benchmark, protocol, estimators, metrics, threats to validity, reproduction |
+| `docs/EXPERIMENT_DESIGN.md` | Lab, 26-PR benchmark, protocol, estimators, metrics, threats to validity, reproduction |
 | `docs/FAILURE_MODES.md` | Phase 8: each failure mode classified (solvable / statistical / uncertainty / config / unpredictable) |
 | `docs/EVIDENCE_LOG.md` | Every material claim with its evidence level and source |
 | `docs/OWNER_REQUEST.md` | The only items that need the owner (live platform access) |
 | `docs/research/` | Raw primary-source research notes per platform (~300 URLs) |
 | `costci/` | Harness: data environments, dbt wrapper, scenario/change detection, measurement, estimators, pools/billing, economics, metrics, provider capability matrix |
-| `benchmark/` | Base dbt project (TPC-H, adapter-portable), 25 scenario PRs, synthetic production context |
-| `experiments/` | E1–E8 drivers. They write `results/` |
+| `benchmark/` | Base dbt project (TPC-H, adapter-portable), 26 scenario PRs, synthetic production context |
+| `experiments/` | E1–E10 drivers. They write `results/` |
 | `results/` | Measured and computed outputs (JSON + markdown tables) |
 | `live/snowflake/` | Prepared but unexecuted live experiment: setup/teardown SQL, telemetry SQL, adapter, runbook |
 | `tests/` | Unit tests for billing rules, metrics, provider matrix |

@@ -1,0 +1,796 @@
+<!doctype html>
+<html lang="en">
+<title>Cost CI Lab Results</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+<style>
+  :root {
+    --bg: #F4F6F9;
+    --surface: #FFFFFF;
+    --surface-2: #EEF1F5;
+    --ink: #12161D;
+    --ink-2: #475061;
+    --muted: #626B7C;
+    --rule: #D9DEE6;
+    --rule-strong: #C2C9D4;
+    --accent: #2451B7;
+    --accent-ink: #1C3F90;
+    --accent-tint: #E6ECFA;
+    --code-bg: #EEF1F6;
+    --good: #1B6E3E;   --good-tint: #E3F3E9;
+    --warn: #7A5000;   --warn-tint: #FBF0DA;
+    --low: #9C3F1A;    --low-tint: #FBE9E1;
+    --bad: #931D22;    --bad-tint: #F9E3E4;
+    --comp: #0F6360;   --comp-tint: #DFF1EF;
+    --sim: #5436A0;    --sim-tint: #EEE9FA;
+    --doc: #475061;    --doc-tint: #E7EBF0;
+    --bar-accent: #2451B7;
+    --bar-muted: #8A93A4;
+    --threshold: #475061;
+    --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+    --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --bg: #0D1015;
+      --surface: #141922;
+      --surface-2: #1A202B;
+      --ink: #E6E9EF;
+      --ink-2: #B3BBC8;
+      --muted: #8E97A7;
+      --rule: #273041;
+      --rule-strong: #364154;
+      --accent: #88A6F4;
+      --accent-ink: #B9CBFA;
+      --accent-tint: #1B2640;
+      --code-bg: #1A202B;
+      --good: #5BC98A;   --good-tint: #13291D;
+      --warn: #E0B14E;   --warn-tint: #2B2212;
+      --low: #EE8E61;    --low-tint: #2E1A12;
+      --bad: #F07C82;    --bad-tint: #311417;
+      --comp: #6FD3CD;   --comp-tint: #0F2A29;
+      --sim: #BBA7F4;    --sim-tint: #241B3A;
+      --doc: #B3BBC8;    --doc-tint: #1F2632;
+      --bar-accent: #7F9FF3;
+      --bar-muted: #6E788B;
+      --threshold: #B3BBC8;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #0D1015;
+    --surface: #141922;
+    --surface-2: #1A202B;
+    --ink: #E6E9EF;
+    --ink-2: #B3BBC8;
+    --muted: #8E97A7;
+    --rule: #273041;
+    --rule-strong: #364154;
+    --accent: #88A6F4;
+    --accent-ink: #B9CBFA;
+    --accent-tint: #1B2640;
+    --code-bg: #1A202B;
+    --good: #5BC98A;   --good-tint: #13291D;
+    --warn: #E0B14E;   --warn-tint: #2B2212;
+    --low: #EE8E61;    --low-tint: #2E1A12;
+    --bad: #F07C82;    --bad-tint: #311417;
+    --comp: #6FD3CD;   --comp-tint: #0F2A29;
+    --sim: #BBA7F4;    --sim-tint: #241B3A;
+    --doc: #B3BBC8;    --doc-tint: #1F2632;
+    --bar-accent: #7F9FF3;
+    --bar-muted: #6E788B;
+    --threshold: #B3BBC8;
+  }
+
+  body {
+    margin: 0; background: var(--bg); color: var(--ink); font-family: var(--serif);
+    font-size: 17px; line-height: 1.6; padding-inline: 20px;
+  }
+  .page { max-width: 960px; margin: 0 auto; padding-block: 48px 72px; }
+  h1, h2, h3, h4 { font-family: var(--sans); text-wrap: balance; color: var(--ink); }
+  h1 { font-size: 40px; line-height: 1.12; font-weight: 600; letter-spacing: -0.01em; margin: 10px 0 16px; }
+  h2 { font-size: 26px; line-height: 1.25; font-weight: 600; margin: 0 0 12px; }
+  h3 { font-size: 18.5px; line-height: 1.35; font-weight: 600; margin: 26px 0 10px; }
+  p, li { max-width: 72ch; }
+  p { margin: 0 0 14px; }
+  ul, ol { margin: 0 0 14px; padding-left: 22px; }
+  li { margin-bottom: 6px; }
+  strong { font-weight: 600; }
+  a { color: var(--accent); text-underline-offset: 2px; }
+  a:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  code { font-family: var(--mono); font-size: 0.84em; background: var(--code-bg); padding: 1px 5px; border-radius: 4px; }
+  .sidref { font-family: var(--mono); font-size: 0.86em; color: var(--ink-2); }
+
+  .eyebrow { font-family: var(--mono); font-size: 12.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+  .lede { font-size: 20px; line-height: 1.55; color: var(--ink-2); max-width: 64ch; margin: 0 0 18px; }
+  .crosslink { font-family: var(--sans); font-size: 15px; margin: 0 0 24px; }
+
+  section { padding-block: 36px 10px; border-top: 1px solid var(--rule); }
+  .sec-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-bottom: 6px; }
+  .sec-head .eyebrow { margin: 0; }
+
+  .chip {
+    display: inline-block; font-family: var(--sans); font-size: 11.5px; font-weight: 600; line-height: 1.6;
+    letter-spacing: 0.05em; text-transform: uppercase; padding: 1px 8px; border-radius: 999px; white-space: nowrap;
+  }
+  .chip.good { color: var(--good); background: var(--good-tint); }
+  .chip.warn { color: var(--warn); background: var(--warn-tint); }
+  .chip.low  { color: var(--low);  background: var(--low-tint); }
+  .chip.bad  { color: var(--bad);  background: var(--bad-tint); }
+  .chip.measured { color: var(--accent-ink); background: var(--accent-tint); }
+  .chip.computed { color: var(--comp); background: var(--comp-tint); }
+  .chip.simulated { color: var(--sim); background: var(--sim-tint); }
+  .chip.documented { color: var(--doc); background: var(--doc-tint); }
+  .chip.none { color: var(--muted); background: transparent; box-shadow: inset 0 0 0 1px var(--rule-strong); }
+
+  /* evidence legend */
+  .levels { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 6px 0 12px; }
+  .level { background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; padding: 12px 14px; font-family: var(--sans); font-size: 14.5px; line-height: 1.5; color: var(--ink-2); display: flex; flex-direction: column; gap: 6px; }
+  .level .chip { align-self: flex-start; }
+  .level.is-empty { border-style: dashed; }
+
+  .facts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin: 6px 0 16px; }
+  .fact { background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; padding: 12px 14px; font-family: var(--sans); display: flex; flex-direction: column; gap: 4px; }
+  .fact .v { font-size: 22px; font-weight: 600; line-height: 1.15; color: var(--ink); }
+  .fact .l { font-size: 13px; line-height: 1.45; color: var(--muted); }
+
+  .note { font-family: var(--sans); font-size: 14.5px; line-height: 1.55; color: var(--ink-2); background: var(--surface); border: 1px solid var(--rule); border-left: 3px solid var(--warn); border-radius: 4px; padding: 12px 14px; margin: 0 0 16px; max-width: 80ch; }
+  .note strong { color: var(--ink); }
+
+  .toc { columns: 2; column-gap: 28px; font-family: var(--sans); font-size: 14.5px; margin: 0 0 8px; padding: 0; list-style: none; }
+  .toc li { margin: 0 0 6px; break-inside: avoid; }
+  .toc .id { font-family: var(--mono); font-size: 12px; color: var(--muted); display: inline-block; min-width: 38px; }
+
+  /* tables */
+  .table-wrap { overflow-x: auto; margin: 0 0 18px; }
+  table { width: 100%; border-collapse: collapse; font-family: var(--sans); font-size: 14px; line-height: 1.5; }
+  th { text-align: left; font-weight: 600; color: var(--ink-2); border-bottom: 1px solid var(--rule-strong); padding: 8px 10px; vertical-align: bottom; }
+  td { border-bottom: 1px solid var(--rule); padding: 9px 10px; vertical-align: top; }
+  .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  th.num { text-align: right; white-space: normal; }
+  td.sid { font-family: var(--mono); font-size: 13px; color: var(--ink-2); white-space: nowrap; }
+  tr.hl td { background: var(--accent-tint); }
+  .near { display: block; font-size: 11.5px; color: var(--muted); font-weight: 400; }
+  .money b { font-weight: 600; color: var(--ink); display: block; }
+  .money span { font-size: 12px; color: var(--muted); display: block; white-space: nowrap; }
+  .formula { font-family: var(--mono); font-size: 14px; line-height: 1.6; background: var(--code-bg); border-radius: 6px; padding: 12px 16px; margin: 0 0 16px; overflow-x: auto; white-space: pre; color: var(--ink); }
+
+  /* mechanisms */
+  .mech { list-style: none; padding: 0; margin: 0 0 16px; display: grid; gap: 10px; }
+  .mech li { max-width: none; margin: 0; background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; padding: 12px 16px; font-size: 16px; }
+  .mech h4 { font-size: 15.5px; font-weight: 600; margin: 0 0 4px; }
+  .mech p { margin: 0; max-width: 80ch; }
+
+  /* trade-off chart (same component as the verdict page) */
+  .tradeoff { margin: 0 0 14px; background: var(--surface); border: 1px solid var(--rule); border-radius: 8px; padding: 18px 18px 10px; position: relative; }
+  .tradeoff figcaption { font-family: var(--sans); margin-bottom: 12px; }
+  .tradeoff figcaption .t { font-size: 17px; font-weight: 600; color: var(--ink); }
+  .tradeoff figcaption .s { font-size: 14px; color: var(--muted); line-height: 1.5; max-width: 80ch; margin-top: 4px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 18px; font-family: var(--sans); font-size: 13px; color: var(--ink-2); margin: 10px 0 8px; }
+  .legend span { display: inline-flex; align-items: center; gap: 7px; }
+  .sw { width: 14px; height: 10px; border-radius: 0 3px 3px 0; display: inline-block; }
+  .sw.prod { background: var(--bar-accent); }
+  .sw.other { background: var(--bar-muted); }
+  .sw.line { width: 1px; height: 14px; border-radius: 0; background: var(--threshold); }
+  .tt { font-family: var(--sans); }
+  .tt-head, .tt-row { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.35fr) minmax(0, 1.1fr) 76px; gap: 16px; align-items: center; }
+  .tt-head { font-size: 12.5px; font-weight: 600; color: var(--ink-2); padding: 6px 6px 8px; }
+  .tt-head .num { text-align: right; }
+  .tt-head .acc { position: relative; }
+  .tt-row { padding: 8px 6px; border-top: 1px solid var(--rule); border-radius: 4px; }
+  .tt-row:hover, .tt-row:focus-visible, .tt-row.is-active { background: var(--surface-2); }
+  .tt-row .name { font-size: 14.5px; color: var(--ink); line-height: 1.35; }
+  .tt-row .errs { text-align: right; font-size: 14px; color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .mcap { display: none; font-size: 12px; color: var(--muted); }
+  .track { position: relative; display: flex; align-items: center; gap: 8px; height: 22px; }
+  .track::before { content: ""; position: absolute; left: 0; top: -8px; bottom: -8px; width: 1px; background: var(--rule-strong); }
+  .bar { height: 14px; border-radius: 0 4px 4px 0; background: var(--bar-muted); width: calc((100% - 58px) * var(--v)); flex: none; }
+  .tt-row.is-prod .bar { background: var(--bar-accent); }
+  .val { font-size: 13.5px; color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .val.quiet { color: var(--muted); }
+  .threshold { position: absolute; top: -8px; bottom: -8px; width: 1px; background: var(--threshold); left: calc((100% - 58px) * 0.9); }
+  .tt-head .tlabel { position: absolute; bottom: -2px; left: calc((100% - 58px) * 0.9); transform: translateX(-50%); font-weight: 500; color: var(--ink-2); font-size: 11.5px; white-space: nowrap; }
+  .tt-note { font-family: var(--sans); font-size: 13px; color: var(--muted); margin: 10px 6px 4px; max-width: 90ch; }
+  .tip { position: absolute; z-index: 5; pointer-events: none; max-width: 300px; background: var(--surface); border: 1px solid var(--rule-strong); border-radius: 6px; box-shadow: 0 6px 20px rgba(10, 14, 20, 0.14); padding: 10px 12px; font-family: var(--sans); }
+  .tip .v { font-size: 14px; font-weight: 600; color: var(--ink); font-variant-numeric: tabular-nums; }
+  .tip .n { font-size: 13px; color: var(--ink-2); margin-top: 2px; }
+  .tip .d { font-size: 12.5px; color: var(--muted); margin-top: 6px; line-height: 1.45; }
+
+  footer { border-top: 1px solid var(--rule); margin-top: 36px; padding-top: 18px; font-family: var(--sans); font-size: 13.5px; line-height: 1.6; color: var(--muted); }
+  footer p { max-width: 90ch; }
+
+  @media (max-width: 760px) {
+    body { font-size: 16.5px; padding-inline: 16px; }
+    .page { padding-block: 32px 56px; }
+    h1 { font-size: 31px; }
+    h2 { font-size: 23px; }
+    .lede { font-size: 18px; }
+    .levels { grid-template-columns: 1fr; }
+    .facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .toc { columns: 1; }
+    .tt-head { display: none; }
+    .tt-row { grid-template-columns: 1fr 1fr; grid-template-areas: "name errs" "acc acc" "cost cost"; gap: 6px 12px; padding: 12px 4px; }
+    .tt-row .name { grid-area: name; }
+    .tt-row .errs { grid-area: errs; }
+    .tt-row .acc { grid-area: acc; }
+    .tt-row .cost { grid-area: cost; }
+    .mcap { display: block; margin-bottom: 2px; }
+    .track::before, .threshold { top: -2px; bottom: -2px; }
+    table.stack thead { display: none; }
+    table.stack tr { display: block; padding: 12px 0; border-bottom: 1px solid var(--rule); }
+    table.stack td { display: block; border: 0; padding: 2px 0; }
+    table.stack td + td { margin-top: 4px; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; transition: none !important; } }
+</style>
+
+<main class="page">
+  <header>
+    <div class="eyebrow">Experiment results · 28 September 2026</div>
+    <h1>Cost CI lab results</h1>
+    <p class="lede">Twenty-six adversarial dbt pull requests, eleven ways to estimate their cost impact before merge, and nine follow-up experiments. Only a paired run of both versions on production-scale data got every material change right. Every cheaper method got at least one wrong.</p>
+    <p class="crosslink">The decision drawn from these results is on the <a href="verdict.html">Cost CI Verdict</a> page.</p>
+    <ul class="toc" aria-label="On this page">
+      <li><a href="#evidence"><span class="id">0</span>Evidence levels</a></li>
+      <li><a href="#bars"><span class="id">1</span>Viability bars</a></li>
+      <li><a href="#e1"><span class="id">E1</span>Estimating per-run impact</a></li>
+      <li><a href="#e9"><span class="id">E9</span>Change detection</a></li>
+      <li><a href="#e5"><span class="id">E5</span>Uncertainty</a></li>
+      <li><a href="#e7"><span class="id">E7</span>Calibration</a></li>
+      <li><a href="#e8"><span class="id">E8</span>Physical layout</a></li>
+      <li><a href="#e10"><span class="id">E10</span>CI economics</a></li>
+      <li><a href="#e2"><span class="id">E2</span>Recurring dollars</a></li>
+      <li><a href="#e3"><span class="id">E3</span>Production conditions</a></li>
+      <li><a href="#e4"><span class="id">E4</span>Downstream propagation</a></li>
+      <li><a href="#e6"><span class="id">E6</span>Run frequency</a></li>
+      <li><a href="#hypotheses"><span class="id">H</span>Hypothesis verdicts</a></li>
+      <li><a href="#scenarios"><span class="id">s01</span>Scenario index</a></li>
+    </ul>
+  </header>
+
+  <section id="evidence">
+    <div class="sec-head"><span class="eyebrow">Section 0</span></div>
+    <h2>How to read the evidence</h2>
+    <p>Each section below carries one of these labels. Nothing on this page measures a real warehouse.</p>
+    <div class="levels">
+      <div class="level is-empty"><span class="chip none">Live platform</span>None. No Snowflake, Databricks or BigQuery credentials were available, so there are no live results.</div>
+      <div class="level"><span class="chip measured">Measured, local engine</span>DuckDB 1.5.5 with real dbt-core 1.12.5 on TPC-H SF2. Valid for comparing strategies on this engine. Anything said about a real platform is inferred.</div>
+      <div class="level"><span class="chip computed">Computed</span>Derived from local measurements with a stated method: uncertainty intervals, calibration, and CI-cost break-even (with assumed regression rates).</div>
+      <div class="level"><span class="chip simulated">Simulated</span>Documented vendor billing rules applied to a synthetic production month, and synthetic run histories. These show mechanisms, not forecasts.</div>
+    </div>
+    <p style="font-family: var(--sans); font-size: 14.5px; color: var(--ink-2);"><span class="chip documented">Documented</span> Platform facts from vendor documentation are summarised in the repository's platform feasibility notes.</p>
+  </section>
+
+  <section id="bars">
+    <div class="sec-head"><span class="eyebrow">Section 1</span></div>
+    <h2>Viability bars, refined before judging</h2>
+    <p>The brief proposed: more than 90% correct direction on material changes, more than 90% recall on large regressions, few false positives, useful magnitude buckets, and a cheap, fast check. The lab showed three problems with those bars as written.</p>
+    <ul>
+      <li><strong>Materiality has to sit above measurement noise.</strong> A single run varies by 5–29% for statements of 0.2–10 seconds. Seven of the 26 scenarios had a true impact near ±10%, so their class changed between repetitions. The threshold stays at 10%, and results are reported with and without those seven.</li>
+      <li><strong>Materiality needs two denominators.</strong> A change is judged relative to the workloads it touches (the "+Y%" a PR comment shows) and relative to the whole production bill. A 4.5× regression in one model came to only +5% of its busy affected set (<span class="sidref">s08</span>).</li>
+      <li><strong>"Cheap and fast" needs a unit.</strong> CI cost is measured as <em>k</em>, the number of production runs one analysis consumes, and turned into a break-even run frequency.</li>
+    </ul>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Bar</th><th>Threshold</th></tr></thead>
+        <tbody>
+          <tr><td>Direction accuracy on material changes</td><td>at least 90%</td></tr>
+          <tr><td>Recall of large regressions (+50% or more, including new workloads)</td><td>at least 90%, with at least 75% flagged as +50% or more</td></tr>
+          <tr><td>False warnings on immaterial changes</td><td>at most 20%</td></tr>
+          <tr><td>Magnitude within one bucket (±10, 25, 50, 100%)</td><td>at least 80%</td></tr>
+          <tr><td>CI cost</td><td>k of about 2 or less, and a break-even frequency no higher than the workload's actual run frequency</td></tr>
+          <tr><td>CI latency</td><td>about the production runtime of the affected models, plus about a minute of dbt overhead</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="e1">
+    <div class="sec-head"><span class="eyebrow">E1</span><span class="chip measured">Measured, local engine</span></div>
+    <h2>Can the per-run impact be estimated before merge?</h2>
+    <div class="facts">
+      <div class="fact"><span class="v">26</span><span class="l">pull requests against a 17-model dbt project on TPC-H SF2</span></div>
+      <div class="fact"><span class="v">16</span><span class="l">material changes: 11 increases, 1 new model, 4 decreases</span></div>
+      <div class="fact"><span class="v">10</span><span class="l">immaterial changes</span></div>
+      <div class="fact"><span class="v">9</span><span class="l">large regressions of +50% or more, including the new model</span></div>
+    </div>
+    <p>Truth is the median of four production-scale repetitions per variant. Every estimator sees only what CI could see: a single run of each variant on a full clone, separate history runs of MAIN, four smaller data environments, and <code>EXPLAIN</code> plans.</p>
+    <div class="note"><strong>Protocol fix during the run.</strong> Dashboard queries take milliseconds but run up to 60,000 times a month, so single executions made both the estimates and the truth unusable. Before the fix, one CI estimate read −7% against a truth of +81% (<span class="sidref">s18</span>), and a purely cosmetic change measured +26% (<span class="sidref">s21</span>). Consumer queries were re-measured as the median of five executions per repetition. The pre-fix data stays in the repository's history.</div>
+
+    <figure class="tradeoff" id="tradeoff-fig">
+      <figcaption>
+        <div class="t">Accuracy costs production compute</div>
+        <div class="s">Direction accuracy on the 16 material changes, CI cost in production-run equivalents (median per analysis), and how many of the 16 each strategy got wrong or missed.</div>
+      </figcaption>
+      <div class="legend" aria-hidden="true">
+        <span><i class="sw prod"></i>Production-scale execution</span>
+        <span><i class="sw other"></i>Other strategies</span>
+        <span><i class="sw line"></i>90% direction bar</span>
+      </div>
+      <div class="tt" role="table" aria-label="Estimation strategies: direction accuracy, CI cost and errors">
+        <div class="tt-head" role="row">
+          <span role="columnheader">Strategy</span>
+          <span class="acc" role="columnheader">Direction accuracy<span class="tlabel" aria-hidden="true">90%</span></span>
+          <span role="columnheader">CI cost per analysis</span>
+          <span class="num" role="columnheader">Wrong or missed</span>
+        </div>
+        <div id="tt-rows" role="rowgroup"></div>
+      </div>
+      <div class="tip" id="tip" role="tooltip" hidden></div>
+    </figure>
+
+    <h3 id="e1-scores">All scores</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Strategy</th><th class="num">Direction</th><th class="num">Large-regression recall (strict)</th><th class="num">False warnings</th><th class="num">Within 1 bucket</th><th class="num">Median abs. log error</th><th class="num">Within 2×</th><th class="num">Rank corr.</th><th class="num">CI cost, median / max</th></tr></thead>
+        <tbody>
+          <tr class="hl"><td>Full-clone A/B with history</td><td class="num">100%</td><td class="num">100% (89%)</td><td class="num">20%</td><td class="num">96%</td><td class="num">0.10</td><td class="num">94%</td><td class="num">0.90</td><td class="num">4.6× / 31.9×</td></tr>
+          <tr><td>Full-clone A/B, absolute</td><td class="num">100%</td><td class="num">100% (89%)</td><td class="num">20%</td><td class="num">96%</td><td class="num">0.12</td><td class="num">94%</td><td class="num">0.90</td><td class="num">4.6× / 31.9×</td></tr>
+          <tr><td>PR-only run vs history</td><td class="num">94%</td><td class="num">89% (78%)</td><td class="num">20%</td><td class="num">96%</td><td class="num">0.14</td><td class="num">88%</td><td class="num">0.87</td><td class="num">2.5× / 30.0×</td></tr>
+          <tr><td>Hybrid: static, samples, clone</td><td class="num">88%</td><td class="num">100% (89%)</td><td class="num">10%</td><td class="num">88%</td><td class="num">0.13</td><td class="num">93%</td><td class="num">0.84</td><td class="num">4.0× / 35.9×</td></tr>
+          <tr><td>10% key-consistent sample</td><td class="num">88%</td><td class="num">100% (78%)</td><td class="num">20%</td><td class="num">85%</td><td class="num">0.35</td><td class="num">60%</td><td class="num">0.81</td><td class="num">1.6× / 35.3×</td></tr>
+          <tr><td>Two-point extrapolation (1% and 10%)</td><td class="num">81%</td><td class="num">89% (89%)</td><td class="num">60%</td><td class="num">81%</td><td class="num">0.71</td><td class="num">50%</td><td class="num">0.76</td><td class="num">2.0× / 64.4×</td></tr>
+          <tr><td>1% key-consistent sample</td><td class="num">75%</td><td class="num">78% (56%)</td><td class="num">50%</td><td class="num">85%</td><td class="num">0.60</td><td class="num">73%</td><td class="num">0.53</td><td class="num">0.5× / 29.1×</td></tr>
+          <tr><td>Last-90-days sample</td><td class="num">75%</td><td class="num">78% (44%)</td><td class="num">10%</td><td class="num">77%</td><td class="num">0.54</td><td class="num">67%</td><td class="num">0.58</td><td class="num">3.4× / 27.8×</td></tr>
+          <tr><td>1% Bernoulli sample</td><td class="num">69%</td><td class="num">78% (67%)</td><td class="num">0%</td><td class="num">77%</td><td class="num">0.73</td><td class="num">46%</td><td class="num">0.63</td><td class="num">0.1× / 37.6×</td></tr>
+          <tr><td>Bytes (dry-run analog)</td><td class="num">75%</td><td class="num">78% (67%)</td><td class="num">30%</td><td class="num">77%</td><td class="num">0.24</td><td class="num">69%</td><td class="num">0.79</td><td class="num">0 / 0</td></tr>
+          <tr><td>Static plan (EXPLAIN row estimates)</td><td class="num">62%</td><td class="num">78% (67%)</td><td class="num">10%</td><td class="num">69%</td><td class="num">1.81</td><td class="num">20%</td><td class="num">0.64</td><td class="num">0 / 0</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Scored against elapsed engine time on all 26 scenarios. Recall counts a large regression as caught when the estimate warned (+10% or more); "strict" recall requires the estimate itself to reach +50%. A median absolute log error of 0.10 means estimates were typically within about 10% of the truth. Rank correlation is Spearman's, over the monthly change across scenarios.</p>
+
+    <h3 id="e1-errors">Sign errors and misses</h3>
+    <p>A wrong sign tells a reviewer the opposite of the truth, which is worse than a miss.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Strategy</th><th class="num">Wrong sign on a material change</th><th class="num">Material change called immaterial</th></tr></thead>
+        <tbody>
+          <tr class="hl"><td>Full-clone A/B (both variants)</td><td class="num">0</td><td class="num">0</td></tr>
+          <tr><td>PR-only run vs history</td><td class="num">0</td><td class="num">1 <span class="sidref">(s04)</span></td></tr>
+          <tr><td>Hybrid</td><td class="num">1 <span class="sidref">(s14)</span></td><td class="num">1 <span class="sidref">(s22)</span></td></tr>
+          <tr><td>10% key-consistent sample</td><td class="num">1 <span class="sidref">(s22)</span></td><td class="num">1 <span class="sidref">(s14)</span></td></tr>
+          <tr><td>Two-point extrapolation</td><td class="num">1 <span class="sidref">(s14)</span></td><td class="num">2</td></tr>
+          <tr><td>1% key-consistent, 1% Bernoulli, last-90-days samples</td><td class="num">1 each</td><td class="num">3–4 each</td></tr>
+          <tr><td>Bytes (dry-run analog)</td><td class="num">0</td><td class="num">4 <span class="sidref">(s10, s14, s17, s22)</span></td></tr>
+          <tr><td>Static plan</td><td class="num">1 <span class="sidref">(s14)</span></td><td class="num">5</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Robustness checks</h3>
+    <ul>
+      <li><strong>Stable truth only.</strong> With the seven near-threshold scenarios removed (19 remain), the full clone scores 100% direction, 100% recall, no false warnings and 95% within one bucket. The ranking of strategies does not change.</li>
+      <li><strong>CPU work instead of elapsed time.</strong> The ordering holds. Samples do better on work than on elapsed time (the 10% sample reaches 95% direction) because work scales more linearly than parallel run time. The full clone still has no sign errors.</li>
+      <li><strong>Share of the whole bill.</strong> Counting a change as material when it moves the total production bill by 1% or more, the full clone scores 84% direction and the PR-only run 95%. Most of these changes are driven by millisecond dashboard queries, where a single CI measurement stays noisy even at five executions.</li>
+    </ul>
+
+    <h3 id="e1-mechanisms">Why the cheap strategies fail</h3>
+    <ul class="mech">
+      <li><h4>The sign can flip with data size</h4><p>Adding an ORDER BY (<span class="sidref">s22</span>) made the model 38% cheaper at production scale, while the 10% and 1% samples showed it as a regression of +22% and +41%. For a join optimisation (<span class="sidref">s14</span>, truth −29%), three cheap estimators reported increases of +21% to +40%.</p></li>
+      <li><h4>Super-linear joins break extrapolation</h4><p>Self-joining line items on ship date and ship mode (<span class="sidref">s06</span>) made the affected workloads about 15 times as expensive (+1,413%). The 1% key-consistent sample showed +4%, the 10% sample +570%, two-point extrapolation +4,264%, and the static plan +124,924%. One full-clone run measured +1,419%.</p></li>
+      <li><h4>Compute-bound changes are invisible to plans and bytes</h4><p>Adding windows, ranks and medians (<span class="sidref">s17</span>, +56% per run) moved neither bytes nor plan row estimates. Adding an ORDER BY (<span class="sidref">s22</span>) left bytes unchanged and moved row estimates only 6%.</p></li>
+      <li><h4>Bytes and compute diverge</h4><p>Comparing dates as strings, which defeats pruning (<span class="sidref">s02</span>), raised bytes scanned 239% but engine time only 4%. Replacing an incremental model with a full rebuild (<span class="sidref">s04</span>) raised bytes 856% and time 62%. They can also agree: dropping two text columns (<span class="sidref">s13</span>) cut bytes 35% and time 40%. Separately, the latency ratio and the CPU-work ratio of the same model differed by up to 3×, because parallel efficiency differs between variants and with data size.</p></li>
+      <li><h4>Some changes are no-ops on the actual data</h4><p>Removing the filter that excluded returned items (<span class="sidref">s15</span>) reads in code as +33% rows. On this data the filter excluded no rows in the model's window, so the true change was about zero. Only execution shows this.</p></li>
+      <li><h4>Small increments hide incremental-window changes</h4><p>Reprocessing 45 days instead of 3 (<span class="sidref">s03</span>, <span class="sidref">s24</span>) cost only +7% and 0% at lab scale, because fixed per-statement overhead dominates tiny increments. At production volume this would be a large regression of the hourly job.</p></li>
+      <li><h4>Recent-window CI data cannot see window changes</h4><p>Widening a 180-day window to 730 days (<span class="sidref">s01</span>, truth +111%) read as −5% on a last-90-days sample.</p></li>
+      <li><h4>History comparisons are fragile for tiny, frequent queries</h4><p>For <span class="sidref">s04</span>, a 7 ms dashboard query's history median (10.9 ms) against one CI run (7.3 ms), times 30,000 runs a month, swamped a +673% per-run regression of the hourly model. A paired A/B run cancels drift like this; comparing against history does not.</p></li>
+    </ul>
+
+    <h3 id="e1-mapping">Which workloads to count</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Workloads included (full-clone A/B)</th><th class="num">Direction</th><th class="num">Large-regression recall</th><th class="num">Within 1 bucket</th><th class="num">Rank corr.</th></tr></thead>
+        <tbody>
+          <tr><td>Modified models only</td><td class="num">75%</td><td class="num">67%</td><td class="num">85%</td><td class="num">0.58</td></tr>
+          <tr><td>Plus their direct children</td><td class="num">75%</td><td class="num">67%</td><td class="num">85%</td><td class="num">0.60</td></tr>
+          <tr><td>All dbt descendants</td><td class="num">75%</td><td class="num">67%</td><td class="num">85%</td><td class="num">0.62</td></tr>
+          <tr class="hl"><td>Plus dashboard and app queries on changed tables</td><td class="num">100%</td><td class="num">100%</td><td class="num">96%</td><td class="num">0.90</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Without the queries that read changed tables, materialisation changes get the wrong answer. Turning a table into a view (<span class="sidref">s10</span>) read as −10% from the dbt graph alone and measured +118%. Turning a view into a table (<span class="sidref">s11</span>) read as +1% and measured −89%. Inside the dbt graph, going beyond direct children changed little; E4 below has the cost of each depth.</p>
+
+    <h3 id="e1-latency">CI latency</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Step</th><th>Measured</th></tr></thead>
+        <tbody>
+          <tr><td>Change detection and compilation (dbt in-process)</td><td>median 25 seconds per PR: one parse (4.2 s), eight state listings (1.8 s each), two compiles (4.4 s each)</td></tr>
+          <tr><td>The same through the dbt command line</td><td>about 3–4 times slower on this laptop</td></tr>
+          <tr><td>Execution on a full clone</td><td>one production run of each affected workload per variant, plus a warm-up. The median affected set runs in 2.3 lab-seconds (maximum 24.9 s, <span class="sidref">s25</span>), so CI wall time is about 4–5 times the production runtime of the affected models</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>On a real warehouse the execution term dominates, since production dbt models run for minutes to hours.</p>
+  </section>
+
+  <section id="e9">
+    <div class="sec-head"><span class="eyebrow">E9</span><span class="chip measured">Measured, dbt-core 1.12.5</span></div>
+    <h2>Does change detection find the affected models?</h2>
+    <p>Three detectors were compared on the 26 PRs: the changed files, dbt's <code>state:modified</code>, and a diff of the compiled SQL of every model.</p>
+    <ul>
+      <li><strong>25 of 26 matched.</strong> dbt's state comparison agreed with the compiled-SQL diff at model level. It caught a macro edit fanning out to three models, a folder-level config change reaching five staging models, and in-file materialisation changes.</li>
+      <li><strong>One miss.</strong> Changing a variable's default in <code>dbt_project.yml</code> (<span class="sidref">s24</span>) made the hourly incremental model reprocess 15 times more days, and dbt reported nothing. The compiled-SQL diff caught it.</li>
+      <li><strong>Changed is not the same as costlier.</strong> A cosmetic refactor with a renamed CTE (<span class="sidref">s21</span>, truth −1%) and a macro edit touching three models (<span class="sidref">s23</span>, truth +1%) were both flagged. Detection decides where to look; only measurement says whether it matters. A static screen settled 58 of 108 workload checks without running anything, mostly unchanged downstream models with identical plans.</li>
+      <li><strong>Consumers live outside dbt.</strong> Dashboard queries were mapped from a registry that stands in for the platforms' access history. The workload-mapping table under E1 shows this step is required.</li>
+    </ul>
+  </section>
+
+  <section id="e5">
+    <div class="sec-head"><span class="eyebrow">E5</span><span class="chip computed">Computed from measured noise</span></div>
+    <h2>Can confidence be grounded in numbers?</h2>
+    <p>80% intervals were built by propagating measured run-to-run noise: the spread of a single CI run by duration, the noise in three history runs, and for the hybrid the disagreement between its two samples. A grade follows from the interval: high when it sits inside one class (increase, immaterial or decrease), medium when it spans two, low when it spans both directions.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Estimator</th><th class="num">80% interval covered the truth</th><th>Direction right, by grade</th></tr></thead>
+        <tbody>
+          <tr class="hl"><td>Full-clone A/B with history</td><td class="num">84% (21 of 25)</td><td>High 100% (19) · Medium 67% (6) · Low, none</td></tr>
+          <tr><td>Hybrid</td><td class="num">80% (20 of 25)</td><td>High 94% (16) · Medium 71% (7) · Low 100% (2)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <ul>
+      <li>Coverage is close to nominal, and high-grade calls from the full clone were never wrong on direction.</li>
+      <li>The misses were near a threshold or dominated by millisecond queries (<span class="sidref">s12</span>, <span class="sidref">s19</span>), or right in direction with a systematic drift of 7–9 points that noise alone does not explain (<span class="sidref">s14</span>, <span class="sidref">s22</span>).</li>
+      <li>These intervals cover measurement noise only. A production interval also needs the CI-versus-production gaps (E3), physical layout (no effect in E8, but untested on real warehouse storage), frequency (E6), and pricing policy (E2). None of these could be quantified on a real platform.</li>
+    </ul>
+    <p style="font-family: var(--sans); font-size: 13.5px; color: var(--muted);">The new-model scenario is excluded because its relative impact is infinite.</p>
+  </section>
+
+  <section id="e7">
+    <div class="sec-head"><span class="eyebrow">E7</span><span class="chip computed">Computed from measured pairs</span></div>
+    <h2>Does learning from past PRs improve estimates?</h2>
+    <p>Each estimator's (predicted, measured) pairs were corrected by a multiplicative factor learned from the other scenarios, leaving each scenario out in turn. Only material pairs where the estimate had the right sign were used. Values are the median absolute log error.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Estimator</th><th class="num">Pairs</th><th class="num">Before correction</th><th class="num">One global factor</th><th class="num">Factor per workload class</th><th class="num">Learned factor</th></tr></thead>
+        <tbody>
+          <tr class="hl"><td>Full-clone A/B with history</td><td class="num">38</td><td class="num">0.16</td><td class="num">0.14</td><td class="num">0.19</td><td class="num">1.08</td></tr>
+          <tr><td>Hybrid</td><td class="num">31</td><td class="num">0.16</td><td class="num">0.15</td><td class="num">0.18</td><td class="num">1.08</td></tr>
+          <tr><td>10% key-consistent sample</td><td class="num">34</td><td class="num">0.42</td><td class="num">0.55</td><td class="num">0.57</td><td class="num">1.28</td></tr>
+          <tr><td>Two-point extrapolation</td><td class="num">32</td><td class="num">0.70</td><td class="num">0.84</td><td class="num">0.64</td><td class="num">0.88</td></tr>
+          <tr><td>Bytes</td><td class="num">28</td><td class="num">0.62</td><td class="num">0.52</td><td class="num">0.55</td><td class="num">1.13</td></tr>
+          <tr><td>Static plan</td><td class="num">22</td><td class="num">1.32</td><td class="num">1.10</td><td class="num">1.13</td><td class="num">0.46</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <ul>
+      <li>The accurate estimator reads about 8% low; one global factor removes part of that.</li>
+      <li>Correction made the sample-based estimators worse. Their errors depend on the scenario (plan and parallelism effects that change with scale), not on a stable bias, so calibration cannot turn a cheap, wrong-sign estimator into a reliable one.</li>
+      <li>Per-class factors overfit at this sample size. All pairs come from one engine and one synthetic customer, so nothing here speaks to transfer between customers.</li>
+    </ul>
+  </section>
+
+  <section id="e8">
+    <div class="sec-head"><span class="eyebrow">E8</span><span class="chip measured">Measured, local engine</span></div>
+    <h2>Does physical layout change the truth?</h2>
+    <p>The same data was rewritten with row groups of 8,192 rows (about 1.7 days of line items) instead of the default 122,880 rows (about 26 days).</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Scenario</th><th class="num">PR / MAIN ratio, default layout</th><th class="num">PR / MAIN ratio, fine layout</th></tr></thead>
+        <tbody>
+          <tr><td><span class="sidref">s01</span> Widen the analysis window</td><td class="num">2.50</td><td class="num">2.39</td></tr>
+          <tr><td><span class="sidref">s02</span> Cast defeats pruning</td><td class="num">0.99</td><td class="num">1.01</td></tr>
+          <tr><td><span class="sidref">s03</span> Incremental lookback 3 → 45 days</td><td class="num">1.21</td><td class="num">1.17</td></tr>
+          <tr><td><span class="sidref">s04</span> Incremental → full table</td><td class="num">5.88</td><td class="num">5.78</td></tr>
+          <tr><td><span class="sidref">s13</span> Fewer columns</td><td class="num">0.58</td><td class="num">0.60</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>The hypothesis is rejected: layout granularity changed no ratio materially. Incremental-window changes look small in the lab because about 214,000 extra rows cost milliseconds against about 18 ms of fixed work per run. At 100 times the data, the same change would multiply the hourly job's scan work about 15 times. The lab therefore understates these regressions, and so would any CI run on less-than-production data.</p>
+  </section>
+
+  <section id="e10">
+    <div class="sec-head"><span class="eyebrow">E10</span><span class="chip computed">Measured cost, assumed rates</span></div>
+    <h2>Does the check pay for itself?</h2>
+    <p>A check that consumes <em>k</em> production runs, triggered a few times per PR, is worth running only if it removes more expected cost than it spends:</p>
+    <div class="formula">k × runs per PR  ≤  P(material regression) × typical regression × runs per month × months undetected</div>
+    <p><em>k</em> was measured for each strategy. The break-even frequency was swept over a 5% or 20% regression rate, +50% or +100% typical regression, one or three months before discovery, and one or three CI runs per PR.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Strategy</th><th class="num">k (median)</th><th class="num">Break-even runs per month: min / median / max</th></tr></thead>
+        <tbody>
+          <tr><td>Full-clone A/B</td><td class="num">4.6</td><td class="num">7.7 / <strong>69</strong> / 552</td></tr>
+          <tr><td>PR-only run vs history</td><td class="num">2.5</td><td class="num">4.1 / <strong>37</strong> / 299</td></tr>
+          <tr><td>10% key-consistent sample</td><td class="num">1.6</td><td class="num">2.7 / <strong>24</strong> / 196</td></tr>
+          <tr><td>Hybrid</td><td class="num">4.0</td><td class="num">6.7 / <strong>60</strong> / 480</td></tr>
+          <tr><td>Static plan</td><td class="num">0</td><td class="num">0</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <ul>
+      <li>The one strategy that met the accuracy bars pays off at median assumptions only on workloads run more than about 70 times a month, such as hourly jobs and dashboard queries. The PR-only run lowers that to just over daily.</li>
+      <li>A monthly job can never justify a clone run: one analysis costs about 4.6 of its monthly runs.</li>
+      <li>The hybrid does not save money (k of 4.0 against 4.6). Its static screen skipped unchanged descendants, but the sample stage then ran on the changed workloads, and most of them escalated to a clone anyway.</li>
+      <li>The most expensive analyses (k of 30–36) came from super-linear regressions and wide blast radii, so the check costs most when the PR is most dangerous. A per-PR spend cap with a "too expensive to measure" result is required.</li>
+      <li>Snowflake bills a 60-second minimum every time a CI warehouse resumes, which makes short sample runs cost more than their runtime (inferred).</li>
+    </ul>
+  </section>
+
+  <section id="e2">
+    <div class="sec-head"><span class="eyebrow">E2</span><span class="chip simulated">Simulated month, documented rules</span></div>
+    <h2>From usage changes to recurring dollars</h2>
+    <p>Each scenario's measured usage was replayed through a 30-day production month with every other workload at its measured baseline, the job schedules and dashboard traffic, and seven pool configurations, four of which are shown. Units scale lab measurements by an assumed factor of 100. Each cell shows the <strong>marginal</strong> change in the bill (month with PR minus month with MAIN) and the <strong>attributed</strong> figure a per-query cost report would show, both in dollars per month. Highlighted rows are changes driven by dashboard queries.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Scenario</th><th class="num">Snowflake, dedicated</th><th class="num">BigQuery on-demand</th><th class="num">BigQuery editions</th><th class="num">Databricks SQL serverless</th></tr></thead>
+        <tbody>
+          <tr><td><span class="sidref">s01</span> Widen window (batch)</td><td class="num money"><b>+$90</b><span>attributed +$90</span></td><td class="num money"><b>+$10</b><span>attributed +$10</span></td><td class="num money"><b>+$62</b><span>attributed +$34</span></td><td class="num money"><b>+$126</b><span>attributed +$126</span></td></tr>
+          <tr><td><span class="sidref">s04</span> Incremental → full (hourly)</td><td class="num money"><b>+$47</b><span>attributed +$49</span></td><td class="num money"><b>+$282</b><span>attributed +$282</span></td><td class="num money"><b>+$38</b><span>attributed +$25</span></td><td class="num money"><b>+$66</b><span>attributed +$69</span></td></tr>
+          <tr><td><span class="sidref">s06</span> Super-linear join (batch)</td><td class="num money"><b>+$208</b><span>attributed +$208</span></td><td class="num money"><b>+$1</b><span>attributed +$1</span></td><td class="num money"><b>+$109</b><span>attributed +$93</span></td><td class="num money"><b>+$292</b><span>attributed +$292</span></td></tr>
+          <tr class="hl"><td><span class="sidref">s10</span> Table → view (dashboards)</td><td class="num money"><b>−$11</b><span>attributed +$57</span></td><td class="num money"><b>+$166</b><span>attributed +$166</span></td><td class="num money"><b>−$9</b><span>attributed +$14</span></td><td class="num money"><b>−$15</b><span>attributed +$79</span></td></tr>
+          <tr class="hl"><td><span class="sidref">s11</span> View → table (dashboards)</td><td class="num money"><b>$0</b><span>attributed −$25</span></td><td class="num money"><b>−$67</b><span>attributed −$67</span></td><td class="num money"><b>$0</b><span>attributed −$13</span></td><td class="num money"><b>$0</b><span>attributed −$35</span></td></tr>
+          <tr class="hl"><td><span class="sidref">s18</span> Frequent cheap view (dashboards)</td><td class="num money"><b>$0</b><span>attributed +$12</span></td><td class="num money"><b>+$1</b><span>attributed +$1</span></td><td class="num money"><b>$0</b><span>attributed $0</span></td><td class="num money"><b>$0</b><span>attributed +$17</span></td></tr>
+          <tr><td><span class="sidref">s25</span> Staging layer → tables</td><td class="num money"><b>+$317</b><span>attributed +$328</span></td><td class="num money"><b>+$44</b><span>attributed +$44</span></td><td class="num money"><b>+$86</b><span>attributed +$42</span></td><td class="num money"><b>+$368</b><span>attributed +$459</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <ul>
+      <li><strong>Batch jobs on dedicated warehouses:</strong> marginal and attributed dollars agree. The 60-second minimum and idle time matter little for jobs that run for minutes, so cost per run times frequency is a fair estimate here.</li>
+      <li><strong>Dashboard queries on a busy warehouse:</strong> the marginal cost is about zero and can have the opposite sign. The simulated dashboard warehouse is up all business day, so extra query time is absorbed until concurrency forces a second cluster. Whether to report short-run marginal spend or capacity consumed is a policy choice, not a measurement.</li>
+      <li><strong>Billing models differ by orders of magnitude.</strong> The compute-heavy join costs +$208 on Snowflake and +$1 under BigQuery on-demand. The byte-heavy full rebuild costs +$282 on-demand and +$47 on Snowflake. How PRs rank by cost depends on the platform.</li>
+      <li><strong>Capacity pricing adds rounding.</strong> BigQuery editions allocate slots in steps of 50 held for at least 60 seconds, so batch changes cost more than their slot-seconds suggest (<span class="sidref">s01</span>: $62 against $34). The dashboard pool's 100 baseline slots absorbed dashboard changes entirely.</li>
+      <li><strong>The pattern holds at other scales.</strong> On the dedicated Snowflake pool, from a scale factor of 10 to 1,000, dashboard changes stay absorbed (at 1,000: $0 marginal against +$167 attributed for <span class="sidref">s19</span>) and batch changes stay close to attributed. Idle-time effects grow for the short hourly job (<span class="sidref">s03</span> at 1,000: +$8 marginal against +$45 attributed).</li>
+    </ul>
+    <div class="note"><strong>These dollars are not forecasts.</strong> They show mechanisms under documented billing rules applied to a synthetic month. The replay has not been checked against real metered bills; that is the first item of the live experiment. One defect in the simulator was found and fixed during this work: rounding residue created phantom autoscale charges.</div>
+  </section>
+
+  <section id="e3">
+    <div class="sec-head"><span class="eyebrow">E3</span><span class="chip measured">Measured, local engine</span></div>
+    <h2>Does a CI measurement hold under production conditions?</h2>
+    <p>In E1 the full clone ran under the same conditions as the truth, which flatters it. Here six scenarios were re-measured under conditions where CI and production usually differ. Each value is a PR / MAIN ratio of total latency, with its deviation from the production reference (four threads, isolated, warm, three interleaved repetitions).</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Scenario</th><th class="num">Production reference</th><th class="num">Smaller CI engine (1 thread)</th><th class="num">Production under concurrent load</th><th class="num">Cold single run</th></tr></thead>
+        <tbody>
+          <tr><td><span class="sidref">s01</span> Widen window</td><td class="num">2.36</td><td class="num">3.00 (+27%)</td><td class="num">1.95 (−18%)</td><td class="num">2.14 (−10%)</td></tr>
+          <tr><td><span class="sidref">s04</span> Incremental → full</td><td class="num">6.78</td><td class="num">15.98 (+136%)</td><td class="num">10.70 (+58%)</td><td class="num">4.79 (−29%)</td></tr>
+          <tr><td><span class="sidref">s05</span> Many-to-many join</td><td class="num">1.67</td><td class="num">1.94 (+16%)</td><td class="num">1.58 (−5%)</td><td class="num">1.63 (−3%)</td></tr>
+          <tr><td><span class="sidref">s08</span> Window functions</td><td class="num">2.26</td><td class="num">3.44 (+52%)</td><td class="num">2.52 (+12%)</td><td class="num">2.00 (−11%)</td></tr>
+          <tr><td><span class="sidref">s09</span> Repeated scans</td><td class="num">1.26</td><td class="num">1.28 (+1%)</td><td class="num">1.28 (+1%)</td><td class="num">1.26 (0%)</td></tr>
+          <tr class="hl"><td><span class="sidref">s22</span> Add ORDER BY</td><td class="num">0.81</td><td class="num">1.10 (+35%, sign flips)</td><td class="num">0.90 (+11%)</td><td class="num">0.78 (−4%)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <ul>
+      <li><strong>CI must match the production warehouse size.</strong> A smaller engine overstated regressions by up to 136%, because MAIN and PR parallelise differently, and turned a production improvement (<span class="sidref">s22</span>) into a regression. The error is not a constant factor, so one global correction cannot fix it. For Snowflake this implies (inferred) that an X-Small CI warehouse is no proxy for a Large production one: CI must run at the production size, or be calibrated per pool.</li>
+      <li><strong>Concurrent load shifted ratios by −18% to +58%</strong> while keeping their direction. The load was two heavy aggregations running alongside, like other tenants of one warehouse; it slowed absolute runtimes 2.6–4.5×. This depends on what else runs, so it belongs in the interval, not the estimate.</li>
+      <li><strong>Warm-up matters.</strong> A cold single run understated ratios by up to 29%.</li>
+      <li>E1's accuracy for the full clone is therefore an upper bound. A high-grade verdict needs CI compute of the production size and an interval widened for contention.</li>
+    </ul>
+  </section>
+
+  <section id="e4">
+    <div class="sec-head"><span class="eyebrow">E4</span><span class="chip measured">Measured, local engine</span></div>
+    <h2>How far downstream should a check reach?</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Scenario</th><th class="num">Truth</th><th class="num">Changed models only</th><th class="num">+ direct children</th><th class="num">All dbt descendants</th><th class="num">+ dashboard queries</th><th class="num">Row-count scaling</th></tr></thead>
+        <tbody>
+          <tr><td><span class="sidref">s01</span> Widen window</td><td class="num">+111%</td><td class="num">+87%</td><td class="num">+98%</td><td class="num">+98%</td><td class="num">+99%</td><td class="num">+193%</td></tr>
+          <tr><td><span class="sidref">s26</span> Include future shipments</td><td class="num">+33%</td><td class="num">+20%</td><td class="num">+25%</td><td class="num">+25%</td><td class="num">+30%</td><td class="num">+30%</td></tr>
+          <tr><td><span class="sidref">s25</span> Staging layer → tables</td><td class="num">+94%</td><td class="num">+82%</td><td class="num">+83%</td><td class="num">+83%</td><td class="num">+83%</td><td class="num">+82%</td></tr>
+          <tr><td><span class="sidref">s10</span> Table → view</td><td class="num">+118%</td><td class="num">−10%</td><td class="num">−10%</td><td class="num">−10%</td><td class="num">+118%</td><td class="num">−10%</td></tr>
+          <tr><td><span class="sidref">s18</span> Frequent cheap view</td><td class="num">+77%</td><td class="num">0%</td><td class="num">0%</td><td class="num">0%</td><td class="num">+64%</td><td class="num">0%</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>CI execution, lab seconds (MAIN and PR once each)</th><th class="num">Changed only</th><th class="num">+ direct children</th><th class="num">All descendants</th><th class="num">+ dashboard queries</th></tr></thead>
+        <tbody>
+          <tr><td><span class="sidref">s01</span> Widen window</td><td class="num">18.2</td><td class="num">22.9</td><td class="num">22.9</td><td class="num">22.9</td></tr>
+          <tr><td><span class="sidref">s25</span> Staging layer → tables</td><td class="num">32.2</td><td class="num">78.2</td><td class="num">83.1</td><td class="num">83.2</td></tr>
+          <tr><td><span class="sidref">s23</span> Macro fan-out</td><td class="num">30.3</td><td class="num">34.1</td><td class="num">34.1</td><td class="num">34.1</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <ul>
+      <li><strong>One hop was enough inside the dbt graph here.</strong> Running direct children captured nearly all the downstream effect (<span class="sidref">s01</span>: +87% to +98%; <span class="sidref">s26</span>: +20% to +25%). Going deeper added cost without accuracy: on <span class="sidref">s25</span>, running all descendants cost 2.6 times the direct-only run and moved the estimate by one point. This project's graph is at most three levels deep, so one hop is not shown to suffice everywhere.</li>
+      <li><strong>Dashboard queries drove the largest downstream effects</strong>, and a dbt-only strategy got them wrong or missed them.</li>
+      <li><strong>Scaling descendants by the changed model's row count</strong> costs nothing extra but is unreliable: right for <span class="sidref">s26</span>, 82 points too high for <span class="sidref">s01</span>, where one descendant filters to recent months. Use it to decide which descendants to run, not as an estimate.</li>
+    </ul>
+  </section>
+
+  <section id="e6">
+    <div class="sec-head"><span class="eyebrow">E6</span><span class="chip simulated">Simulated histories</span></div>
+    <h2>Can run frequency be forecast from history?</h2>
+    <p>Recurring cost is the per-run change times future runs. For each pattern, 300 synthetic 180-day histories were generated and the next 30 days forecast.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Pattern</th><th class="num">Median error, forecast from last 30 days</th><th class="num">90th percentile, same</th><th class="num">Median error, forecast from last 90 days</th><th class="num">Poisson 80% interval coverage</th><th class="num">Historical-range coverage</th></tr></thead>
+        <tbody>
+          <tr><td>Daily cron</td><td class="num">0.0%</td><td class="num">0.0%</td><td class="num">0.0%</td><td class="num">100%</td><td class="num">100%</td></tr>
+          <tr><td>Hourly cron with retries</td><td class="num">0.4%</td><td class="num">1.0%</td><td class="num">0.3%</td><td class="num">100%</td><td class="num">76%</td></tr>
+          <tr><td>Monthly job</td><td class="num">0.0%</td><td class="num">0.0%</td><td class="num">0.0%</td><td class="num">100%</td><td class="num">100%</td></tr>
+          <tr><td>Dashboard traffic, weekday pattern</td><td class="num">7.3%</td><td class="num">8.2%</td><td class="num">6.1%</td><td class="num">0%</td><td class="num">0%</td></tr>
+          <tr><td>Dashboard traffic, growing 5% a month</td><td class="num">2.3%</td><td class="num">3.0%</td><td class="num">3.7%</td><td class="num">0%</td><td class="num">100%</td></tr>
+          <tr><td>Seasonal peak not in history</td><td class="num">66.6%</td><td class="num">67.1%</td><td class="num">66.7%</td><td class="num">0%</td><td class="num">0%</td></tr>
+          <tr><td>Sparse ad-hoc job</td><td class="num">100%</td><td class="num">200%</td><td class="num">66.7%</td><td class="num">72%</td><td class="num">83%</td></tr>
+          <tr><td>Rebuilt when data arrives</td><td class="num">10.3%</td><td class="num">26.3%</td><td class="num">8.6%</td><td class="num">100%</td><td class="num">73%</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <ul>
+      <li>Scheduled jobs are essentially exact.</li>
+      <li>Weekday dashboard traffic carries 6–8% error from calendar composition alone, and simple Poisson intervals never covered the truth.</li>
+      <li>A seasonal peak missing from history (three times normal traffic) is missed by about two thirds, and sparse ad-hoc jobs by about 100%. Neither is predictable from history.</li>
+      <li>Models rebuilt only when new data arrives come within about 10% at the median and 26% at the 90th percentile.</li>
+    </ul>
+  </section>
+
+  <section id="hypotheses">
+    <div class="sec-head"><span class="eyebrow">Summary</span></div>
+    <h2>Hypothesis verdicts</h2>
+    <div class="table-wrap">
+      <table class="stack">
+        <thead><tr><th>Hypothesis</th><th>Verdict</th><th>Why</th></tr></thead>
+        <tbody>
+          <tr><td><strong>H1</strong> Change attribution</td><td><span class="chip good">Supported</span></td><td>With two fixes: a compiled-SQL diff next to dbt's state comparison, and consumer discovery from the platform's access history.</td></tr>
+          <tr><td><strong>H2</strong> Counterfactual estimation</td><td><span class="chip warn">Only by execution</span></td><td>Supported only by production-scale execution. The full clone had 100% direction and no sign errors. Every cheaper estimator (static, bytes, four sampling schemes, extrapolation) made wrong-sign or missed-material errors.</td></tr>
+          <tr><td><strong>H3</strong> Extrapolation to monthly cost</td><td><span class="chip warn">Partly</span></td><td>Per-run change times frequency works for scheduled jobs on dedicated or per-query pools. Frequency cannot be forecast for seasonal or sparse work, marginal dollars on shared or prepaid pools depend on pricing policy and can have the opposite sign, and production conditions shift ratios by 10–60%.</td></tr>
+          <tr><td><strong>H4</strong> Post-merge calibration</td><td><span class="chip warn">Weak</span></td><td>Designed, and weakly supported. It removes a small bias from the accurate estimator and makes inaccurate ones worse. No evidence of transfer between customers.</td></tr>
+          <tr><td><strong>H5</strong> CI practicality</td><td><span class="chip warn">Narrow</span></td><td>A reliable check costs 2.5–4.6 production runs per analysis (up to about 36) and about the production runtime in latency. It breaks even only above about 40–70 runs a month at median assumptions.</td></tr>
+          <tr><td><strong>H6</strong> Cross-platform abstraction</td><td><span class="chip warn">Reframed</span></td><td>Survives as a usage change replayed through each pool's billing, not as cost per query. Magnitudes are not comparable across billing models: the same change was $208 on one platform and $1 on another.</td></tr>
+          <tr><td><strong>HA vs HB</strong> Do cheap CI measurements transfer?</td><td><span class="chip bad">No (HB)</span></td><td>Sample ratios erred both ways by large factors, and direction flipped with data size (<span class="sidref">s22</span>, <span class="sidref">s14</span>) and with warehouse size (E3).</td></tr>
+          <tr><td><strong>HC vs HD</strong> Is attributed cost the marginal cost?</td><td><span class="chip bad">No (HD)</span></td><td>As a mechanism, simulated under documented rules. They agree for long batch jobs on dedicated pools and diverge, even in sign, for dashboard queries on busy or prepaid pools.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="scenarios">
+    <div class="sec-head"><span class="eyebrow">Appendix</span></div>
+    <h2>Scenario index</h2>
+    <p>Every pull request in the benchmark, with its measured truth and four of the estimates. Truth is the relative change in monthly engine time across all affected workloads: the changed models, their dbt descendants, and the queries that read them, each weighted by how often it runs.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>ID</th><th>Change</th><th class="num">Truth</th><th class="num">Full clone</th><th class="num">PR-only</th><th class="num">10% sample</th><th class="num">Static plan</th></tr></thead>
+        <tbody>
+          <tr><td class="sid">s01</td><td>Widen int_order_lines analysis window from 180 to 730 days</td><td class="num">+111%</td><td class="num">+99%</td><td class="num">+96%</td><td class="num">+285%</td><td class="num">+56%</td></tr>
+          <tr><td class="sid">s02</td><td>Compare ship_date as strings (same result, defeats pruning)</td><td class="num">+4% <span class="near">near threshold</span></td><td class="num">−1%</td><td class="num">+3%</td><td class="num">+2%</td><td class="num">0%</td></tr>
+          <tr><td class="sid">s03</td><td>Reprocess 45 days instead of 3 on every incremental run</td><td class="num">+7% <span class="near">near threshold</span></td><td class="num">0%</td><td class="num">−4%</td><td class="num">−7%</td><td class="num">+1%</td></tr>
+          <tr><td class="sid">s04</td><td>Switch fct_daily_revenue from incremental to full table rebuild</td><td class="num">+62%</td><td class="num">+57%</td><td class="num">+3%</td><td class="num">+15%</td><td class="num">0%</td></tr>
+          <tr><td class="sid">s05</td><td>Join part suppliers on part_key only (many-to-many fan-out)</td><td class="num">+47%</td><td class="num">+53%</td><td class="num">+49%</td><td class="num">+233%</td><td class="num">+184%</td></tr>
+          <tr><td class="sid">s06</td><td>Self-join order lines on (ship_date, ship_mode) to count peer volume</td><td class="num">+1,413%</td><td class="num">+1,419%</td><td class="num">+1,403%</td><td class="num">+570%</td><td class="num">+124,924%</td></tr>
+          <tr><td class="sid">s07</td><td>Add SELECT DISTINCT over a wide, already-unique row set</td><td class="num">+3%</td><td class="num">−2%</td><td class="num">+4%</td><td class="num">+6%</td><td class="num">+19%</td></tr>
+          <tr><td class="sid">s08</td><td>Add per-customer window functions (lag, running sum, percent_rank)</td><td class="num">+5% <span class="near">near threshold</span></td><td class="num">+16%</td><td class="num">+16%</td><td class="num">+11%</td><td class="num">+2%</td></tr>
+          <tr><td class="sid">s09</td><td>Split customer_features into three separately-scanned CTEs</td><td class="num">−2% <span class="near">near threshold</span></td><td class="num">−6%</td><td class="num">−4%</td><td class="num">−2%</td><td class="num">+7%</td></tr>
+          <tr><td class="sid">s10</td><td>Materialise dim_customers as a view instead of a table</td><td class="num">+118%</td><td class="num">+118%</td><td class="num">+113%</td><td class="num">+99%</td><td class="num">+745%</td></tr>
+          <tr><td class="sid">s11</td><td>Materialise rpt_customer_segments as a table</td><td class="num">−89%</td><td class="num">−92%</td><td class="num">−91%</td><td class="num">−67%</td><td class="num">−95%</td></tr>
+          <tr><td class="sid">s12</td><td>Move the recent-months filter from HAVING into WHERE</td><td class="num">0% <span class="near">near threshold</span></td><td class="num">−12%</td><td class="num">−15%</td><td class="num">+15%</td><td class="num">0%</td></tr>
+          <tr><td class="sid">s13</td><td>Drop the two free-text comment columns from int_order_lines</td><td class="num">−40%</td><td class="num">−42%</td><td class="num">−44%</td><td class="num">−28%</td><td class="num">0%</td></tr>
+          <tr><td class="sid">s14</td><td>Pre-aggregate line items per order before joining to orders</td><td class="num">−29%</td><td class="num">−20%</td><td class="num">−24%</td><td class="num">−9%</td><td class="num">+127%</td></tr>
+          <tr><td class="sid">s15</td><td>Stop excluding returned items from int_order_lines</td><td class="num">−1% <span class="near">near threshold</span></td><td class="num">−1%</td><td class="num">−2%</td><td class="num">+1%</td><td class="num">0%</td></tr>
+          <tr><td class="sid">s16</td><td>Add a new daily churn mart</td><td class="num">new</td><td class="num">new</td><td class="num">new</td><td class="num">new</td><td class="num">new</td></tr>
+          <tr><td class="sid">s17</td><td>Add rolling windows, ranks and medians to the monthly LTV job</td><td class="num">+56%</td><td class="num">+54%</td><td class="num">+57%</td><td class="num">+66%</td><td class="num">0%</td></tr>
+          <tr><td class="sid">s18</td><td>Add 28-day average and year-over-year join to the KPI view</td><td class="num">+77%</td><td class="num">+64%</td><td class="num">+62%</td><td class="num">+64%</td><td class="num">+874%</td></tr>
+          <tr><td class="sid">s19</td><td>Same KPI-view change as s18, on an always-on BI warehouse with spare capacity</td><td class="num">+63%</td><td class="num">+23%</td><td class="num">+27%</td><td class="num">+87%</td><td class="num">+676%</td></tr>
+          <tr><td class="sid">s20</td><td>Carry six more columns through int_order_lines, on prepaid capacity</td><td class="num">+25%</td><td class="num">+18%</td><td class="num">+20%</td><td class="num">+21%</td><td class="num">0%</td></tr>
+          <tr><td class="sid">s21</td><td>Reformat customer_features, rename CTE, add comments</td><td class="num">−1%</td><td class="num">+2%</td><td class="num">0%</td><td class="num">−5%</td><td class="num">0%</td></tr>
+          <tr><td class="sid">s22</td><td>Add a full ORDER BY to int_order_lines &quot;for deterministic output&quot;</td><td class="num">−27%</td><td class="num">−19%</td><td class="num">−19%</td><td class="num">+22%</td><td class="num">+6%</td></tr>
+          <tr><td class="sid">s23</td><td>Round and null-guard the shared net_revenue macro</td><td class="num">+1%</td><td class="num">+2%</td><td class="num">−1%</td><td class="num">+4%</td><td class="num">0%</td></tr>
+          <tr><td class="sid">s24</td><td>Change the revenue_lookback_days var default from 3 to 45 in dbt_project.yml</td><td class="num">0% <span class="near">near threshold</span></td><td class="num">+6%</td><td class="num">−2%</td><td class="num">−3%</td><td class="num">+2%</td></tr>
+          <tr><td class="sid">s25</td><td>Materialise the whole staging layer as tables (folder-level config)</td><td class="num">+94%</td><td class="num">+83%</td><td class="num">+99%</td><td class="num">+26%</td><td class="num">+15%</td></tr>
+          <tr><td class="sid">s26</td><td>Include shipments scheduled after the run date in int_order_lines</td><td class="num">+33%</td><td class="num">+30%</td><td class="num">+25%</td><td class="num">+29%</td><td class="num">+14%</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="font-family: var(--sans); font-size: 13.5px; color: var(--muted);">s15 turned out to be a no-op on this data. s24 is measured with the compiled-SQL detector, because dbt's state comparison found nothing to run. "Near threshold" marks scenarios whose truth changed class between repetitions.</p>
+  </section>
+
+  <footer>
+    <p><strong>Method.</strong> Local engine DuckDB 1.5.5 with dbt-core 1.12.5 and dbt-duckdb 1.11 on TPC-H SF2, four threads. Four CI data environments: 1% Bernoulli, 1% and 10% key-consistent, and last 90 days. Eight interleaved production-scale repetitions per variant, with a warm-up discarded and disjoint repetitions for CI, history and truth.</p>
+    <p>Source documents in the investigation repository: RESULTS.md (this page), EXPERIMENT_DESIGN.md, DECISION.md and EVIDENCE_LOG.md. Raw measurements are under results/.</p>
+  </footer>
+</main>
+
+<script>
+(function () {
+  var data = [
+    { name: "Full-clone A/B with history", acc: 100, cost: 4.6, errs: 0, prod: true,
+      desc: "One MAIN and one PR run on a full production clone; their ratio is applied to the workload's production history." },
+    { name: "PR-only run vs history", acc: 94, cost: 2.5, errs: 1, prod: true,
+      desc: "One PR run on the clone, compared with the model's production history. No MAIN run." },
+    { name: "Hybrid", acc: 88, cost: 4.0, errs: 2, prod: false,
+      desc: "Static screen first, then key-consistent samples, escalating to a full clone when a workload looks risky." },
+    { name: "10% key-consistent sample", acc: 88, cost: 1.6, errs: 2, prod: false,
+      desc: "MAIN and PR on 10% of customers with all their orders and line items." },
+    { name: "Two-point extrapolation", acc: 81, cost: 2.0, errs: 3, prod: false,
+      desc: "A power law fitted through 1% and 10% samples, extrapolated to full scale." },
+    { name: "Bytes (dry-run analog)", acc: 75, cost: 0, errs: 4, prod: false,
+      desc: "Ratio of logical bytes scanned, the quantity a BigQuery dry run reports. Nothing is executed." },
+    { name: "1% key-consistent sample", acc: 75, cost: 0.5, errs: 4, prod: false,
+      desc: "MAIN and PR on 1% of customers with all their orders and line items." },
+    { name: "Last-90-days sample", acc: 75, cost: 3.4, errs: 4, prod: false,
+      desc: "Fact tables cut to their last 90 days and dimensions kept whole, a common dbt CI pattern." },
+    { name: "1% Bernoulli sample", acc: 69, cost: 0.1, errs: 5, prod: false,
+      desc: "1% of rows sampled independently from each large table." },
+    { name: "Static plan (EXPLAIN)", acc: 62, cost: 0, errs: 6, prod: false,
+      desc: "Ratio of the summed row estimates in the optimizer's plan. Nothing is executed." }
+  ];
+  var COST_MAX = 5;
+  var rows = document.getElementById("tt-rows");
+  var fig = document.getElementById("tradeoff-fig");
+  var tip = document.getElementById("tip");
+
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text != null) e.textContent = text;
+    return e;
+  }
+  function fmtCost(c) { return c === 0 ? "0, no execution" : c.toFixed(1) + "×"; }
+
+  data.forEach(function (d) {
+    var row = el("div", "tt-row" + (d.prod ? " is-prod" : ""));
+    row.setAttribute("role", "row");
+    row.tabIndex = 0;
+    row.setAttribute("aria-label", d.name + ": " + d.acc + "% direction accuracy, CI cost " + fmtCost(d.cost) +
+      ", " + d.errs + " of 16 material changes wrong or missed");
+
+    var name = el("span", "name", d.name);
+    name.setAttribute("role", "cell");
+
+    var acc = el("div", "acc");
+    acc.setAttribute("role", "cell");
+    acc.appendChild(el("span", "mcap", "Direction accuracy"));
+    var t1 = el("div", "track");
+    var b1 = el("span", "bar");
+    b1.style.setProperty("--v", String(d.acc / 100));
+    t1.appendChild(b1);
+    t1.appendChild(el("span", "val", d.acc + "%"));
+    t1.appendChild(el("span", "threshold"));
+    acc.appendChild(t1);
+
+    var cost = el("div", "cost");
+    cost.setAttribute("role", "cell");
+    cost.appendChild(el("span", "mcap", "CI cost per analysis"));
+    var t2 = el("div", "track");
+    var b2 = el("span", "bar");
+    b2.style.setProperty("--v", String(d.cost / COST_MAX));
+    t2.appendChild(b2);
+    t2.appendChild(el("span", "val" + (d.cost === 0 ? " quiet" : ""), fmtCost(d.cost)));
+    cost.appendChild(t2);
+
+    var errs = el("span", "errs", d.errs + " of 16");
+    errs.setAttribute("role", "cell");
+
+    row.appendChild(name);
+    row.appendChild(acc);
+    row.appendChild(cost);
+    row.appendChild(errs);
+    rows.appendChild(row);
+
+    function show(x, y) {
+      tip.textContent = "";
+      tip.appendChild(el("div", "v", d.acc + "% direction · " + fmtCost(d.cost) + " · " + d.errs + " of 16 wrong or missed"));
+      tip.appendChild(el("div", "n", d.name));
+      tip.appendChild(el("div", "d", d.desc));
+      tip.hidden = false;
+      var fr = fig.getBoundingClientRect();
+      var w = tip.offsetWidth, h = tip.offsetHeight;
+      var left = Math.min(Math.max(8, x - fr.left + 14), fr.width - w - 8);
+      var top = y - fr.top + 16;
+      if (top + h > fr.height - 8) top = y - fr.top - h - 12;
+      tip.style.left = left + "px";
+      tip.style.top = Math.max(8, top) + "px";
+    }
+    function hide() { tip.hidden = true; row.classList.remove("is-active"); }
+    row.addEventListener("pointermove", function (e) { row.classList.add("is-active"); show(e.clientX, e.clientY); });
+    row.addEventListener("pointerleave", hide);
+    row.addEventListener("focus", function () {
+      var r = row.getBoundingClientRect();
+      row.classList.add("is-active");
+      show(r.left + r.width * 0.35, r.bottom - 4);
+    });
+    row.addEventListener("blur", hide);
+  });
+})();
+</script>
