@@ -19,8 +19,8 @@ OUT = ROOT / "public_corpus" / "manifest.json"
 REPO = "tuva-health/tuva-core"
 WINDOW_START = "2026-02-04"      # the day Tuva's own DuckDB CI profile landed (PR #1193)
 WINDOW_END = "2026-09-09"        # exclusive upper bound; clone HEAD is 2026-09-08
-DEV_N = 15
-HOLDOUT_N = 25
+DEV_N = 10
+HOLDOUT_N = 20
 
 
 def cost_relevant(c: dict) -> bool:

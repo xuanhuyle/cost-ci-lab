@@ -51,6 +51,7 @@ DBT_VARS = {"synthetic_data_size": "large"}
 CI = {"threads": 2, "memory": "3GB", "warm": False, "background": False}
 PROD = {"threads": 4, "memory": "8GB", "warm": True, "background": True}
 REPS = 2
+DEV_N, HOLD_N = 10, 20        # protocol amendment 2026-10-05, before any holdout truth
 
 BACKGROUND_SQL = [
     "select count(*) from core.medical_claim",
@@ -141,15 +142,20 @@ def measure_pair(rec: dict, regime: dict, db: Path, profiles: Path, cap_s: int,
     """Interleaved MAIN/PR repetitions of the affected node set in one regime."""
     nodes = rec["affected"]
     runs = []
+    # worktrees and packages are set up once per PR per regime, not per repetition
+    projs = {}
+    for variant, wt, sha in (("main", WT_MAIN, rec["base_sha"]), ("pr", WT_PR, rec["head_sha"])):
+        ensure_worktree(CLONE, wt, sha)
+        proj = regime_project(wt, regime, db, profiles)
+        proj.deps()
+        projs[variant] = proj
     bg = BackgroundLoad(db, regime["background"])
     if regime["warm"]:
         prime(db)
     with bg:
         for rep in range(REPS):
-            for variant, wt in (("main", WT_MAIN), ("pr", WT_PR)):
-                ensure_worktree(CLONE, wt, rec["base_sha"] if variant == "main" else rec["head_sha"])
-                proj = regime_project(wt, regime, db, profiles)
-                proj.deps()
+            for variant in ("main", "pr"):
+                proj = projs[variant]
                 r = build_once(proj, nodes, cap_s)
                 r.update(variant=variant, rep=rep, regime=label)
                 runs.append(r)
@@ -204,7 +210,8 @@ def main() -> None:
     recs = json.loads((RES / "reconstruction.json").read_text(encoding="utf-8"))
     usable = [r for r in recs if r.get("executable")]
     for i, r in enumerate(usable):
-        r["split"] = "development" if i < 15 else ("holdout" if i < 40 else "reserve")
+        r["split"] = "development" if i < DEV_N else ("holdout" if i < DEV_N + HOLD_N
+                                                      else "reserve")
 
     write_profile(PROF_CI, DB_CI, CI["threads"], CI["memory"])
     write_profile(PROF_PROD, DB_PROD, PROD["threads"], PROD["memory"])

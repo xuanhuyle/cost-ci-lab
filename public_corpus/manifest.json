@@ -8,8 +8,8 @@
   "cost_relevant_rule": "diff touches a model .sql, a macro .sql, or project config",
   "n": 93,
   "split_rule": {
-   "development": 15,
-   "holdout": 25,
+   "development": 10,
+   "holdout": 20,
    "assignment": "first DEV_N usable in merge order, then next HOLDOUT_N; remainder is reserve for bug-invalidated holdout cases"
   },
   "protocol": "docs/PUBLIC_CORPUS_PROTOCOL.md"

@@ -40,9 +40,8 @@ clone's `main` HEAD. No PR was looked at for cost before the window was chosen.
 
 Process the 93 commits **in merge order**, oldest first. For each, attempt reconstruction (§5).
 
-- The **first 15** that pass reconstruction form the **development / calibration set**.
-- The **next 25** that pass form the **locked holdout**. (The brief's target is >=20; 25 is taken so
-  that later-discovered execution failures do not drop the holdout below 20.)
+- The **first 10** that pass reconstruction form the **development / calibration set**.
+- The **next 20** that pass form the **locked holdout**.
 - Everything after that is the **reserve**, used *only* to replace a holdout case invalidated by a
   genuine harness bug, in merge order.
 
@@ -158,7 +157,7 @@ while materially more expensive, that is recorded as **negative evidence**.
 | Freeze | What is frozen | Recorded where |
 |---|---|---|
 | F0 | pre-experiment estimator/harness baseline | `0ea6284` (in `STATUS.md`) |
-| F1 | corpus manifest (the 93, the split, the exclusion rules) | git SHA of the commit adding `public_corpus/manifest.json` |
+| F1 | corpus manifest (the 93, the split rule, the exclusion rules) | `b02b0dd` / `6768fc8` (`public_corpus/manifest.json`) |
 | F2 | estimator + harness, before the first holdout prediction | git SHA recorded in `results/public_pr/freeze.json` |
 | F3 | holdout predictions, before any shadow-production run | git SHA + per-PR prediction artifacts under `results/public_pr/holdout_predictions/` |
 | F4 | final truth evaluation | git SHA of the commit adding `results/public_pr/holdout_truth/` |
@@ -195,4 +194,5 @@ All three amendments below were made **before any holdout measurement ran**.
 |---|---|---|
 | 2026-10-05 | §5 step 3: the **full rendered-SQL diff is replaced by a targeted changed-var detector**. The detector diffs the top-level `vars:` block of `dbt_project.yml` between `C^` and `C`, then selects every model whose `raw_code`, or a macro it depends on, reads one of the changed vars, and adds their descendants. | `dbt compile` of this project does not run against an empty catalog: an `on-run-start`/seed hook queries `_tuva_synthetic.appointment_seed`, so a full rendered diff would need a populated warehouse per commit pair and roughly doubles the per-PR cost. The targeted detector covers exactly the class `state:modified` is *proven* to miss (`E-023`, dbt-core#4304) at negligible cost. It does **not** cover env-var or Jinja-rendering differences, which is recorded as a limitation. |
 | 2026-10-05 | Phase A and Phase B are **interleaved per PR** (predict, freeze, then deploy and measure) rather than all predictions first. | The shadow production database has to be in the PR's *base* state when its prediction is made, and production advances along `main` by deploying each PR in turn. Storing a 1.3 GB database snapshot per PR is not affordable. The brief specifies the freeze per PR ("Only after the prediction is frozen"), and the estimator is frozen at F2 before the first holdout PR, so no holdout outcome can influence any prediction. |
+| 2026-10-05 | The split is **10 development + 20 holdout** instead of 15 + 25. | That is the brief's own stated target ("~10–15 earliest usable PRs", ">=20 later usable PRs"), and the per-PR measurement cost measured during harness bring-up (8 full dbt invocations over a 1.3 GB database on a 4-core laptop) makes 40 PRs unaffordable in the available time. Choosing 30 before any truth is observed is preferable to running out of time with a partially measured holdout. |
 | 2026-10-05 | The deterministic **data-growth step** of `docs/SHADOW_PRODUCTION_DESIGN.md` §3 is made **conditional** on a development-set check that it does not cause build failures, and is reported as not-applied if the check fails. | Appending rows to derived relations can break model assumptions in a third-party project. Risking the whole experiment on an untested perturbation is worse than reporting that one of the six CI/production gap dimensions was not varied. |
