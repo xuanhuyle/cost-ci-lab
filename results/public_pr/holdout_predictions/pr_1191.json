@@ -1,0 +1,81 @@
+{
+ "affected": [
+  "service_category__inpatient_skilled_nursing_professional",
+  "service_category__inpatient_substance_use_institutional",
+  "service_category__inpatient_substance_use_professional",
+  "service_category__lab_institutional",
+  "service_category__lab_professional",
+  "service_category__observation_institutional",
+  "service_category__observation_professional",
+  "service_category__office_based_other_professional",
+  "service_category__office_based_physical_therapy_professional",
+  "service_category__office_based_radiology",
+  "service_category__office_based_surgery_professional",
+  "service_category__office_based_visit_professional",
+  "service_category__outpatient_hospice_institutional",
+  "service_category__outpatient_hospice_professional",
+  "service_category__outpatient_hospital_or_clinic_institutional",
+  "service_category__outpatient_hospital_or_clinic_professional",
+  "service_category__outpatient_physical_therapy_institutional",
+  "service_category__outpatient_physical_therapy_professional",
+  "service_category__outpatient_psychiatric_institutional",
+  "service_category__outpatient_psychiatric_professional",
+  "service_category__outpatient_radiology_institutional",
+  "service_category__outpatient_radiology_professional",
+  "service_category__outpatient_rehab_institutional",
+  "service_category__outpatient_rehab_professional",
+  "service_category__outpatient_skilled_nursing_institutional",
+  "service_category__outpatient_substance_use_institutional",
+  "service_category__outpatient_substance_use_professional",
+  "service_category__outpatient_surgery_institutional",
+  "service_category__outpatient_surgery_professional",
+  "service_category__pharmacy_institutional",
+  "service_category__pharmacy_professional",
+  "service_category__service_category_grouper",
+  "service_category__stg_inpatient_institutional",
+  "service_category__stg_medical_claim",
+  "service_category__stg_office_based",
+  "service_category__stg_outpatient_institutional",
+  "service_category__stg_professional",
+  "service_category__urgent_care_institutional",
+  "service_category__urgent_care_professional",
+  "tuva_chronic_conditions__stg_core__condition",
+  "tuva_chronic_conditions__stg_core__patient",
+  "urgent_care__anchor_events",
+  "urgent_care__encounter_grain",
+  "urgent_care__generate_encounter_id",
+  "urgent_care__match_claims_to_anchor"
+ ],
+ "frozen_at": "2026-10-05T12:31:22",
+ "pr": 1191,
+ "prediction": {
+  "analysis_engine_s": 900.9988,
+  "analysis_wall_s": 657.6,
+  "delta_s": -1.8584999999999923,
+  "grade": "HIGH",
+  "k_full_job_runs": 0.6168452579641894,
+  "k_production_runs": 6.027687258281725,
+  "main": {
+   "cv": 0.016494397563565934,
+   "median_s": 149.4767,
+   "n": 3,
+   "values": [
+    152.0722,
+    149.4767,
+    146.0625
+   ]
+  },
+  "pr": {
+   "cv": 0.042007970427511955,
+   "median_s": 147.6182,
+   "n": 3,
+   "values": [
+    145.7283,
+    147.6182,
+    160.0409
+   ]
+  },
+  "rel": -0.012433375904070617
+ },
+ "split": "development"
+}
