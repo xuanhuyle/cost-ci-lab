@@ -110,6 +110,13 @@ different engine size, different concurrency, different cache state, and a wall-
 production timeline per node, which a 7-month replay on one laptop cannot provide. This is a
 weakening of the design and is reported as such.
 
+**Limits of the "cold" CI arm.** Each CI run is a fresh process, so DuckDB's buffer pool starts
+empty, and no priming query is issued. The *operating system's* page cache is not cleared, and
+copying the 1.8 GB production database to the CI database immediately beforehand leaves much of it
+resident. The CI arm is therefore colder than production at the engine level but not at the OS
+level, so the cache-warmth gap between the two regimes is narrower than the design intends. The
+other three gaps (engine threads, memory limit, concurrent load) are unaffected.
+
 ## 5. Caps and safety
 
 - Per-PR Phase A cap **45 min**, Phase B cap **45 min** (`docs/PUBLIC_CORPUS_PROTOCOL.md` §7).
