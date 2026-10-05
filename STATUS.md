@@ -30,3 +30,51 @@ All execution evidence is local (DuckDB + real dbt).
 ## Blockers
 - No live platform access. The gcloud credentials on this machine belong to an unrelated project and
   are not used.
+
+---
+
+## Next experiment: public PR shadow production
+
+Added 2026-10-05 (session 2). Governing brief:
+`NEXT_EXPERIMENT_PUBLIC_PR_SHADOW_PRODUCTION.md`. Nothing above this line is revised; the
+session-1 results and `docs/DECISION.md` stand as the prior-stage record.
+
+### The kernel now being tested
+> A pre-merge counterfactual run can correctly identify material cost regressions from **natural**
+> dbt/SQL PRs under **later, meaningfully different** production conditions, with an analysis cost
+> low enough to be decision-useful.
+
+### Why the prior local lab is insufficient
+1. **The PRs were written by the same agent that evaluated them.** 26 hand-designed adversarial
+   scenarios carry no base rate and no evidence of structural realism.
+2. **"Truth" came from extra repetitions under near-identical conditions.** E1's 100% direction
+   figure is a same-condition upper bound; E3 (`E-039`) showed condition changes alone shift ratios
+   −18%…+136% and flipped one sign. Transfer to a later, different production regime is untested.
+3. **No live platform measurement exists.** Every executable result is `MEASURED (local engine)`.
+
+An independent audit placed the project at **Evidence Level 0.5–1**, not 3: mechanism partial,
+generalization untested, real-world validity untested, economics untested.
+
+### Authorization for this stage
+- **No new product work.** No SaaS, dashboard, GitHub App, multi-tenancy, Databricks, new adapters.
+- **No new synthetic scenarios** as primary evidence.
+- **The estimator is not to be modified** before the public-corpus feasibility gate is decided, and
+  is frozen before any holdout truth is observed.
+- Pre-experiment baseline (estimator + harness as inherited): **`0ea6284`**
+  (`0ea6284c1dba8796338f276157ab6d8aa8085803`).
+
+### First gate
+> Can at least ~30 natural historical merged PRs be found in public repositories that are
+> reconstructable (exact base/head commits, compilable, data reproducible) well enough to support a
+> fair pre-merge-vs-shadow-production experiment?
+
+If NO: the coding work stops, the reason is documented, and no replacement corpus is manufactured.
+Search and gate verdict: `docs/PUBLIC_CORPUS_SEARCH.md`.
+
+### Kill condition (project level)
+> Stop the pre-merge Cost CI thesis if a representative set of natural PRs cannot be evaluated with
+> >=90% material-regression recall and >=90% direction accuracy under later production-like
+> conditions, at an analysis cost materially below the regressions it would prevent.
+
+Not to be rescued by more synthetic scenarios, a platform switch, an LLM, more calibration,
+post-hoc narrowing, or redefining "material" after seeing holdout failures.
