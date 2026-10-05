@@ -40,8 +40,13 @@ CLONE = ROOT / "work" / "corpus" / "tuva-core"
 PUB = ROOT / "work" / "pub"
 WT_MAIN, WT_PR = PUB / "wt_main", PUB / "wt_pr"
 PKG_CACHE = PUB / "pkgcache"
+# DuckDB names the catalog after the database file's stem, and a view's stored definition
+# embeds that catalog name ("prod"."core"."patient"). The baseline build created 178 views, so
+# the CI copy must keep the file NAME and change only the directory; otherwise every view in the
+# clone fails to bind. (The counterfactual clone has to present the same database identity as
+# production - a real constraint on the zero-copy-clone design, not a lab artefact.)
 DB_PROD = PUB / "db" / "prod.duckdb"
-DB_CI = PUB / "db" / "ci.duckdb"
+DB_CI = PUB / "db_ci" / "prod.duckdb"
 PROF_CI, PROF_PROD = PUB / "profiles_ci", PUB / "profiles_prod"
 RES = ROOT / "results" / "public_pr"
 PROJECT_SUBDIR = "integration_tests"
@@ -280,9 +285,12 @@ def main() -> None:
     RES_OUT = RES / "measurements.json"
     if args.trial:
         WT_MAIN, WT_PR = PUB / "wt_t_main", PUB / "wt_t_pr"
-        DB_PROD, DB_CI = PUB / "db" / "trial_prod.duckdb", PUB / "db" / "trial_ci.duckdb"
+        DB_PROD = PUB / "db_trial_prod" / "prod.duckdb"
+        DB_CI = PUB / "db_trial_ci" / "prod.duckdb"
         PROF_CI, PROF_PROD = PUB / "profiles_t_ci", PUB / "profiles_t_prod"
         RES_OUT = RES / "measurements_trial.json"
+        DB_PROD.parent.mkdir(parents=True, exist_ok=True)
+        DB_CI.parent.mkdir(parents=True, exist_ok=True)
         if not DB_PROD.exists():
             print("trial: copying the production database (throwaway)", flush=True)
             shutil.copy2(PUB / "db" / "prod.duckdb", DB_PROD)
@@ -293,6 +301,7 @@ def main() -> None:
         r["split"] = "development" if i < DEV_N else ("holdout" if i < DEV_N + HOLD_N
                                                       else "reserve")
 
+    DB_CI.parent.mkdir(parents=True, exist_ok=True)
     write_profile(PROF_CI, DB_CI, CI["threads"], CI["memory"])
     write_profile(PROF_PROD, DB_PROD, PROD["threads"], PROD["memory"])
     (RES / "holdout_predictions").mkdir(parents=True, exist_ok=True)
