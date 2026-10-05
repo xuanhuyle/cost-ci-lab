@@ -270,8 +270,22 @@ def main() -> None:
     ap.add_argument("--limit", type=int, default=0)
     ap.add_argument("--cap-minutes", type=int, default=45)
     ap.add_argument("--only", type=int, nargs="*", help="specific PR numbers")
+    ap.add_argument("--trial", action="store_true",
+                    help="smoke test: separate worktrees, a throwaway copy of the production "
+                         "database and a separate output file, so the real timeline is untouched")
     args = ap.parse_args()
     cap_s = args.cap_minutes * 60
+
+    global WT_MAIN, WT_PR, DB_PROD, DB_CI, PROF_CI, PROF_PROD, RES_OUT
+    RES_OUT = RES / "measurements.json"
+    if args.trial:
+        WT_MAIN, WT_PR = PUB / "wt_t_main", PUB / "wt_t_pr"
+        DB_PROD, DB_CI = PUB / "db" / "trial_prod.duckdb", PUB / "db" / "trial_ci.duckdb"
+        PROF_CI, PROF_PROD = PUB / "profiles_t_ci", PUB / "profiles_t_prod"
+        RES_OUT = RES / "measurements_trial.json"
+        if not DB_PROD.exists():
+            print("trial: copying the production database (throwaway)", flush=True)
+            shutil.copy2(PUB / "db" / "prod.duckdb", DB_PROD)
 
     recs = json.loads((RES / "reconstruction.json").read_text(encoding="utf-8"))
     usable = [r for r in recs if r.get("executable")]
@@ -283,7 +297,7 @@ def main() -> None:
     write_profile(PROF_PROD, DB_PROD, PROD["threads"], PROD["memory"])
     (RES / "holdout_predictions").mkdir(parents=True, exist_ok=True)
 
-    out_path = RES / "measurements.json"
+    out_path = RES_OUT
     done = json.loads(out_path.read_text(encoding="utf-8")) if out_path.exists() else []
     seen = {d["pr"] for d in done}
     n = 0
@@ -307,7 +321,7 @@ def main() -> None:
                "subject": rec["subject"], "n_affected": rec["n_affected"],
                "affected": rec["affected"], "touched": rec["touched"]}
 
-        if rec["split"] == "holdout":
+        if rec["split"] == "holdout" and not args.trial:
             record_freeze("F2_estimator_frozen",
                           {"note": "estimator and harness frozen before the first holdout "
                                    "prediction", "first_holdout_pr": rec["pr"]})
@@ -340,12 +354,13 @@ def main() -> None:
                                    if FULL_JOB_SECONDS else None)
         row["prediction"] = pred
         row["prediction_sha256"] = freeze(
-            RES / "holdout_predictions" / f"pr_{rec['pr']}.json",
+            RES / ("trial_predictions" if args.trial else "holdout_predictions")
+            / f"pr_{rec['pr']}.json",
             {"pr": rec["pr"], "split": rec["split"], "frozen_at": time.strftime("%Y-%m-%dT%H:%M:%S"),
              "affected": rec["affected"], "prediction": pred})
         print(f"   prediction rel={pred['rel']} grade={pred['grade']} "
               f"k={pred['k_production_runs']}", flush=True)
-        if rec["split"] == "holdout":
+        if rec["split"] == "holdout" and not args.trial:
             record_freeze("F3_first_holdout_prediction",
                           {"pr": rec["pr"], "prediction_sha256": row["prediction_sha256"]})
 
