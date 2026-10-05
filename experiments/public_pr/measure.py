@@ -222,6 +222,23 @@ def grade(summary: dict) -> str:
     return "HIGH" if same else "MEDIUM"
 
 
+def git_sha() -> str:
+    import subprocess
+    return subprocess.run(["git", "-C", str(ROOT), "rev-parse", "HEAD"],
+                          capture_output=True, text=True).stdout.strip()
+
+
+def record_freeze(point: str, detail: dict) -> None:
+    """F2/F3/F4 of docs/PUBLIC_CORPUS_PROTOCOL.md §10, appended as they happen."""
+    path = RES / "freeze.json"
+    data = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
+    if point in data:
+        return
+    data[point] = {"git_sha": git_sha(), "at": time.strftime("%Y-%m-%dT%H:%M:%S"), **detail}
+    path.write_text(json.dumps(data, indent=1), encoding="utf-8")
+    print(f"   [freeze {point}] {data[point]['git_sha'][:8]}", flush=True)
+
+
 def freeze(path: Path, payload: dict) -> str:
     path.parent.mkdir(parents=True, exist_ok=True)
     blob = json.dumps(payload, indent=1, sort_keys=True).encode()
@@ -266,6 +283,10 @@ def main() -> None:
                "subject": rec["subject"], "n_affected": rec["n_affected"],
                "affected": rec["affected"], "touched": rec["touched"]}
 
+        if rec["split"] == "holdout":
+            record_freeze("F2_estimator_frozen",
+                          {"note": "estimator and harness frozen before the first holdout "
+                                   "prediction", "first_holdout_pr": rec["pr"]})
         # ---- Phase A: pre-merge CI prediction
         t0 = time.perf_counter()
         row["ci_db_copy_s"] = round(copy_db(DB_PROD, DB_CI), 1)
@@ -295,6 +316,9 @@ def main() -> None:
              "affected": rec["affected"], "prediction": pred})
         print(f"   prediction rel={pred['rel']} grade={pred['grade']} "
               f"k={pred['k_production_runs']}", flush=True)
+        if rec["split"] == "holdout":
+            record_freeze("F3_first_holdout_prediction",
+                          {"pr": rec["pr"], "prediction_sha256": row["prediction_sha256"]})
 
         # ---- Phase B: shadow-production truth (prediction is already on disk and hashed)
         t1 = time.perf_counter()
