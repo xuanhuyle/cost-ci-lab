@@ -60,8 +60,8 @@ DBT_VARS = {"synthetic_data_size": "large"}
 # --- regimes (docs/SHADOW_PRODUCTION_DESIGN.md §1), fixed before any holdout truth -------------
 # Sized for a 16 GB laptop (CLAUDE.md). The CI/production gap is what matters, not the absolute
 # values: production gets 2x the threads and 3x the memory ceiling.
-CI = {"threads": 2, "memory": "1500MB", "warm": False, "background": False}
-PROD = {"threads": 4, "memory": "4GB", "warm": True, "background": True}
+CI = {"threads": 2, "memory": "1200MB", "warm": False, "background": False}
+PROD = {"threads": 4, "memory": "3GB", "warm": True, "background": True}
 BG_MEMORY = "512MB"      # the background connection must be capped too: DuckDB otherwise defaults
                        # it to ~80% of system RAM, which OOM-killed an earlier run
 REPS = 3                      # protocol amendment 2026-10-05, before any holdout truth

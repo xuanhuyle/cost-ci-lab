@@ -271,7 +271,12 @@ def harvest(project: DbtProject) -> tuple[dict[str, float], list[str]]:
 def write_profile(path: Path, duckdb_path: Path, threads: int, memory_limit: str,
                   extra_settings: dict | None = None) -> None:
     path.mkdir(parents=True, exist_ok=True)
+    spill = (PUB / "spill")
+    spill.mkdir(parents=True, exist_ok=True)
     settings = {"memory_limit": memory_limit, "s3_region": "us-east-1",
+                # an explicit spill path means an over-budget query goes to disk instead of
+                # being killed by the OS; two runs were lost to OOM before this was set
+                "temp_directory": spill.as_posix(),
                 **(extra_settings or {})}
     lines = "\n".join(f"        {k}: '{v}'" for k, v in settings.items())
     (path / "profiles.yml").write_text(

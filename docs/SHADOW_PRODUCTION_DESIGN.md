@@ -12,7 +12,7 @@ what this design exists to stop doing.
 |---|---|---|
 | When | produced and frozen for a PR before that PR's Phase B | only after that PR's prediction file exists and is hashed |
 | Engine threads | **2** | **4** |
-| DuckDB `memory_limit` | **1.5 GB** | **4 GB** |
+| DuckDB `memory_limit` | **1.2 GB** | **3 GB** |
 | Concurrency | isolated, no other query load | **background load**: a concurrent read workload replayed for the duration of the measurement, competing for CPU, memory and IO |
 | Cache warmth | **cold** — a fresh process per variant, no priming | **warm** — a fixed priming scan of the principal input relations before measurement |
 | Data snapshot | **T0** (the corpus data assets as published) | **T1 = T0 + deterministic growth** if the development-set check clears it, §3 |
@@ -131,10 +131,13 @@ other three gaps (engine threads, memory limit, concurrent load) are unaffected.
 - Per-PR Phase A cap **45 min**, Phase B cap **45 min** (`docs/PUBLIC_CORPUS_PROTOCOL.md` §7).
   Exceeding either is recorded as `ABSTAIN` ("too expensive to measure"), which is an outcome.
 - DuckDB `memory_limit` set explicitly in both regimes **and on the background-load and
-  maintenance connections**. Two runs were killed by the OS for memory before the limits were right: the first because the
+  maintenance connections**. Three runs were killed by the OS for memory before the limits were right: the first because the
   background connection had no limit at all (DuckDB defaults an unconstrained connection to ~80%
   of system RAM), the second because a 6 GB production ceiling plus dbt's own footprint still
-  exceeded what a 16 GB machine had free. The ratio between the regimes (2.7x memory, 2x threads)
+  exceeded what the machine had free (only ~5 GB of 16 GB, the rest held by the browser, Slack
+  and the agent itself), and the third because the baseline builder still carried an 8 GB
+  ceiling of its own. Every DuckDB connection now also has an explicit `temp_directory`, so an
+  over-budget query spills to disk instead of being killed. The ratio between the regimes (2.7x memory, 2x threads)
   is what the transfer test depends on, not the absolute values.
 - Reconstruction and measurement never run concurrently: measurement is a timing experiment.
 - No external account is touched. All data comes from an anonymous read of a public S3 bucket and

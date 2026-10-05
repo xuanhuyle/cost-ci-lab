@@ -27,7 +27,7 @@ PROF = PUB / "profiles_prod"
 MANIFEST = ROOT / "public_corpus" / "manifest.json"
 OUT = ROOT / "results" / "public_pr" / "baseline_build.json"
 
-THREADS, MEMORY = 4, "8GB"
+THREADS, MEMORY = 4, "3GB"
 DBT_VARS = {"synthetic_data_size": "large"}
 SELECT = ["package:integration_tests", "package:the_tuva_project"]
 
