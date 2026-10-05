@@ -1,0 +1,74 @@
+[
+ {
+  "pr": 1198,
+  "merged_at": "2026-02-05T16:38:01-07:00",
+  "code": "X4_NO_GRAPH",
+  "detail": "diff produces no node in the compiled graph on this engine",
+  "phase": "reconstruction",
+  "decided_at": "2026-10-05T11:43:49",
+  "outcome_known_at_exclusion": false
+ },
+ {
+  "pr": 1199,
+  "merged_at": "2026-02-06T23:32:14-07:00",
+  "code": "X4_NO_GRAPH",
+  "detail": "diff produces no node in the compiled graph on this engine",
+  "phase": "reconstruction",
+  "decided_at": "2026-10-05T11:43:49",
+  "outcome_known_at_exclusion": false
+ },
+ {
+  "pr": 1205,
+  "merged_at": "2026-02-11T22:40:12-07:00",
+  "code": "X4_NO_GRAPH",
+  "detail": "diff produces no node in the compiled graph on this engine",
+  "phase": "reconstruction",
+  "decided_at": "2026-10-05T11:43:49",
+  "outcome_known_at_exclusion": false
+ },
+ {
+  "pr": 1210,
+  "merged_at": "2026-02-15T15:35:25-07:00",
+  "code": "X4_NO_GRAPH",
+  "detail": "diff produces no node in the compiled graph on this engine",
+  "phase": "reconstruction",
+  "decided_at": "2026-10-05T11:43:49",
+  "outcome_known_at_exclusion": false
+ },
+ {
+  "pr": 1228,
+  "merged_at": "2026-03-08T00:47:32-07:00",
+  "code": "X4_NO_GRAPH",
+  "detail": "diff produces no node in the compiled graph on this engine",
+  "phase": "reconstruction",
+  "decided_at": "2026-10-05T11:43:49",
+  "outcome_known_at_exclusion": false
+ },
+ {
+  "pr": 1247,
+  "merged_at": "2026-03-08T15:16:57-04:00",
+  "code": "X4_NO_GRAPH",
+  "detail": "diff produces no node in the compiled graph on this engine",
+  "phase": "reconstruction",
+  "decided_at": "2026-10-05T11:43:49",
+  "outcome_known_at_exclusion": false
+ },
+ {
+  "pr": 1260,
+  "merged_at": "2026-03-08T20:30:56-06:00",
+  "code": "X4_NO_GRAPH",
+  "detail": "diff produces no node in the compiled graph on this engine",
+  "phase": "reconstruction",
+  "decided_at": "2026-10-05T11:43:49",
+  "outcome_known_at_exclusion": false
+ },
+ {
+  "pr": 1273,
+  "merged_at": "2026-03-12T11:18:24-06:00",
+  "code": "X4_NO_GRAPH",
+  "detail": "diff produces no node in the compiled graph on this engine",
+  "phase": "reconstruction",
+  "decided_at": "2026-10-05T11:43:49",
+  "outcome_known_at_exclusion": false
+ }
+]
