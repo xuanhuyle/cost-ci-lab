@@ -240,18 +240,32 @@ def measure_pair(rec: dict, regime: dict, db: Path, profiles: Path, cap_s: int,
     bg = BackgroundLoad(regime["background"])
     if regime["warm"]:
         prime(db)
+    t_phase = time.perf_counter()
     with bg:
         for rep in range(REPS):
             for variant in ("main", "pr"):
+                elapsed = time.perf_counter() - t_phase
+                remaining = cap_s - elapsed
+                if remaining <= 0:
+                    # The cap is per PHASE (protocol §7), not per dbt invocation. Running out of
+                    # budget is an ABSTAIN outcome, which is a result, not an exclusion.
+                    return {"runs": runs, "ok": False, "abstain": True,
+                            "reason": "phase compute cap exceeded",
+                            "phase_elapsed_s": round(elapsed, 1),
+                            "background_queries": bg.queries, "background_error": bg.error}
                 proj = projs[variant]
-                r = build_once(proj, nodes, cap_s)
+                r = build_once(proj, nodes, int(remaining))
                 r.update(variant=variant, rep=rep, regime=label)
                 runs.append(r)
                 if not r["ok"]:
-                    return {"runs": runs, "ok": False, "background_queries": bg.queries,
-                            "background_error": bg.error}
-    return {"runs": runs, "ok": True, "background_queries": bg.queries,
-            "background_error": bg.error}
+                    timed_out = r["error"] == "TIMEOUT"
+                    return {"runs": runs, "ok": False, "abstain": timed_out,
+                            "reason": "phase compute cap exceeded" if timed_out else "build failed",
+                            "phase_elapsed_s": round(time.perf_counter() - t_phase, 1),
+                            "background_queries": bg.queries, "background_error": bg.error}
+    return {"runs": runs, "ok": True, "abstain": False,
+            "phase_elapsed_s": round(time.perf_counter() - t_phase, 1),
+            "background_queries": bg.queries, "background_error": bg.error}
 
 
 def advance_production(rec: dict, cap_s: int) -> dict:
@@ -393,7 +407,7 @@ def main() -> None:
         row["phase_a"] = a
         row["phase_a_wall_s"] = round(time.perf_counter() - t0, 1)
         if not a["ok"]:
-            row["outcome"] = "CI_BUILD_FAILED"
+            row["outcome"] = "CI_ABSTAIN_TOO_EXPENSIVE" if a.get("abstain") else "CI_BUILD_FAILED"
             row["detail"] = next((r["error"] for r in a["runs"] if not r["ok"]), "")[-1200:]
             row["deploy_only"] = advance_production(rec, cap_s)
             done.append(row)
@@ -431,7 +445,8 @@ def main() -> None:
         row["phase_b"] = b
         row["phase_b_wall_s"] = round(time.perf_counter() - t1, 1)
         if not b["ok"]:
-            row["outcome"] = "PROD_BUILD_FAILED"
+            row["outcome"] = ("PROD_ABSTAIN_TOO_EXPENSIVE" if b.get("abstain")
+                              else "PROD_BUILD_FAILED")
             row["detail"] = next((r["error"] for r in b["runs"] if not r["ok"]), "")[-1200:]
             row["deploy_only"] = advance_production(rec, cap_s)
         else:
