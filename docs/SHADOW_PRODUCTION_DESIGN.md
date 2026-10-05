@@ -98,6 +98,10 @@ all-A-then-all-B):
 10. Stop the background load. Record realised per-node times and the realised monthly shadow delta.
 11. The production database retains the `C` state, so production advances along `main`'s real
     history, PR by PR, exactly as a real deployment would.
+12. **If a PR cannot be measured** (CI or production build failure, or the compute cap), the PR is
+    still *deployed* into shadow production without being measured. Otherwise every later PR would
+    be evaluated against a base state that never existed on `main`. The deploy-only step is
+    recorded per PR.
 
 **Honest limitation of step 9.** The MAIN side of production truth is measured contemporaneously
 with the PR side, in the production regime, rather than being read from telemetry recorded days

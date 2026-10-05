@@ -113,15 +113,32 @@ def prime(db: Path) -> None:
         pass
 
 
+def checkpoint(db: Path) -> None:
+    """Fold the WAL into the database file so a plain file copy is a consistent snapshot."""
+    try:
+        con = duckdb.connect(str(db))
+        con.execute("CHECKPOINT")
+        con.close()
+    except Exception:
+        pass
+
+
 def copy_db(src: Path, dst: Path) -> float:
     t0 = time.perf_counter()
-    rmtree(dst) if dst.is_dir() else dst.unlink(missing_ok=True)
+    checkpoint(src)
+    dst.unlink(missing_ok=True)
     Path(str(dst) + ".wal").unlink(missing_ok=True)
     shutil.copy2(src, dst)
+    wal = Path(str(src) + ".wal")
+    if wal.exists() and wal.stat().st_size > 0:
+        shutil.copy2(wal, str(dst) + ".wal")
     return time.perf_counter() - t0
 
 
 def build_once(project: DbtProject, nodes: list[str], cap_s: int) -> dict:
+    if not nodes:                       # an empty --select would build the whole project
+        return {"ok": False, "wall_s": 0.0, "nodes": {}, "total_s": 0.0, "failed": [],
+                "error": "empty node set", "n_selected": 0, "sel_chars": 0}
     sel = " ".join(nodes)
     res = project.run(["run", "--select", *nodes, "--vars", json.dumps(DBT_VARS)],
                       timeout=cap_s)
@@ -162,6 +179,19 @@ def measure_pair(rec: dict, regime: dict, db: Path, profiles: Path, cap_s: int,
                 if not r["ok"]:
                     return {"runs": runs, "ok": False, "background_queries": bg.queries}
     return {"runs": runs, "ok": True, "background_queries": bg.queries}
+
+
+def advance_production(rec: dict, cap_s: int) -> dict:
+    """Deploy the PR state into the shadow production database without measuring it.
+
+    Used when a PR could not be measured. Production must still move to `C`, otherwise every
+    later PR would be evaluated against a base state that never existed on main.
+    """
+    ensure_worktree(CLONE, WT_PR, rec["head_sha"])
+    proj = regime_project(WT_PR, PROD, DB_PROD, PROF_PROD)
+    proj.deps()
+    r = build_once(proj, rec["affected"], cap_s)
+    return {"ok": r["ok"], "wall_s": r["wall_s"], "error": r["error"][-800:]}
 
 
 def summarise(runs: list[dict]) -> dict:
@@ -245,9 +275,11 @@ def main() -> None:
         if not a["ok"]:
             row["outcome"] = "CI_BUILD_FAILED"
             row["detail"] = next((r["error"] for r in a["runs"] if not r["ok"]), "")[-1200:]
+            row["deploy_only"] = advance_production(rec, cap_s)
             done.append(row)
             out_path.write_text(json.dumps(done, indent=1), encoding="utf-8")
-            print("   CI build failed", flush=True)
+            print(f"   CI build failed; production advanced "
+                  f"ok={row['deploy_only']['ok']}", flush=True)
             continue
         pred = summarise(a["runs"])
         pred["grade"] = grade(pred)
@@ -272,6 +304,7 @@ def main() -> None:
         if not b["ok"]:
             row["outcome"] = "PROD_BUILD_FAILED"
             row["detail"] = next((r["error"] for r in b["runs"] if not r["ok"]), "")[-1200:]
+            row["deploy_only"] = advance_production(rec, cap_s)
         else:
             truth = summarise(b["runs"])
             row["truth"] = truth

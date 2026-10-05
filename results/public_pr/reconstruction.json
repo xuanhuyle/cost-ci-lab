@@ -204,5 +204,66 @@
   "executable": true,
   "exclusion": null,
   "reconstruct_seconds": 68.7
+ },
+ {
+  "pr": 1197,
+  "order": 2,
+  "merged_at": "2026-02-05T15:51:32-07:00",
+  "base_sha": "13eb34b0dcdfc2cddacffc0879f5d935cc71bb9d",
+  "head_sha": "6c94b79a4abc01c42358150dc76f974d9d7e275b",
+  "subject": "Fixed Redshift / Snowflake Discrepancy (#1197)",
+  "touched": {
+   "model_sql": 3,
+   "macro_sql": 1,
+   "test_sql": 0,
+   "other_sql": 0,
+   "project_cfg": 0,
+   "yml": 0,
+   "seed_csv": 0,
+   "py": 0,
+   "other": 0
+  },
+  "n_files": 4,
+  "parse_seconds": 37.7,
+  "state_modified": [
+   "quality_measures__int_adh_diabetes_numerator",
+   "quality_measures__int_adh_statins_numerator",
+   "quality_measures__int_adhras_numerator"
+  ],
+  "state_modified_plus": [
+   "mart_review__quality_measures_summary_long",
+   "quality_measures__int_adh_diabetes_long",
+   "quality_measures__int_adh_diabetes_numerator",
+   "quality_measures__int_adh_statins_long",
+   "quality_measures__int_adh_statins_numerator",
+   "quality_measures__int_adhras_long",
+   "quality_measures__int_adhras_numerator",
+   "quality_measures__summary_counts",
+   "quality_measures__summary_long",
+   "quality_measures__summary_wide",
+   "semantic_layer__fact_quality_measures",
+   "semantic_layer__stg_quality_measures__summary_long"
+  ],
+  "changed_vars": [],
+  "var_only_models": [],
+  "var_detector_seconds": 0.2,
+  "affected": [
+   "mart_review__quality_measures_summary_long",
+   "quality_measures__int_adh_diabetes_long",
+   "quality_measures__int_adh_diabetes_numerator",
+   "quality_measures__int_adh_statins_long",
+   "quality_measures__int_adh_statins_numerator",
+   "quality_measures__int_adhras_long",
+   "quality_measures__int_adhras_numerator",
+   "quality_measures__summary_counts",
+   "quality_measures__summary_long",
+   "quality_measures__summary_wide",
+   "semantic_layer__fact_quality_measures",
+   "semantic_layer__stg_quality_measures__summary_long"
+  ],
+  "n_affected": 12,
+  "executable": true,
+  "exclusion": null,
+  "reconstruct_seconds": 71.6
  }
 ]
