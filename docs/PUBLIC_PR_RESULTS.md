@@ -77,7 +77,57 @@ natural PRs.
 
 ## 3. Reconstruction (`MEASURED_PUBLIC_CORPUS`)
 
-*(filled from `results/public_pr/reconstruction.json` and `exclusion_log.json`)*
+Processed in merge order from the 93-PR frame until the pre-registered split was full.
+
+| | |
+|---|---|
+| PRs scanned | **38** |
+| Usable | **30** (79%) |
+| Excluded | **8** (21%), every one `X4_NO_GRAPH` |
+| Split | 10 development (#1175–#1230), 20 holdout (#1233–#1278) |
+| Median reconstruction cost | 52 s per PR (2 dbt invocations: parse MAIN, `state:modified+` on PR) |
+
+### R1. 21% of natural cost-relevant PRs are invisible to a counterfactual engine
+
+All 8 exclusions are the same condition: the PR's diff **produces no node in the compiled graph**
+under the project's own configuration. They are version bumps (#1198, #1205), documentation-only
+changes to model YAML (#1210), and changes to SQL that the configured deployment never builds
+because the owning model family is gated off by a project var (#1199 `fhir_preprocessing`, and
+#1228, #1247, #1260, #1273).
+
+This is not a harness limitation; it is a property of real repositories. A cost gate built on
+counterfactual execution has nothing to say about a fifth of the cost-relevant PR stream, because
+there is nothing to execute. Those PRs are not necessarily cost-neutral in a *differently
+configured* deployment of the same project — which is precisely why the exclusion is reported
+rather than silently treated as "immaterial".
+
+### R2. Blast amplification is 15x at the median
+
+| | median | p90 | max |
+|---|---|---|---|
+| Models the PR modifies directly (`state:modified`) | **1** | — | 53 |
+| Nodes that must be executed (`state:modified+`) | **31** | 50 | 53 |
+| Amplification (executed / modified) | **15x** | — | 53x |
+
+The median natural PR changes **one** model and obliges the counterfactual to rebuild **31**. This
+is the measured form of the prediction in `docs/PUBLIC_CORPUS_SEARCH.md` §3: the previous stage's
+CI-cost figure (`E-037`: 2.5–4.6 production-run equivalents) was measured on a benchmark whose
+median blast radius was one model, so it understates the cost of the same method on natural PRs.
+
+### R3. Reconstruction itself is cheap and exact
+
+No PR required a dependency reconstruction approximation: `packages.yml` is pinned in-repo at every
+commit, `dbt deps` resolved at every commit attempted, and `dbt parse` succeeded on every MAIN tree
+(median 15 s with partial parsing). Zero PRs were excluded for `X1_DEPS`, `X2_PARSE`, `X3_ENGINE`
+or `X5_EMPTY_DIFF`. Reconstructing natural PRs from a public repository was the *easy* part of this
+experiment.
+
+### R4. The changed-var detector never fired
+
+Not one PR in the 93-PR frame changed a top-level `vars:` default, so the detector added for the
+class `state:modified` provably misses (`E-023`, dbt-core#4304) selected nothing. The gap is real
+but did not occur in this repository's seven-month window. `MEASURED_PUBLIC_CORPUS`; it says
+nothing about how often that class occurs elsewhere.
 
 ---
 
