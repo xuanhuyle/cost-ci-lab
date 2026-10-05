@@ -40,7 +40,7 @@ EXCL = ROOT / "results" / "public_pr" / "exclusion_log.json"
 
 PROJECT_SUBDIR = "integration_tests"
 DBT_VARS = {"synthetic_data_size": "large"}
-SUBSELECTORS = ("body", "configs", "macros", "relation", "persisted_descriptions", "contract")
+VALIDATE = [3]      # cross-check the derived descendants against dbt for this many PRs
 
 
 def changed_vars(base_sha: str, head_sha: str) -> list[str]:
@@ -92,6 +92,32 @@ def node_names(ids: list[str]) -> list[str]:
     return sorted({i.split(".")[-1] for i in ids})
 
 
+def descendants(manifest: dict, modified: list[str]) -> list[str]:
+    """dbt's `+` suffix: the modified model nodes plus every model reachable from them.
+
+    Derived from the manifest's child_map instead of a separate `dbt ls` invocation, which costs
+    a full parse. Validated against dbt's own `state:modified+` on the first
+    VALIDATE_DESCENDANTS reconstructions; any mismatch aborts the run.
+    """
+    child = manifest.get("child_map", {})
+    by_name = {}
+    for uid, n in manifest.get("nodes", {}).items():
+        if n.get("resource_type") == "model":
+            by_name.setdefault(n["name"], uid)
+    seen, stack = set(), [by_name[m] for m in modified if m in by_name]
+    while stack:
+        uid = stack.pop()
+        if uid in seen:
+            continue
+        seen.add(uid)
+        for c in child.get(uid, []):
+            if c not in seen:
+                stack.append(c)
+    models = manifest.get("nodes", {})
+    return sorted({models[u]["name"] for u in seen
+                   if u in models and models[u].get("resource_type") == "model"})
+
+
 def reconstruct_one(row: dict, do_rendered: bool) -> dict:
     rec = {"pr": row["pr"], "order": row["order"], "merged_at": row["merged_at"],
            "base_sha": row["base_sha"], "head_sha": row["head_sha"], "subject": row["subject"],
@@ -110,31 +136,37 @@ def reconstruct_one(row: dict, do_rendered: bool) -> dict:
                        detail=f"deps failed on {name}: {r.error[-400:]}")
             return rec
 
-    pr_parse = pr.parse(DBT_VARS)
     main_parse = main.parse(DBT_VARS)
-    rec["parse_seconds"] = round(pr_parse.seconds + main_parse.seconds, 1)
-    if not (main_parse.ok and pr_parse.ok):
-        both = (not main_parse.ok) and (not pr_parse.ok)
-        rec.update(executable=False, exclusion="X2_PARSE" if both else "PARSE_PR_ONLY",
-                   detail=(main_parse.error or pr_parse.error)[-600:])
-        if not both:
-            # only one side fails: that is a property of the change, not of the environment.
-            # Not an allowed exclusion; recorded and carried forward as a build failure.
-            rec["exclusion"] = None
-            rec["executable"] = False
-            rec["detail"] = ("parse fails on %s only" %
-                             ("main" if not main_parse.ok else "pr")) + " :: " + rec["detail"]
+    rec["parse_seconds"] = round(main_parse.seconds, 1)
+    if not main_parse.ok:
+        rec.update(executable=False, exclusion="X2_PARSE",
+                   detail="parse fails on main: " + main_parse.error[-600:])
         return rec
 
     main.save_state(STATE)
+    # `dbt ls` parses the PR project itself and writes its manifest, so no separate parse is run.
     modified, r = pr.ls("state:modified", STATE, dbt_vars=DBT_VARS)
+    if not r.ok:
+        rec.update(executable=False, exclusion=None,
+                   detail="state:modified fails on pr only: " + r.error[-600:])
+        return rec
     rec["state_modified"] = node_names(modified)
     # The six state:modified sub-selectors would each cost a separate dbt invocation (~40 s).
     # The same structural question - which file class drives the change - is already answered
     # mechanically by the census (public_corpus/census_tuva.json `classes`), so they are not
     # re-derived here.
-    plus, _ = pr.ls("state:modified+", STATE, dbt_vars=DBT_VARS)
-    rec["state_modified_plus"] = node_names(plus)
+    pr_manifest = pr.manifest()
+    rec["state_modified_plus"] = descendants(pr_manifest, rec["state_modified"])
+    if VALIDATE[0] > 0:
+        VALIDATE[0] -= 1
+        plus, _ = pr.ls("state:modified+", STATE, dbt_vars=DBT_VARS)
+        ref = node_names(plus)
+        rec["descendants_validated_against_dbt"] = (ref == rec["state_modified_plus"])
+        if not rec["descendants_validated_against_dbt"]:
+            raise RuntimeError(
+                f"descendant derivation disagrees with dbt state:modified+ on PR {row['pr']}: "
+                f"dbt-only={sorted(set(ref) - set(rec['state_modified_plus']))[:10]} "
+                f"derived-only={sorted(set(rec['state_modified_plus']) - set(ref))[:10]}")
 
     if do_rendered:
         t1 = time.perf_counter()
@@ -146,11 +178,8 @@ def reconstruct_one(row: dict, do_rendered: bool) -> dict:
         if extra:
             # A widely-read var can select hundreds of models; a Windows command line is
             # bounded, so the selector is chunked.
-            got = set()
-            for i in range(0, len(extra), 40):
-                ids, _ = pr.ls(" ".join(f"{n}+" for n in extra[i:i + 40]), dbt_vars=DBT_VARS)
-                got |= set(node_names(ids))
-            rec["state_modified_plus"] = sorted(set(rec["state_modified_plus"]) | got)
+            rec["state_modified_plus"] = sorted(
+                set(rec["state_modified_plus"]) | set(descendants(pr_manifest, extra)))
         rec["var_detector_seconds"] = round(time.perf_counter() - t1, 1)
 
     rec["affected"] = rec["state_modified_plus"]
