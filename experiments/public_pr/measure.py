@@ -110,6 +110,17 @@ def _full_job_seconds() -> float:
 
 FULL_JOB_SECONDS = _full_job_seconds()
 
+
+def _baseline_relations() -> int:
+    try:
+        return int(json.loads((RES / "baseline_build.json").read_text(
+            encoding="utf-8")).get("relation_count") or 0)
+    except Exception:
+        return 0
+
+
+BASELINE_RELATIONS = _baseline_relations()
+
 BACKGROUND_SQL = [
     "select count(*) from core.medical_claim",
     "select data_source, count(*) from core.eligibility group by 1",
@@ -184,25 +195,52 @@ def prime(db: Path) -> None:
         pass
 
 
-def checkpoint(db: Path) -> None:
-    """Fold the WAL into the database file so a plain file copy is a consistent snapshot."""
+CHECKPOINT_MEMORY = "3GB"
+
+
+def relation_count(db: Path) -> int:
+    """Relations visible in a database file, read-only."""
+    con = duckdb.connect(str(db), read_only=True, config={"memory_limit": "512MB"})
     try:
-        con = duckdb.connect(str(db), config={"memory_limit": "512MB"})
-        con.execute("CHECKPOINT")
+        return con.execute("SELECT count(*) FROM information_schema.tables").fetchone()[0]
+    finally:
         con.close()
-    except Exception:
-        pass
+
+
+def checkpoint(db: Path) -> None:
+    """Fold the WAL into the database file so a plain file copy is a consistent snapshot.
+
+    This MUST NOT be done under a small memory limit and MUST NOT swallow failures. Replaying a
+    large WAL needs real memory; an earlier version opened a 1.8 GB database with a 512 MB limit
+    and ignored the error, which partially applied and then truncated the WAL and silently
+    destroyed ~400 relations. Everything downstream then failed with "table does not exist".
+    """
+    con = duckdb.connect(str(db), config={"memory_limit": CHECKPOINT_MEMORY})
+    try:
+        con.execute("CHECKPOINT")
+    finally:
+        con.close()
+    wal = Path(str(db) + ".wal")
+    if wal.exists() and wal.stat().st_size > 0:
+        raise RuntimeError(f"WAL still present after CHECKPOINT: {wal} "
+                           f"({wal.stat().st_size} bytes)")
 
 
 def copy_db(src: Path, dst: Path) -> float:
+    """Snapshot the production database, verifying the clone is complete.
+
+    A clone that silently loses relations produces confidently wrong cost numbers, so the
+    relation count is compared before and after and a mismatch raises.
+    """
     t0 = time.perf_counter()
     checkpoint(src)
+    before = relation_count(src)
     dst.unlink(missing_ok=True)
     Path(str(dst) + ".wal").unlink(missing_ok=True)
     shutil.copy2(src, dst)
-    wal = Path(str(src) + ".wal")
-    if wal.exists() and wal.stat().st_size > 0:
-        shutil.copy2(wal, str(dst) + ".wal")
+    after = relation_count(dst)
+    if after != before:
+        raise RuntimeError(f"CI clone is incomplete: {after} relations vs {before} in production")
     return time.perf_counter() - t0
 
 

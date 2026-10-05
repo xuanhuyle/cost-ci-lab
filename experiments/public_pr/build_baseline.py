@@ -16,6 +16,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
+import duckdb  # noqa: E402
+
 from costci.public_pr import DbtProject, ensure_worktree, write_profile  # noqa: E402
 
 CLONE = ROOT / "work" / "corpus" / "tuva-core"
@@ -53,6 +55,17 @@ def main() -> None:
     r = proj.run(["build", "--full-refresh", "--select", *SELECT,
                   "--vars", json.dumps(DBT_VARS)], timeout=6 * 3600)
     wall = time.perf_counter() - t0
+    # Fold the WAL in under a real memory limit and record how many relations the baseline
+    # holds, so every later clone and deployment can be checked against it.
+    con = duckdb.connect(str(DB), config={"memory_limit": "3GB"})
+    con.execute("CHECKPOINT")
+    relations = con.execute("SELECT count(*) FROM information_schema.tables").fetchone()[0]
+    con.close()
+    wal = Path(str(DB) + ".wal")
+    if wal.exists() and wal.stat().st_size > 0:
+        raise RuntimeError(f"WAL still present after CHECKPOINT ({wal.stat().st_size} bytes)")
+    print(f"baseline relations: {relations}", flush=True)
+
     rr = proj.run_results()
     nodes = [{"unique_id": x.get("unique_id"), "status": x.get("status"),
               "execution_time": x.get("execution_time")} for x in rr.get("results", [])]
@@ -62,6 +75,7 @@ def main() -> None:
     OUT.write_text(json.dumps({
         "baseline_commit": base, "ok": r.ok, "wall_s": round(wall, 1),
         "n_nodes": len(nodes), "n_ok": len(ok), "n_failed": len(bad),
+        "relation_count": relations,
         "failed": [n["unique_id"] for n in bad][:80],
         "threads": THREADS, "memory_limit": MEMORY, "vars": DBT_VARS,
         "nodes": nodes, "error_tail": r.error[-4000:] if not r.ok else "",
