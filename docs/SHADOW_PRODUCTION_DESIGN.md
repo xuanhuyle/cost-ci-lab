@@ -137,6 +137,16 @@ other three gaps (engine threads, memory limit, concurrent load) are unaffected.
 - No external account is touched. All data comes from an anonymous read of a public S3 bucket and
   is mirrored locally after the first fetch.
 
+**Why repetitions can share one database.** A repetition rebuilds the affected nodes in place
+rather than restoring the database first, which would cost a 1.8 GB copy per run. That is sound
+only if every affected node is idempotent under rebuild. In this corpus 709 models are `table`,
+192 `view` and 55 `ephemeral` — all `CREATE OR REPLACE` from unchanged inputs — and the only 15
+`incremental` models are the Elementary observability artefacts (`dbt_models`, `dbt_run_results`,
+`data_monitoring_metrics`, ...), which are not descendants of any Tuva transformation. Each PR's
+record carries `non_idempotent_affected_nodes`, so the property is checked per PR instead of
+assumed. The one non-deterministic column, `tuva_last_run` (`run_started_at`), changes per run but
+affects no row count.
+
 ## 6. Checks run on the development set only
 
 1. **Containment:** do nodes outside `A` change their execution time between `C^` and `C` beyond

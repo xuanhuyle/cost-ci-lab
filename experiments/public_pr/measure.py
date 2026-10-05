@@ -74,6 +74,30 @@ DEV_N, HOLD_N = 10, 20        # protocol amendment 2026-10-05, before any holdou
 # change any other node's cost. results/public_pr/baseline_build.json records the failure.
 BROKEN_NODES = {"data_quality__testing_summary"}
 
+def _incremental_models() -> set[str]:
+    """Models whose repeated build is NOT idempotent, so repetitions on one database would
+    contaminate each other.
+
+    In this corpus the only incremental models are the Elementary observability artefacts
+    (dbt_models, dbt_run_results, data_monitoring_metrics, ...), which are not descendants of any
+    Tuva transformation. Everything else is table (709), view (192) or ephemeral (55) and is
+    rebuilt by CREATE OR REPLACE from the same inputs, so repeated A/B runs on one CI database
+    are safe. Any PR whose affected set does intersect this list is flagged in its record rather
+    than being silently measured.
+    """
+    try:
+        man = json.loads((PUB / "wt_prod" / "integration_tests" / "target"
+                          / "manifest.json").read_text(encoding="utf-8"))
+        return {n["name"] for n in man["nodes"].values()
+                if n.get("resource_type") == "model"
+                and n["config"].get("materialized") == "incremental"}
+    except Exception:
+        return set()
+
+
+INCREMENTAL = _incremental_models()
+
+
 def _full_job_seconds() -> float:
     try:
         b = json.loads((RES / "baseline_build.json").read_text(encoding="utf-8"))
@@ -350,8 +374,10 @@ def main() -> None:
         if dropped:
             rec["affected"] = [n for n in rec["affected"] if n not in BROKEN_NODES]
             rec["n_affected"] = len(rec["affected"])
+        non_idempotent = sorted(set(rec["affected"]) & INCREMENTAL)
         row = {"pr": rec["pr"], "split": rec["split"], "merged_at": rec["merged_at"],
                "nodes_dropped_broken_on_main": dropped,
+               "non_idempotent_affected_nodes": non_idempotent,
                "base_sha": rec["base_sha"], "head_sha": rec["head_sha"],
                "subject": rec["subject"], "n_affected": rec["n_affected"],
                "affected": rec["affected"], "touched": rec["touched"]}
