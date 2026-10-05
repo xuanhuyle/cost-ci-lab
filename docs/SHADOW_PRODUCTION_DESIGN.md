@@ -12,7 +12,7 @@ what this design exists to stop doing.
 |---|---|---|
 | When | produced and frozen for a PR before that PR's Phase B | only after that PR's prediction file exists and is hashed |
 | Engine threads | **2** | **4** |
-| DuckDB `memory_limit` | **3 GB** | **8 GB** |
+| DuckDB `memory_limit` | **2 GB** | **6 GB** |
 | Concurrency | isolated, no other query load | **background load**: a concurrent read workload replayed for the duration of the measurement, competing for CPU, memory and IO |
 | Cache warmth | **cold** — a fresh process per variant, no priming | **warm** — a fixed priming scan of the principal input relations before measurement |
 | Data snapshot | **T0** (the corpus data assets as published) | **T1 = T0 + deterministic growth** if the development-set check clears it, §3 |
@@ -130,7 +130,10 @@ other three gaps (engine threads, memory limit, concurrent load) are unaffected.
 
 - Per-PR Phase A cap **45 min**, Phase B cap **45 min** (`docs/PUBLIC_CORPUS_PROTOCOL.md` §7).
   Exceeding either is recorded as `ABSTAIN` ("too expensive to measure"), which is an outcome.
-- DuckDB `memory_limit` set explicitly in both regimes; `temp_directory` under `work/pub`.
+- DuckDB `memory_limit` set explicitly in both regimes **and on the background-load and
+  maintenance connections**. An early run was killed by the OS for memory because the background
+  connection had no limit and DuckDB defaults an unconstrained connection to ~80% of system RAM.
+- Reconstruction and measurement never run concurrently: measurement is a timing experiment.
 - No external account is touched. All data comes from an anonymous read of a public S3 bucket and
   is mirrored locally after the first fetch.
 

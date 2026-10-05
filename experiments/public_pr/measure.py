@@ -58,8 +58,12 @@ PROJECT_SUBDIR = "integration_tests"
 DBT_VARS = {"synthetic_data_size": "large"}
 
 # --- regimes (docs/SHADOW_PRODUCTION_DESIGN.md §1), fixed before any holdout truth -------------
-CI = {"threads": 2, "memory": "3GB", "warm": False, "background": False}
-PROD = {"threads": 4, "memory": "8GB", "warm": True, "background": True}
+# Sized for a 16 GB laptop (CLAUDE.md). The CI/production gap is what matters, not the absolute
+# values: production gets 2x the threads and 3x the memory ceiling.
+CI = {"threads": 2, "memory": "2GB", "warm": False, "background": False}
+PROD = {"threads": 4, "memory": "6GB", "warm": True, "background": True}
+BG_MEMORY = "1GB"      # the background connection must be capped too: DuckDB otherwise defaults
+                       # it to ~80% of system RAM, which OOM-killed an earlier run
 REPS = 3                      # protocol amendment 2026-10-05, before any holdout truth
 DEV_N, HOLD_N = 10, 20        # protocol amendment 2026-10-05, before any holdout truth
 
@@ -113,6 +117,7 @@ class BackgroundLoad:
         try:
             con = duckdb.connect(str(DB_BG), read_only=True)
             con.execute("SET threads=1")
+            con.execute(f"SET memory_limit='{BG_MEMORY}'")
         except Exception as e:                                   # noqa: BLE001
             self.error = str(e)[:200]
             return
@@ -144,6 +149,7 @@ def prime(db: Path) -> None:
     """
     try:
         con = duckdb.connect(str(db), read_only=True)
+        con.execute("SET memory_limit='1GB'")
         for q in BACKGROUND_SQL:
             try:
                 con.execute(q).fetchall()
@@ -157,7 +163,7 @@ def prime(db: Path) -> None:
 def checkpoint(db: Path) -> None:
     """Fold the WAL into the database file so a plain file copy is a consistent snapshot."""
     try:
-        con = duckdb.connect(str(db))
+        con = duckdb.connect(str(db), config={"memory_limit": "1GB"})
         con.execute("CHECKPOINT")
         con.close()
     except Exception:
