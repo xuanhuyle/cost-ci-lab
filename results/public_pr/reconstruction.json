@@ -265,5 +265,37 @@
   "executable": true,
   "exclusion": null,
   "reconstruct_seconds": 71.6
+ },
+ {
+  "pr": 1198,
+  "order": 3,
+  "merged_at": "2026-02-05T16:38:01-07:00",
+  "base_sha": "6c94b79a4abc01c42358150dc76f974d9d7e275b",
+  "head_sha": "c177bf8b2cd48438a19e82beef9f02c91e56bb02",
+  "subject": "updated version for release (#1198)",
+  "touched": {
+   "model_sql": 0,
+   "macro_sql": 0,
+   "test_sql": 0,
+   "other_sql": 0,
+   "project_cfg": 1,
+   "yml": 0,
+   "seed_csv": 0,
+   "py": 0,
+   "other": 0
+  },
+  "n_files": 1,
+  "parse_seconds": 81.6,
+  "state_modified": [],
+  "state_modified_plus": [],
+  "changed_vars": [],
+  "var_only_models": [],
+  "var_detector_seconds": 0.1,
+  "affected": [],
+  "n_affected": 0,
+  "executable": false,
+  "exclusion": "X4_NO_GRAPH",
+  "detail": "diff produces no node in the compiled graph on this engine",
+  "reconstruct_seconds": 115.5
  }
 ]

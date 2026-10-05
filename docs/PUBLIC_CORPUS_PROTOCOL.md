@@ -98,7 +98,12 @@ invalidates that case and is reported.
 
 Taken unchanged from `costci/metrics.py` at baseline `0ea6284`:
 
-- `rel = (shadow monthly cost with PR - shadow monthly cost with MAIN) / shadow monthly cost with MAIN`
+- `rel = (per-run engine seconds of the affected workload with PR - the same with MAIN) /
+  the same with MAIN`. Because the schedule is identical in both arms, this equals the relative
+  change in monthly engine seconds. Monthly **dollars** are reported separately, in both the
+  marginal and the attributed view, because the warehouse's idle policy decouples dollars from
+  resource for a short workload (`E-038`); materiality is defined on resource, exactly as the
+  previous stage's truth was (`METRIC = latency_s`).
 - **immaterial**: `|rel| < 0.10`; **increase**: `rel >= +0.10`; **decrease**: `rel <= -0.10`
 - **large regression**: `rel >= +0.50`
 - magnitude buckets: the nine `metrics.BUCKETS` bands.
