@@ -178,6 +178,39 @@ def comparator_highcost(rows: list[dict], T: float) -> dict:
             "false_warning_rate": frac([flagged[i] for i in immaterial])}
 
 
+def comparator_blastsize(rows: list[dict], N: int) -> dict:
+    """C2': a no-execution rule. Flag a PR if its affected node set is at least N nodes.
+
+    The brief asks for the cheapest estimator in the repo that needs no counterfactual
+    execution. The static-plan and byte estimators of `costci/estimators.py` operate on
+    per-statement DuckDB profiles, which this adapter does not produce (real dbt executes the
+    models). The nearest computable no-execution predictor is blast-radius size, which is
+    available from change detection alone.
+    """
+    n = len(rows)
+    td = [direction(r["truth_rel"]) for r in rows]
+    flagged = [r["n_affected"] >= N for r in rows]
+    mat_up = [i for i in range(n) if td[i] == "increase"]
+    immaterial = [i for i in range(n) if td[i] == "immaterial"]
+    return {"N_nodes": N, "n_flagged": sum(flagged),
+            "material_regression_recall": frac([flagged[i] for i in mat_up]),
+            "false_warning_rate": frac([flagged[i] for i in immaterial])}
+
+
+def choose_N(dev_rows: list[dict]) -> int:
+    cands = sorted({r["n_affected"] for r in dev_rows})
+    best, bestf1 = (cands[0] if cands else 1), -1.0
+    for N in cands:
+        c = comparator_blastsize(dev_rows, N)
+        rec, fp = c["material_regression_recall"], c["false_warning_rate"]
+        if rec is None:
+            continue
+        f1 = 0.0 if (rec + 1 - (fp or 0.0)) == 0 else             2 * rec * (1 - (fp or 0.0)) / (rec + 1 - (fp or 0.0))
+        if f1 > bestf1:
+            best, bestf1 = N, f1
+    return best
+
+
 def choose_T(dev_rows: list[dict]) -> float:
     """Pick T on the development set only, maximising F1 against material increases."""
     cands = sorted({round(r["truth_base"], 4) for r in dev_rows if r["truth_base"] is not None})
@@ -215,6 +248,10 @@ def main() -> None:
         out["comparator_C1"] = {"T_chosen_on_development": T,
                                 "development": comparator_highcost(dev, T),
                                 "holdout": comparator_highcost(hold, T) if hold else None}
+        N = choose_N(dev)
+        out["comparator_C2"] = {"N_chosen_on_development": N,
+                                "development": comparator_blastsize(dev, N),
+                                "holdout": comparator_blastsize(hold, N) if hold else None}
     out["rows"] = {"development": dev, "holdout": hold}
     (RES / "scores.json").write_text(json.dumps(out, indent=1), encoding="utf-8")
     md = md_table(out["development"], "Development set") + "\n" + \
