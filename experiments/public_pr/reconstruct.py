@@ -155,18 +155,15 @@ def reconstruct_one(row: dict, do_rendered: bool) -> dict:
     # The same structural question - which file class drives the change - is already answered
     # mechanically by the census (public_corpus/census_tuva.json `classes`), so they are not
     # re-derived here.
-    pr_manifest = pr.manifest()
-    rec["state_modified_plus"] = descendants(pr_manifest, rec["state_modified"])
-    if VALIDATE[0] > 0:
-        VALIDATE[0] -= 1
-        plus, _ = pr.ls("state:modified+", STATE, dbt_vars=DBT_VARS)
-        ref = node_names(plus)
-        rec["descendants_validated_against_dbt"] = (ref == rec["state_modified_plus"])
-        if not rec["descendants_validated_against_dbt"]:
-            raise RuntimeError(
-                f"descendant derivation disagrees with dbt state:modified+ on PR {row['pr']}: "
-                f"dbt-only={sorted(set(ref) - set(rec['state_modified_plus']))[:10]} "
-                f"derived-only={sorted(set(rec['state_modified_plus']) - set(ref))[:10]}")
+    # dbt's own selector is authoritative. A manifest-DAG derivation was tried as a cheaper
+    # substitute and agreed on three PRs, then diverged on PR #1241 by adding 10+ ahrq_measures
+    # descendants dbt does not select. Rather than chase the discrepancy, the corpus uses dbt.
+    plus, r_plus = pr.ls("state:modified+", STATE, dbt_vars=DBT_VARS)
+    if not r_plus.ok:
+        rec.update(executable=False, exclusion=None,
+                   detail="state:modified+ fails on pr: " + r_plus.error[-600:])
+        return rec
+    rec["state_modified_plus"] = node_names(plus)
 
     if do_rendered:
         t1 = time.perf_counter()
@@ -178,8 +175,11 @@ def reconstruct_one(row: dict, do_rendered: bool) -> dict:
         if extra:
             # A widely-read var can select hundreds of models; a Windows command line is
             # bounded, so the selector is chunked.
-            rec["state_modified_plus"] = sorted(
-                set(rec["state_modified_plus"]) | set(descendants(pr_manifest, extra)))
+            got = set()
+            for i in range(0, len(extra), 40):
+                ids, _ = pr.ls(" ".join(f"{n}+" for n in extra[i:i + 40]), dbt_vars=DBT_VARS)
+                got |= set(node_names(ids))
+            rec["state_modified_plus"] = sorted(set(rec["state_modified_plus"]) | got)
         rec["var_detector_seconds"] = round(time.perf_counter() - t1, 1)
 
     rec["affected"] = rec["state_modified_plus"]
