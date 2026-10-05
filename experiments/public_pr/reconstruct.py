@@ -129,10 +129,10 @@ def reconstruct_one(row: dict, do_rendered: bool) -> dict:
     main.save_state(STATE)
     modified, r = pr.ls("state:modified", STATE, dbt_vars=DBT_VARS)
     rec["state_modified"] = node_names(modified)
-    rec["modified_by"] = {}
-    for s in SUBSELECTORS:
-        ids, _ = pr.ls(f"state:modified.{s}", STATE, dbt_vars=DBT_VARS)
-        rec["modified_by"][s] = node_names(ids)
+    # The six state:modified sub-selectors would each cost a separate dbt invocation (~40 s).
+    # The same structural question - which file class drives the change - is already answered
+    # mechanically by the census (public_corpus/census_tuva.json `classes`), so they are not
+    # re-derived here.
     plus, _ = pr.ls("state:modified+", STATE, dbt_vars=DBT_VARS)
     rec["state_modified_plus"] = node_names(plus)
 
@@ -144,9 +144,13 @@ def reconstruct_one(row: dict, do_rendered: bool) -> dict:
         extra = [n for n in node_names(extra_ids) if n not in rec["state_modified"]]
         rec["var_only_models"] = extra
         if extra:
-            ids, _ = pr.ls(" ".join(f"{n}+" for n in extra), dbt_vars=DBT_VARS)
-            rec["state_modified_plus"] = sorted(set(rec["state_modified_plus"])
-                                                | set(node_names(ids)))
+            # A widely-read var can select hundreds of models; a Windows command line is
+            # bounded, so the selector is chunked.
+            got = set()
+            for i in range(0, len(extra), 40):
+                ids, _ = pr.ls(" ".join(f"{n}+" for n in extra[i:i + 40]), dbt_vars=DBT_VARS)
+                got |= set(node_names(ids))
+            rec["state_modified_plus"] = sorted(set(rec["state_modified_plus"]) | got)
         rec["var_detector_seconds"] = round(time.perf_counter() - t1, 1)
 
     rec["affected"] = rec["state_modified_plus"]

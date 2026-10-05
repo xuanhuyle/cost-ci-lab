@@ -18,20 +18,10 @@
    "other": 0
   },
   "n_files": 1,
-  "parse_seconds": 34.5,
+  "parse_seconds": 48.0,
   "state_modified": [
    "core__stg_claims_condition"
   ],
-  "modified_by": {
-   "body": [
-    "core__stg_claims_condition"
-   ],
-   "configs": [],
-   "macros": [],
-   "relation": [],
-   "persisted_descriptions": [],
-   "contract": []
-  },
   "state_modified_plus": [
    "hcc_suspecting__summary",
    "mart_review__data_source",
@@ -140,6 +130,79 @@
   "n_affected": 49,
   "executable": true,
   "exclusion": null,
-  "reconstruct_seconds": 138.1
+  "reconstruct_seconds": 88.2
+ },
+ {
+  "pr": 1194,
+  "order": 1,
+  "merged_at": "2026-02-04T15:57:30-07:00",
+  "base_sha": "5a1c2b3c66cab73361629c5b83d7cdab6ae07885",
+  "head_sha": "13eb34b0dcdfc2cddacffc0879f5d935cc71bb9d",
+  "subject": "BUG FIX: numeric min for hierarchy top-level (#1194)",
+  "touched": {
+   "model_sql": 1,
+   "macro_sql": 0,
+   "test_sql": 0,
+   "other_sql": 0,
+   "project_cfg": 0,
+   "yml": 0,
+   "seed_csv": 0,
+   "py": 0,
+   "other": 0
+  },
+  "n_files": 1,
+  "parse_seconds": 38.1,
+  "state_modified": [
+   "cms_hcc__int_hcc_hierarchy"
+  ],
+  "state_modified_plus": [
+   "cms_hcc__int_disabled_interaction_factors",
+   "cms_hcc__int_disease_factors",
+   "cms_hcc__int_disease_interaction_factors",
+   "cms_hcc__int_hcc_count_factors",
+   "cms_hcc__int_hcc_hierarchy",
+   "cms_hcc__patient_risk_factors",
+   "cms_hcc__patient_risk_factors_monthly",
+   "cms_hcc__patient_risk_scores",
+   "cms_hcc__patient_risk_scores_monthly",
+   "cms_hcc__patient_risk_scores_monthly_by_factor_type",
+   "mart_review__patient_risk",
+   "mart_review__patient_risk_factors",
+   "mart_review__patient_risk_scores",
+   "semantic_layer__fact_member_months",
+   "semantic_layer__fact_risk_factors",
+   "semantic_layer__fact_risk_scores",
+   "semantic_layer__stg_cms_hcc__patient_risk_factors",
+   "semantic_layer__stg_cms_hcc__patient_risk_scores",
+   "semantic_layer__stg_cms_hcc__patient_risk_scores_monthly"
+  ],
+  "changed_vars": [],
+  "var_only_models": [],
+  "var_detector_seconds": 0.2,
+  "affected": [
+   "cms_hcc__int_disabled_interaction_factors",
+   "cms_hcc__int_disease_factors",
+   "cms_hcc__int_disease_interaction_factors",
+   "cms_hcc__int_hcc_count_factors",
+   "cms_hcc__int_hcc_hierarchy",
+   "cms_hcc__patient_risk_factors",
+   "cms_hcc__patient_risk_factors_monthly",
+   "cms_hcc__patient_risk_scores",
+   "cms_hcc__patient_risk_scores_monthly",
+   "cms_hcc__patient_risk_scores_monthly_by_factor_type",
+   "mart_review__patient_risk",
+   "mart_review__patient_risk_factors",
+   "mart_review__patient_risk_scores",
+   "semantic_layer__fact_member_months",
+   "semantic_layer__fact_risk_factors",
+   "semantic_layer__fact_risk_scores",
+   "semantic_layer__stg_cms_hcc__patient_risk_factors",
+   "semantic_layer__stg_cms_hcc__patient_risk_scores",
+   "semantic_layer__stg_cms_hcc__patient_risk_scores_monthly"
+  ],
+  "n_affected": 19,
+  "executable": true,
+  "exclusion": null,
+  "reconstruct_seconds": 68.7
  }
 ]

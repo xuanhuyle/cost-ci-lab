@@ -17,9 +17,29 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
 from costci.metrics import LARGE, MATERIAL, bucket, direction, spearman  # noqa: E402
+from costci.pools import Execution, bill  # noqa: E402
 
 RES = ROOT / "results" / "public_pr"
-RUNS_PER_MONTH = 30.0          # SHADOW_ASSUMPTION: the job runs daily
+RUNS_PER_MONTH = 30                      # SHADOW_ASSUMPTION: the job runs daily
+DAY_S = 24 * 3600
+JOB_START_S = 2 * 3600                   # SHADOW_ASSUMPTION: the job starts at 02:00 each day
+# SHADOW_ASSUMPTION: one dedicated, time-metered warehouse. Rates are the documented
+# Snowflake dedicated-warehouse rules (E-011) at an X-Small rate and a list credit price.
+SHADOW_POOL = {"kind": "snowflake_warehouse", "credits_per_hour": 1.0,
+               "price_per_credit": 3.0, "auto_suspend_s": 600, "min_billing_s": 60,
+               "max_clusters": 1}
+
+
+def shadow_month_dollars(per_run_seconds: float) -> float:
+    """Replay a month of the scheduled job on the shadow pool.
+
+    Describes the shadow environment only. Not anyone's real bill.
+    """
+    if per_run_seconds is None:
+        return None
+    execs = [Execution(workload="job", start_s=d * DAY_S + JOB_START_S,
+                       duration_s=per_run_seconds) for d in range(RUNS_PER_MONTH)]
+    return bill(SHADOW_POOL, execs)["dollars"]
 
 
 def frac(bools: list[bool]) -> float | None:
@@ -39,6 +59,10 @@ def rows_for(ms: list[dict], split: str) -> list[dict]:
             "pred_rel": pred["rel"], "truth_rel": truth["rel"],
             "pred_delta": pred["delta_s"] * RUNS_PER_MONTH,
             "truth_delta": truth["delta_s"] * RUNS_PER_MONTH,
+            "pred_month_dollars_delta": (shadow_month_dollars(pred["pr"]["median_s"])
+                                         - shadow_month_dollars(pred["main"]["median_s"])),
+            "truth_month_dollars_delta": (shadow_month_dollars(truth["pr"]["median_s"])
+                                          - shadow_month_dollars(truth["main"]["median_s"])),
             "pred_base": pred["main"]["median_s"], "truth_base": truth["main"]["median_s"],
             "grade": pred.get("grade"), "k": pred.get("k_production_runs"),
             "analysis_wall_s": pred.get("analysis_wall_s"),
@@ -91,7 +115,35 @@ def score(rows: list[dict]) -> dict:
         "k_max": max([r["k"] for r in rows if r["k"]], default=None),
         "analysis_wall_s_median": st.median([r["analysis_wall_s"] for r in rows]),
     }
+    out.update(economics(rows))
     return out
+
+
+def economics(rows: list[dict]) -> dict:
+    """Shadow-environment economics. SHADOW_ASSUMPTION throughout; not customer ROI.
+
+    avoidable cost = the realised monthly shadow dollars of the material regressions that the
+    method correctly flagged, i.e. what a gate that blocked them would have prevented in the
+    first month. analysis cost = the engine seconds spent analysing every PR in the set, priced
+    on the same pool.
+    """
+    analysis_s = sum(r["analysis_engine_s"] or 0.0 for r in rows)
+    analysis_dollars = analysis_s / 3600 * (SHADOW_POOL["credits_per_hour"]
+                                            * SHADOW_POOL["price_per_credit"])
+    caught, missed = 0.0, 0.0
+    for r in rows:
+        if direction(r["truth_rel"]) != "increase":
+            continue
+        d = r["truth_month_dollars_delta"] or 0.0
+        if direction(r["pred_rel"]) == "increase":
+            caught += d
+        else:
+            missed += d
+    return {"analysis_engine_seconds_total": round(analysis_s, 1),
+            "analysis_dollars_shadow": round(analysis_dollars, 4),
+            "avoided_shadow_dollars_month": round(caught, 4),
+            "missed_shadow_dollars_month": round(missed, 4),
+            "avoided_over_analysis": (caught / analysis_dollars) if analysis_dollars else None}
 
 
 def comparator_highcost(rows: list[dict], T: float) -> dict:
