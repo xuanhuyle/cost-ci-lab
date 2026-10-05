@@ -37,5 +37,17 @@
    1268,
    1278
   ]
+ },
+ "F2_estimator_frozen": {
+  "git_sha": "7b07b8037a20e630f2c2e8600b753834788cd1d7",
+  "at": "2026-10-05T14:01:30",
+  "note": "estimator and harness frozen before the first holdout prediction",
+  "first_holdout_pr": 1233
+ },
+ "F3_first_holdout_prediction": {
+  "git_sha": "7b07b8037a20e630f2c2e8600b753834788cd1d7",
+  "at": "2026-10-05T14:05:37",
+  "pr": 1232,
+  "prediction_sha256": "4096218af40f26eec6b8d9a17aed8d91a58f7210bbc23112cc217a56371cb681"
  }
 }

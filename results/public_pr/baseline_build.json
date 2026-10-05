@@ -1,10 +1,11 @@
 {
  "baseline_commit": "3be09a3e617fe366c7467d3a2bff8f52263c225e",
  "ok": false,
- "wall_s": 410.7,
+ "wall_s": 489.4,
  "n_nodes": 2070,
  "n_ok": 2027,
  "n_failed": 1,
+ "relation_count": 600,
  "failed": [
   "model.the_tuva_project.data_quality__testing_summary"
  ],

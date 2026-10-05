@@ -1,0 +1,59 @@
+{
+ "affected": [
+  "data_quality__condition_normalized_code",
+  "data_quality__crosswalk_field_to_mart_sk",
+  "data_quality__data_quality_claims_detail",
+  "data_quality__data_quality_claims_detail_union",
+  "data_quality__data_quality_claims_for_pbi",
+  "data_quality__data_quality_clinical_detail",
+  "data_quality__data_quality_clinical_detail_union",
+  "data_quality__data_quality_clinical_for_pbi",
+  "data_quality__data_quality_detail",
+  "data_quality__data_quality_for_pbi",
+  "data_quality__encounter_primary_diagnosis_code",
+  "data_quality__institutional_diagnosis_code_1",
+  "data_quality__institutional_diagnosis_code_2",
+  "data_quality__institutional_diagnosis_code_3",
+  "data_quality__institutional_procedure_code_1",
+  "data_quality__institutional_procedure_code_2",
+  "data_quality__institutional_procedure_code_3",
+  "data_quality__procedure_normalized_code",
+  "data_quality__professional_diagnosis_code_1",
+  "data_quality__professional_diagnosis_code_2",
+  "data_quality__professional_diagnosis_code_3",
+  "data_quality__quality_trend",
+  "data_quality__summary"
+ ],
+ "frozen_at": "2026-10-05T14:05:37",
+ "pr": 1232,
+ "prediction": {
+  "analysis_engine_s": 46.964099999999995,
+  "analysis_wall_s": 157.0,
+  "delta_s": -0.22379999999999978,
+  "grade": "MEDIUM",
+  "k_full_job_runs": 0.032152742467088734,
+  "k_production_runs": 5.908697457317917,
+  "main": {
+   "cv": 0.05454335523746609,
+   "median_s": 7.9483,
+   "n": 3,
+   "values": [
+    7.8018,
+    8.8139,
+    7.9483
+   ]
+  },
+  "pr": {
+   "cv": 0.0631306587969482,
+   "median_s": 7.7245,
+   "n": 3,
+   "values": [
+    6.8054,
+    7.8702,
+    7.7245
+   ]
+  },
+  "rel": -0.02815696438232072
+ },
+ "split": "holdout"
+}
