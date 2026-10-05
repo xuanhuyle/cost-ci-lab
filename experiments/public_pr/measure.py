@@ -53,6 +53,13 @@ PROD = {"threads": 4, "memory": "8GB", "warm": True, "background": True}
 REPS = 2
 DEV_N, HOLD_N = 10, 20        # protocol amendment 2026-10-05, before any holdout truth
 
+# Node-level exclusion, decided from the baseline build before any PR was measured.
+# data_quality__testing_summary reads "prod"."main"."dbt_tests", a relation produced by an
+# on-run-end hook that does not exist on DuckDB, so the node fails on MAIN at the baseline
+# commit independently of any PR. It is a leaf (child_map is empty), so removing it cannot
+# change any other node's cost. results/public_pr/baseline_build.json records the failure.
+BROKEN_NODES = {"data_quality__testing_summary"}
+
 BACKGROUND_SQL = [
     "select count(*) from core.medical_claim",
     "select data_source, count(*) from core.eligibility group by 1",
@@ -278,7 +285,12 @@ def main() -> None:
         n += 1
         print(f"\n=== PR #{rec['pr']} [{rec['split']}] {rec['merged_at'][:10]} "
               f"affected={rec['n_affected']}", flush=True)
+        dropped = [n for n in rec["affected"] if n in BROKEN_NODES]
+        if dropped:
+            rec["affected"] = [n for n in rec["affected"] if n not in BROKEN_NODES]
+            rec["n_affected"] = len(rec["affected"])
         row = {"pr": rec["pr"], "split": rec["split"], "merged_at": rec["merged_at"],
+               "nodes_dropped_broken_on_main": dropped,
                "base_sha": rec["base_sha"], "head_sha": rec["head_sha"],
                "subject": rec["subject"], "n_affected": rec["n_affected"],
                "affected": rec["affected"], "touched": rec["touched"]}
