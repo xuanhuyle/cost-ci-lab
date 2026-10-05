@@ -1,0 +1,184 @@
+[
+ {
+  "id": "s01_widen_date_filter",
+  "model_sql": 1,
+  "macro": 0,
+  "cfg": 0,
+  "n": 1
+ },
+ {
+  "id": "s02_remove_partition_pruning",
+  "model_sql": 1,
+  "macro": 0,
+  "cfg": 0,
+  "n": 1
+ },
+ {
+  "id": "s03_expand_incremental_window",
+  "model_sql": 1,
+  "macro": 0,
+  "cfg": 0,
+  "n": 1
+ },
+ {
+  "id": "s04_incremental_to_table",
+  "model_sql": 1,
+  "macro": 0,
+  "cfg": 0,
+  "n": 1
+ },
+ {
+  "id": "s05_many_to_many_join",
+  "model_sql": 1,
+  "macro": 0,
+  "cfg": 0,
+  "n": 1
+ },
+ {
+  "id": "s06_superlinear_self_join",
+  "model_sql": 1,
+  "macro": 0,
+  "cfg": 0,
+  "n": 1
+ },
+ {
+  "id": "s07_unnecessary_distinct",
+  "model_sql": 1,
+  "macro": 0,
+  "cfg": 0,
+  "n": 1
+ },
+ {
+  "id": "s08_expensive_window",
+  "model_sql": 1,
+  "macro": 0,
+  "cfg": 0,
+  "n": 1
+ },
+ {
+  "id": "s09_repeated_scans",
+  "model_sql": 1,
+  "macro": 0,
+  "cfg": 0,
+  "n": 1
+ },
+ {
+  "id": "s10_table_to_view",
+  "model_sql": 1,
+  "macro": 0,
+  "cfg": 0,
+  "n": 1
+ },
+ {
+  "id": "s11_view_to_table",
+  "model_sql": 1,
+  "macro": 0,
+  "cfg": 0,
+  "n": 1
+ },
+ {
+  "id": "s12_manual_predicate_pushdown",
+  "model_sql": 1,
+  "macro": 0,
+  "cfg": 0,
+  "n": 1
+ },
+ {
+  "id": "s13_select_fewer_columns",
+  "model_sql": 1,
+  "macro": 0,
+  "cfg": 0,
+  "n": 1
+ },
+ {
+  "id": "s14_join_preaggregation",
+  "model_sql": 1,
+  "macro": 0,
+  "cfg": 0,
+  "n": 1
+ },
+ {
+  "id": "s15_include_returns",
+  "model_sql": 1,
+  "macro": 0,
+  "cfg": 0,
+  "n": 1
+ },
+ {
+  "id": "s16_new_model",
+  "model_sql": 1,
+  "macro": 0,
+  "cfg": 0,
+  "n": 1
+ },
+ {
+  "id": "s17_monthly_job_regression",
+  "model_sql": 1,
+  "macro": 0,
+  "cfg": 0,
+  "n": 1
+ },
+ {
+  "id": "s18_frequent_cheap_view",
+  "model_sql": 1,
+  "macro": 0,
+  "cfg": 0,
+  "n": 1
+ },
+ {
+  "id": "s19_idle_capacity_absorbs",
+  "model_sql": 1,
+  "macro": 0,
+  "cfg": 0,
+  "n": 1
+ },
+ {
+  "id": "s20_bytes_up_capacity_pricing",
+  "model_sql": 1,
+  "macro": 0,
+  "cfg": 0,
+  "n": 1
+ },
+ {
+  "id": "s21_cosmetic_refactor",
+  "model_sql": 1,
+  "macro": 0,
+  "cfg": 0,
+  "n": 1
+ },
+ {
+  "id": "s22_sort_for_determinism",
+  "model_sql": 1,
+  "macro": 0,
+  "cfg": 0,
+  "n": 1
+ },
+ {
+  "id": "s23_macro_change",
+  "model_sql": 0,
+  "macro": 1,
+  "cfg": 0,
+  "n": 1
+ },
+ {
+  "id": "s24_var_default_change",
+  "model_sql": 0,
+  "macro": 0,
+  "cfg": 1,
+  "n": 1
+ },
+ {
+  "id": "s25_config_inheritance",
+  "model_sql": 0,
+  "macro": 0,
+  "cfg": 1,
+  "n": 1
+ },
+ {
+  "id": "s26_include_future_shipments",
+  "model_sql": 1,
+  "macro": 0,
+  "cfg": 0,
+  "n": 1
+ }
+]
