@@ -297,5 +297,37 @@
   "exclusion": "X4_NO_GRAPH",
   "detail": "diff produces no node in the compiled graph on this engine",
   "reconstruct_seconds": 115.5
+ },
+ {
+  "pr": 1199,
+  "order": 4,
+  "merged_at": "2026-02-06T23:32:14-07:00",
+  "base_sha": "c177bf8b2cd48438a19e82beef9f02c91e56bb02",
+  "head_sha": "faab7f3f5dc45c57410b6b2d458c20743f21904e",
+  "subject": "Fix observation staging for claims-only logic (#1199)",
+  "touched": {
+   "model_sql": 1,
+   "macro_sql": 0,
+   "test_sql": 0,
+   "other_sql": 0,
+   "project_cfg": 0,
+   "yml": 0,
+   "seed_csv": 0,
+   "py": 0,
+   "other": 0
+  },
+  "n_files": 1,
+  "parse_seconds": 114.3,
+  "state_modified": [],
+  "state_modified_plus": [],
+  "changed_vars": [],
+  "var_only_models": [],
+  "var_detector_seconds": 0.3,
+  "affected": [],
+  "n_affected": 0,
+  "executable": false,
+  "exclusion": "X4_NO_GRAPH",
+  "detail": "diff produces no node in the compiled graph on this engine",
+  "reconstruct_seconds": 165.3
  }
 ]
