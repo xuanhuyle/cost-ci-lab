@@ -13,7 +13,7 @@ what this design exists to stop doing.
 | When | produced and frozen for a PR before that PR's Phase B | only after that PR's prediction file exists and is hashed |
 | Engine threads | **2** | **4** |
 | DuckDB `memory_limit` | **3 GB** | **8 GB** |
-| Concurrency | isolated, no other query load | **background load**: a second connection replaying a fixed read workload over the core relations for the duration of the measurement |
+| Concurrency | isolated, no other query load | **background load**: a concurrent read workload replayed for the duration of the measurement, competing for CPU, memory and IO |
 | Cache warmth | **cold** — a fresh process per variant, no priming | **warm** — a fixed priming scan of the principal input relations before measurement |
 | Data snapshot | **T0** (the corpus data assets as published) | **T1 = T0 + deterministic growth** if the development-set check clears it, §3 |
 | Database file | a copy of the production database made before the measurement | the production database itself |
@@ -109,6 +109,15 @@ earlier. What is temporally and environmentally separated is the *prediction* fr
 different engine size, different concurrency, different cache state, and a wall-clock gap. A fully historical baseline would additionally require a stable
 production timeline per node, which a 7-month replay on one laptop cannot provide. This is a
 weakening of the design and is reported as such.
+
+**How the background load is applied.** DuckDB takes an exclusive file lock, so a second
+connection to the measured database would stop the dbt subprocess from opening it at all
+(verified: a read-only handle in another process makes the read-write open fail). The background
+workload therefore runs against a **separate copy of the same data** on the same machine. It
+competes for CPU, memory and IO — which is what slows a concurrent query down on a shared
+warehouse — but it does not compete for the same buffer-pool pages or locks. The contention
+modelled is machine-level, not engine-level, and that is weaker than Snowflake's real
+multi-tenancy of a single warehouse.
 
 **Limits of the "cold" CI arm.** Each CI run is a fresh process, so DuckDB's buffer pool starts
 empty, and no priming query is issued. The *operating system's* page cache is not cleared, and

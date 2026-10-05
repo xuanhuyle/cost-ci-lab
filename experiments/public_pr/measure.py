@@ -47,6 +47,11 @@ PKG_CACHE = PUB / "pkgcache"
 # production - a real constraint on the zero-copy-clone design, not a lab artefact.)
 DB_PROD = PUB / "db" / "prod.duckdb"
 DB_CI = PUB / "db_ci" / "prod.duckdb"
+# DuckDB takes an exclusive file lock: a read-only handle in this process prevents the dbt
+# subprocess from opening the same file read-write at all (verified). The production-regime
+# background load therefore runs against its own copy of the same data, so it competes for CPU,
+# memory and IO - which is what slows a concurrent query down - without taking the lock.
+DB_BG = PUB / "db_bg" / "prod.duckdb"
 PROF_CI, PROF_PROD = PUB / "profiles_ci", PUB / "profiles_prod"
 RES = ROOT / "results" / "public_pr"
 PROJECT_SUBDIR = "integration_tests"
@@ -85,23 +90,31 @@ BACKGROUND_SQL = [
 
 
 class BackgroundLoad:
-    """A second connection replaying a fixed read workload: production contention (E-039)."""
+    """A concurrent read workload on a separate copy of the same data: production contention
+    (E-039 measured -18%..+58% from exactly this). It cannot share the measured database file,
+    see the note on DB_BG above."""
 
-    def __init__(self, db: Path, enabled: bool):
-        self.db, self.enabled, self._stop, self._t = db, enabled, threading.Event(), None
+    def __init__(self, enabled: bool):
+        self.enabled, self._stop, self._t = enabled, threading.Event(), None
         self.queries = 0
+        self.error = ""
 
     def __enter__(self):
         if self.enabled:
+            if not DB_BG.exists():
+                DB_BG.parent.mkdir(parents=True, exist_ok=True)
+                checkpoint(DB_PROD)
+                shutil.copy2(DB_PROD, DB_BG)
             self._t = threading.Thread(target=self._loop, daemon=True)
             self._t.start()
         return self
 
     def _loop(self):
         try:
-            con = duckdb.connect(str(self.db), read_only=True)
+            con = duckdb.connect(str(DB_BG), read_only=True)
             con.execute("SET threads=1")
-        except Exception:
+        except Exception as e:                                   # noqa: BLE001
+            self.error = str(e)[:200]
             return
         i = 0
         while not self._stop.is_set():
@@ -124,7 +137,11 @@ class BackgroundLoad:
 
 
 def prime(db: Path) -> None:
-    """Warm the buffer manager the way a recurring production job leaves it."""
+    """Warm the OS/page cache the way a recurring production job leaves it.
+
+    The connection is opened and closed before any dbt subprocess starts, because DuckDB's file
+    lock is exclusive.
+    """
     try:
         con = duckdb.connect(str(db), read_only=True)
         for q in BACKGROUND_SQL:
@@ -190,7 +207,7 @@ def measure_pair(rec: dict, regime: dict, db: Path, profiles: Path, cap_s: int,
         proj = regime_project(wt, regime, db, profiles)
         proj.deps()
         projs[variant] = proj
-    bg = BackgroundLoad(db, regime["background"])
+    bg = BackgroundLoad(regime["background"])
     if regime["warm"]:
         prime(db)
     with bg:
@@ -201,8 +218,10 @@ def measure_pair(rec: dict, regime: dict, db: Path, profiles: Path, cap_s: int,
                 r.update(variant=variant, rep=rep, regime=label)
                 runs.append(r)
                 if not r["ok"]:
-                    return {"runs": runs, "ok": False, "background_queries": bg.queries}
-    return {"runs": runs, "ok": True, "background_queries": bg.queries}
+                    return {"runs": runs, "ok": False, "background_queries": bg.queries,
+                            "background_error": bg.error}
+    return {"runs": runs, "ok": True, "background_queries": bg.queries,
+            "background_error": bg.error}
 
 
 def advance_production(rec: dict, cap_s: int) -> dict:
@@ -281,12 +300,13 @@ def main() -> None:
     args = ap.parse_args()
     cap_s = args.cap_minutes * 60
 
-    global WT_MAIN, WT_PR, DB_PROD, DB_CI, PROF_CI, PROF_PROD, RES_OUT
+    global WT_MAIN, WT_PR, DB_PROD, DB_CI, DB_BG, PROF_CI, PROF_PROD, RES_OUT
     RES_OUT = RES / "measurements.json"
     if args.trial:
         WT_MAIN, WT_PR = PUB / "wt_t_main", PUB / "wt_t_pr"
         DB_PROD = PUB / "db_trial_prod" / "prod.duckdb"
         DB_CI = PUB / "db_trial_ci" / "prod.duckdb"
+        DB_BG = PUB / "db_trial_bg" / "prod.duckdb"
         PROF_CI, PROF_PROD = PUB / "profiles_t_ci", PUB / "profiles_t_prod"
         RES_OUT = RES / "measurements_trial.json"
         DB_PROD.parent.mkdir(parents=True, exist_ok=True)
