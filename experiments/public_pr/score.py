@@ -86,6 +86,7 @@ def rows_for(ms: list[dict], split: str) -> list[dict]:
                 - shadow_month_dollars_standalone(truth["main"]["median_s"])),
             "pred_base": pred["main"]["median_s"], "truth_base": truth["main"]["median_s"],
             "grade": pred.get("grade"), "k": pred.get("k_production_runs"),
+            "k_job": pred.get("k_full_job_runs"),
             "analysis_wall_s": pred.get("analysis_wall_s"),
             "analysis_engine_s": pred.get("analysis_engine_s"),
             "touched": m.get("touched", {}),
@@ -132,8 +133,10 @@ def score(rows: list[dict]) -> dict:
         "direction_acc_HIGH": frac([pd_[i] == td[i] for i in hi]),
         "direction_acc_not_HIGH": frac([pd_[i] == td[i] for i in lo]),
         "n_HIGH": len(hi), "n_not_HIGH": len(lo),
-        "k_median": st.median([r["k"] for r in rows if r["k"]]) if any(r["k"] for r in rows) else None,
-        "k_max": max([r["k"] for r in rows if r["k"]], default=None),
+        "k_affected_median": st.median([r["k"] for r in rows if r["k"]]) if any(r["k"] for r in rows) else None,
+        "k_job_median": (st.median([r["k_job"] for r in rows if r["k_job"]])
+                         if any(r["k_job"] for r in rows) else None),
+        "k_job_max": max([r["k_job"] for r in rows if r["k_job"]], default=None),
         "analysis_wall_s_median": st.median([r["analysis_wall_s"] for r in rows]),
     }
     out.update(economics(rows))

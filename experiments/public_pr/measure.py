@@ -50,7 +50,7 @@ DBT_VARS = {"synthetic_data_size": "large"}
 # --- regimes (docs/SHADOW_PRODUCTION_DESIGN.md §1), fixed before any holdout truth -------------
 CI = {"threads": 2, "memory": "3GB", "warm": False, "background": False}
 PROD = {"threads": 4, "memory": "8GB", "warm": True, "background": True}
-REPS = 2
+REPS = 3                      # protocol amendment 2026-10-05, before any holdout truth
 DEV_N, HOLD_N = 10, 20        # protocol amendment 2026-10-05, before any holdout truth
 
 # Node-level exclusion, decided from the baseline build before any PR was measured.
@@ -59,6 +59,18 @@ DEV_N, HOLD_N = 10, 20        # protocol amendment 2026-10-05, before any holdou
 # commit independently of any PR. It is a leaf (child_map is empty), so removing it cannot
 # change any other node's cost. results/public_pr/baseline_build.json records the failure.
 BROKEN_NODES = {"data_quality__testing_summary"}
+
+def _full_job_seconds() -> float:
+    try:
+        b = json.loads((RES / "baseline_build.json").read_text(encoding="utf-8"))
+        return sum(float(n["execution_time"]) for n in b["nodes"]
+                   if (n.get("unique_id") or "").startswith("model.")
+                   and n.get("execution_time") is not None)
+    except Exception:
+        return 0.0
+
+
+FULL_JOB_SECONDS = _full_job_seconds()
 
 BACKGROUND_SQL = [
     "select count(*) from core.medical_claim",
@@ -320,7 +332,12 @@ def main() -> None:
         pred["analysis_engine_s"] = sum(r["total_s"] for r in a["runs"])
         # production-run equivalents: engine seconds spent analysing / one production run of A
         base_run = pred["main"]["median_s"] or 0.0
+        # k_affected is fixed by the protocol (REPS x 2 variants) and is reported only for
+        # comparability with E-037. k_job is the decision-relevant one: what fraction of one
+        # full production job run the check costs, which varies with blast radius.
         pred["k_production_runs"] = (pred["analysis_engine_s"] / base_run) if base_run else None
+        pred["k_full_job_runs"] = ((pred["analysis_engine_s"] / FULL_JOB_SECONDS)
+                                   if FULL_JOB_SECONDS else None)
         row["prediction"] = pred
         row["prediction_sha256"] = freeze(
             RES / "holdout_predictions" / f"pr_{rec['pr']}.json",

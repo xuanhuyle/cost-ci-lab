@@ -16,6 +16,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 RES = ROOT / "results" / "public_pr"
+REPS = 3
 
 
 def main() -> None:
@@ -39,10 +40,11 @@ def main() -> None:
             "pr": r["pr"], "merged_at": r["merged_at"], "n_affected": len(aff),
             "n_priced": len(known), "blast_seconds_per_run": round(secs, 2),
             "share_of_full_job": round(secs / full_job_s, 4) if full_job_s else None,
-            # one counterfactual analysis = 2 variants x 2 reps of the blast radius
-            "analysis_seconds": round(4 * secs, 2),
-            "k_production_runs_of_blast": 4.0,
-            "k_production_runs_of_full_job": round(4 * secs / full_job_s, 3) if full_job_s else None,
+            # one counterfactual analysis = 2 variants x REPS reps of the blast radius
+            "analysis_seconds": round(2 * REPS * secs, 2),
+            "k_production_runs_of_blast": float(2 * REPS),
+            "k_production_runs_of_full_job": (round(2 * REPS * secs / full_job_s, 4)
+                                              if full_job_s else None),
         })
     out = {
         "baseline_commit": base["baseline_commit"],
